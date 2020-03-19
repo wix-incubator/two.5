@@ -26,7 +26,11 @@ const DEFAULTS = {
     skewActive: false,
     skewInvertX: false,
     skewInvertY: false,
-    skewMax: 25
+    skewMax: 25,
+    scaleActive: false,
+    scaleInvertX: false,
+    scaleInvertY: false,
+    scaleMax: 0.5
 };
 
 export default class Two5 {
@@ -127,6 +131,12 @@ export default class Two5 {
                 invertX: this.config.skewInvertX,
                 invertY: this.config.skewInvertY,
                 max: this.config.skewMax
+            },
+            scaling: {
+                active: this.config.scaleActive,
+                invertX: this.config.scaleInvertX,
+                invertY: this.config.scaleInvertY,
+                max: this.config.scaleMax
             }
         });
 

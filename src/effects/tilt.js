@@ -40,6 +40,8 @@ export function getEffect ({
         let rotateYFactor;
         let skewXFactor;
         let skewYFactor;
+        let scaleXFactor;
+        let scaleYFactor;
 
         if (translation.active) {
             translateXFactor = (translation.invertX ? -1 : 1) * translation.max * (2 * x - 1);
@@ -54,6 +56,11 @@ export function getEffect ({
         if (skewing.active) {
             skewXFactor = (skewing.invertX ? -1 : 1) * skewing.max * (1 - x * 2);
             skewYFactor = (skewing.invertY ? -1 : 1) * skewing.max * (1 - y * 2);
+        }
+
+        if (scaling.active) {
+            scaleXFactor = (scaling.invertX ? -1 : 1) * scaling.max * (Math.abs(0.5 - x) * 2);
+            scaleYFactor = (scaling.invertY ? -1 : 1) * scaling.max * (Math.abs(0.5 - y) * 2);
         }
 
         layers.forEach((layer, index) => {
@@ -95,7 +102,18 @@ export function getEffect ({
                 skewPart = 'skew(0deg, 0deg)';
             }
 
-            layer.el.style.transform = `${layerPerspective}${translatePart} ${rotatePart} ${skewPart}`;
+            let scalePart = '';
+            if (scaling.active) {
+                const scaleXVal = 1 + scaleXFactor * depth;
+                const scaleYVal = 1 + scaleYFactor * depth;
+
+                scalePart = `scale(${scaleXVal}, ${scaleYVal})`;
+            }
+            else {
+                scalePart = 'scale(1, 1)';
+            }
+
+            layer.el.style.transform = `${layerPerspective}${translatePart} ${scalePart} ${skewPart} ${rotatePart}`;
         });
 
         if (perspective.active) {

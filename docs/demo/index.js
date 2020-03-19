@@ -45,6 +45,8 @@
       let rotateYFactor;
       let skewXFactor;
       let skewYFactor;
+      let scaleXFactor;
+      let scaleYFactor;
 
       if (translation.active) {
         translateXFactor = (translation.invertX ? -1 : 1) * translation.max * (2 * x - 1);
@@ -59,6 +61,11 @@
       if (skewing.active) {
         skewXFactor = (skewing.invertX ? -1 : 1) * skewing.max * (1 - x * 2);
         skewYFactor = (skewing.invertY ? -1 : 1) * skewing.max * (1 - y * 2);
+      }
+
+      if (scaling.active) {
+        scaleXFactor = (scaling.invertX ? -1 : 1) * scaling.max * (Math.abs(0.5 - x) * 2);
+        scaleYFactor = (scaling.invertY ? -1 : 1) * scaling.max * (Math.abs(0.5 - y) * 2);
       }
 
       layers.forEach((layer, index) => {
@@ -94,7 +101,17 @@
           skewPart = 'skew(0deg, 0deg)';
         }
 
-        layer.el.style.transform = `${layerPerspective}${translatePart} ${rotatePart} ${skewPart}`;
+        let scalePart = '';
+
+        if (scaling.active) {
+          const scaleXVal = 1 + scaleXFactor * depth;
+          const scaleYVal = 1 + scaleYFactor * depth;
+          scalePart = `scale(${scaleXVal}, ${scaleYVal})`;
+        } else {
+          scalePart = 'scale(1, 1)';
+        }
+
+        layer.el.style.transform = `${layerPerspective}${translatePart} ${scalePart} ${skewPart} ${rotatePart}`;
       });
 
       if (perspective.active) {
@@ -169,7 +186,11 @@
     skewActive: false,
     skewInvertX: false,
     skewInvertY: false,
-    skewMax: 25
+    skewMax: 25,
+    scaleActive: false,
+    scaleInvertX: false,
+    scaleInvertY: false,
+    scaleMax: 0.5
   };
 
   class Two5 {
@@ -266,6 +287,12 @@
           invertX: this.config.skewInvertX,
           invertY: this.config.skewInvertY,
           max: this.config.skewMax
+        },
+        scaling: {
+          active: this.config.scaleActive,
+          invertX: this.config.scaleInvertX,
+          invertY: this.config.scaleInvertY,
+          max: this.config.scaleMax
         }
       });
       this.effects.push(tilt);
@@ -3311,6 +3338,12 @@
       invertX: two5.config.skewInvertX,
       invertY: two5.config.skewInvertY,
       max: two5.config.skewMax
+    },
+    scaling: {
+      active: two5.config.scaleActive,
+      invertX: two5.config.scaleInvertX,
+      invertY: two5.config.scaleInvertY,
+      max: two5.config.scaleMax
     }
   };
 
@@ -3381,5 +3414,10 @@
   skewing.add(two5Config.skewing, 'invertX').onChange(getHandler$1('skewInvertX'));
   skewing.add(two5Config.skewing, 'invertY').onChange(getHandler$1('skewInvertY'));
   skewing.add(two5Config.skewing, 'max', 10, 60, 1).onChange(getHandler$1('skewMax'));
+  const scaling = gui.addFolder('Scaling');
+  scaling.add(two5Config.scaling, 'active').onChange(getHandler$1('scaleActive'));
+  scaling.add(two5Config.scaling, 'invertX').onChange(getHandler$1('scaleInvertX'));
+  scaling.add(two5Config.scaling, 'invertY').onChange(getHandler$1('scaleInvertY'));
+  scaling.add(two5Config.scaling, 'max', 0.1, 2, 0.1).onChange(getHandler$1('scaleMax'));
 
 })));

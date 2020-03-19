@@ -61,6 +61,12 @@ const two5Config = {
         invertX: two5.config.skewInvertX,
         invertY: two5.config.skewInvertY,
         max: two5.config.skewMax
+    },
+    scaling: {
+        active: two5.config.scaleActive,
+        invertX: two5.config.scaleInvertX,
+        invertY: two5.config.scaleInvertY,
+        max: two5.config.scaleMax
     }
 };
 
@@ -147,3 +153,13 @@ skewing.add(two5Config.skewing, 'invertY')
     .onChange(getHandler('skewInvertY'));
 skewing.add(two5Config.skewing, 'max', 10, 60, 1)
     .onChange(getHandler('skewMax'));
+
+const scaling = gui.addFolder('Scaling');
+scaling.add(two5Config.scaling, 'active')
+    .onChange(getHandler('scaleActive'));
+scaling.add(two5Config.scaling, 'invertX')
+    .onChange(getHandler('scaleInvertX'));
+scaling.add(two5Config.scaling, 'invertY')
+    .onChange(getHandler('scaleInvertY'));
+scaling.add(two5Config.scaling, 'max', 0.1, 2, 0.1)
+    .onChange(getHandler('scaleMax'));
