@@ -38,6 +38,8 @@ function getEffect({
     let translateYFactor;
     let rotateXFactor;
     let rotateYFactor;
+    let skewXFactor;
+    let skewYFactor;
 
     if (translation.active) {
       translateXFactor = (translation.invertX ? -1 : 1) * translation.max * (2 * x - 1);
@@ -47,6 +49,11 @@ function getEffect({
     if (rotation.active) {
       rotateXFactor = (rotation.invertX ? -1 : 1) * rotation.max * (y * 2 - 1);
       rotateYFactor = (rotation.invertY ? -1 : 1) * rotation.max * (1 - x * 2);
+    }
+
+    if (skewing.active) {
+      skewXFactor = (skewing.invertX ? -1 : 1) * skewing.max * (1 - x * 2);
+      skewYFactor = (skewing.invertY ? -1 : 1) * skewing.max * (1 - y * 2);
     }
 
     layers.forEach((layer, index) => {
@@ -72,7 +79,17 @@ function getEffect({
         rotatePart = 'rotateX(0deg) rotateY(0deg)';
       }
 
-      layer.el.style.transform = `${layerPerspective}${translatePart} ${rotatePart}`;
+      let skewPart = '';
+
+      if (skewing.active) {
+        const skewXVal = skewXFactor * depth;
+        const skewYVal = skewYFactor * depth;
+        skewPart = `skew(${skewXVal}deg, ${skewYVal}deg)`;
+      } else {
+        skewPart = 'skew(0deg, 0deg)';
+      }
+
+      layer.el.style.transform = `${layerPerspective}${translatePart} ${rotatePart} ${skewPart}`;
     });
 
     if (perspective.active) {
@@ -143,7 +160,11 @@ const DEFAULTS = {
   rotationActive: false,
   rotationInvertX: false,
   rotationInvertY: false,
-  rotationMax: 25
+  rotationMax: 25,
+  skewActive: false,
+  skewInvertX: false,
+  skewInvertY: false,
+  skewMax: 25
 };
 class Two5 {
   constructor(config = {}) {
@@ -233,6 +254,12 @@ class Two5 {
         invertX: this.config.rotationInvertX,
         invertY: this.config.rotationInvertY,
         max: this.config.rotationMax
+      },
+      skewing: {
+        active: this.config.skewActive,
+        invertX: this.config.skewInvertX,
+        invertY: this.config.skewInvertY,
+        max: this.config.skewMax
       }
     });
     this.effects.push(tilt);

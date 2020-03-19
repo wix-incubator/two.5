@@ -22,7 +22,11 @@ const DEFAULTS = {
     rotationActive: false,
     rotationInvertX: false,
     rotationInvertY: false,
-    rotationMax: 25
+    rotationMax: 25,
+    skewActive: false,
+    skewInvertX: false,
+    skewInvertY: false,
+    skewMax: 25
 };
 
 export default class Two5 {
@@ -117,6 +121,12 @@ export default class Two5 {
                 invertX: this.config.rotationInvertX,
                 invertY: this.config.rotationInvertY,
                 max: this.config.rotationMax
+            },
+            skewing: {
+                active: this.config.skewActive,
+                invertX: this.config.skewInvertX,
+                invertY: this.config.skewInvertY,
+                max: this.config.skewMax
             }
         });
 

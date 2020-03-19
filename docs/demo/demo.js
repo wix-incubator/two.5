@@ -55,6 +55,12 @@ const two5Config = {
         invertX: two5.config.rotationInvertX,
         invertY: two5.config.rotationInvertY,
         max: two5.config.rotationMax
+    },
+    skewing: {
+        active: two5.config.skewActive,
+        invertX: two5.config.skewInvertX,
+        invertY: two5.config.skewInvertY,
+        max: two5.config.skewMax
     }
 };
 
@@ -131,3 +137,13 @@ rotation.add(two5Config.rotation, 'invertY')
     .onChange(getHandler('rotationInvertY'));
 rotation.add(two5Config.rotation, 'max', 10, 60, 1)
     .onChange(getHandler('rotationMax'));
+
+const skewing = gui.addFolder('Skewing');
+skewing.add(two5Config.skewing, 'active')
+    .onChange(getHandler('skewActive'));
+skewing.add(two5Config.skewing, 'invertX')
+    .onChange(getHandler('skewInvertX'));
+skewing.add(two5Config.skewing, 'invertY')
+    .onChange(getHandler('skewInvertY'));
+skewing.add(two5Config.skewing, 'max', 10, 60, 1)
+    .onChange(getHandler('skewMax'));
