@@ -1,8 +1,23 @@
 import Two5 from './two.5.js';
 import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
+import Stats from '../../node_modules/stats.js/src/Stats.js';
 
 const container = document.querySelector('#container');
 let two5;
+
+
+const stats = new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
+
+function setupStats () {
+    two5.effects.unshift(function () {
+        stats.begin();
+    });
+    two5.effects.push(function () {
+        stats.end();
+    });
+}
 
 function createInstance (config) {
     return new Two5(config);
@@ -14,6 +29,7 @@ two5 = createInstance({
 });
 
 two5.on();
+setupStats();
 
 const two5Config = {
     hitRegion: null,
@@ -55,6 +71,7 @@ gui.add(two5Config, 'hitRegion', {screen: null, container: 'container'})
         const config = Object.assign(two5.config, {mouseTarget, layersContainer: container});
         two5 = createInstance(config);
         two5.on();
+        setupStats();
     });
 
 gui.add(two5Config, 'elevation', 0, 40)
