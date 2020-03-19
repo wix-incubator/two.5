@@ -63,6 +63,7 @@ function getHandler (prop) {
         two5.config[prop] = v;
         two5.effects.length = 0;
         two5.setupEffects();
+        setupStats();
     };
 }
 
@@ -97,7 +98,7 @@ gui.add(two5Config, 'hitRegion', {screen: null, container: 'container'})
         setupStats();
     });
 
-gui.add(two5Config, 'elevation', 0, 40)
+gui.add(two5Config, 'elevation', 0, 40, 1)
     .onChange(getHandler('elevation'));
 
 const perspective = gui.addFolder('Perspective');
@@ -107,7 +108,7 @@ perspective.add(two5Config.perspective, 'invertX')
     .onChange(getHandler('perspectiveInvertX'));
 perspective.add(two5Config.perspective, 'invertY')
     .onChange(getHandler('perspectiveInvertY'));
-perspective.add(two5Config.perspective, 'max', 0, 0.5, 0.1)
+perspective.add(two5Config.perspective, 'max', 0, 0.5, 0.05)
     .onChange(getHandler('perspectiveMax'));
 
 const translation = gui.addFolder('Translation');
@@ -128,5 +129,5 @@ rotation.add(two5Config.rotation, 'invertX')
     .onChange(getHandler('rotationInvertX'));
 rotation.add(two5Config.rotation, 'invertY')
     .onChange(getHandler('rotationInvertY'));
-rotation.add(two5Config.rotation, 'max', 10, 60)
+rotation.add(two5Config.rotation, 'max', 10, 60, 1)
     .onChange(getHandler('rotationMax'));

@@ -57,13 +57,14 @@
       layers.forEach((layer, index) => {
         const depth = (index + 1) / len;
         let translatePart = '';
+        const translateZVal = elevation * (index + 1);
 
         if (translation.active) {
           const translateXVal = translateXFactor * depth;
           const translateYVal = translateYFactor * depth;
-          translatePart = `translate3d(${translateXVal}px, ${translateYVal}px, ${elevation}px)`;
+          translatePart = `translate3d(${translateXVal}px, ${translateYVal}px, ${translateZVal}px)`;
         } else {
-          translatePart = `translateZ(${elevation * (index + 1)}px)`;
+          translatePart = `translateZ(${translateZVal}px)`;
         }
 
         let rotatePart = '';
@@ -3285,6 +3286,7 @@
       two5.config[prop] = v;
       two5.effects.length = 0;
       two5.setupEffects();
+      setupStats();
     };
   }
 
@@ -3324,12 +3326,12 @@
     two5.on();
     setupStats();
   });
-  gui.add(two5Config, 'elevation', 0, 40).onChange(getHandler$1('elevation'));
+  gui.add(two5Config, 'elevation', 0, 40, 1).onChange(getHandler$1('elevation'));
   const perspective = gui.addFolder('Perspective');
   perspective.add(two5Config.perspective, 'active').onChange(getHandler$1('perspectiveActive'));
   perspective.add(two5Config.perspective, 'invertX').onChange(getHandler$1('perspectiveInvertX'));
   perspective.add(two5Config.perspective, 'invertY').onChange(getHandler$1('perspectiveInvertY'));
-  perspective.add(two5Config.perspective, 'max', 0, 0.5, 0.1).onChange(getHandler$1('perspectiveMax'));
+  perspective.add(two5Config.perspective, 'max', 0, 0.5, 0.05).onChange(getHandler$1('perspectiveMax'));
   const translation = gui.addFolder('Translation');
   translation.add(two5Config.translation, 'active').onChange(getHandler$1('translationActive'));
   translation.add(two5Config.translation, 'invertX').onChange(getHandler$1('translationInvertX'));
@@ -3340,6 +3342,6 @@
   rotation.add(two5Config.rotation, 'active').onChange(getHandler$1('rotationActive'));
   rotation.add(two5Config.rotation, 'invertX').onChange(getHandler$1('rotationInvertX'));
   rotation.add(two5Config.rotation, 'invertY').onChange(getHandler$1('rotationInvertY'));
-  rotation.add(two5Config.rotation, 'max', 10, 60).onChange(getHandler$1('rotationMax'));
+  rotation.add(two5Config.rotation, 'max', 10, 60, 1).onChange(getHandler$1('rotationMax'));
 
 })));
