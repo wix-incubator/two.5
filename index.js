@@ -52,13 +52,14 @@ function getEffect({
     layers.forEach((layer, index) => {
       const depth = (index + 1) / len;
       let translatePart = '';
+      const translateZVal = elevation * (index + 1);
 
       if (translation.active) {
         const translateXVal = translateXFactor * depth;
         const translateYVal = translateYFactor * depth;
-        translatePart = `translate3d(${translateXVal}px, ${translateYVal}px, ${elevation}px)`;
+        translatePart = `translate3d(${translateXVal}px, ${translateYVal}px, ${translateZVal}px)`;
       } else {
-        translatePart = `translateZ(${elevation * (index + 1)}px)`;
+        translatePart = `translateZ(${translateZVal}px)`;
       }
 
       let rotatePart = '';
