@@ -1,0 +1,30 @@
+{
+  "name": "two.5",
+  "version": "0.0.0",
+  "description": "Respond to user interactions with visual effects",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "build": "rollup -c",
+    "demo": "npm run build && cp index.js ./docs/demo/two.5.js && cd docs/demo && rollup -c && cd -"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ydaniv/two.5.git"
+  },
+  "author": "Yehonatan Daniv",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/ydaniv/two.5/issues"
+  },
+  "homepage": "https://github.com/ydaniv/two.5#readme",
+  "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "dat.gui": "^0.7.6",
+    "rollup": "^1.27.8",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-filesize": "^6.2.1",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-progress": "^1.1.1"
+  }
+}

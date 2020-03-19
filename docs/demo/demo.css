@@ -1,0 +1,63 @@
+main {
+    display: grid;
+    width: 100vw;
+    height: 100vh;
+    grid-template-rows:  1fr;
+    grid-template-columns:  1fr;
+    place-items: center;
+}
+
+#container {
+    position: relative;
+    width: 800px;
+    height: 500px;
+    background: rebeccapurple;
+}
+
+.shape {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: coral;
+}
+
+#square {
+    top: 140px;
+    left: 200px;
+    background: linear-gradient(45deg, aquamarine, fuchsia);
+}
+
+#hexagon {
+    top: 100px;
+    right: 230px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: linear-gradient(135deg, cornflowerblue, chocolate);
+}
+
+#circle {
+    bottom: 100px;
+    right: 260px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, crimson, cornflowerblue);
+}
+
+#triangle {
+    top: 200px;
+    left: 250px;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    background: linear-gradient(to bottom, tomato, steelblue);
+}
+
+#frame {
+    top: 100px;
+    right: 200px;
+    clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 25%, 75% 25%, 75% 75%, 25% 75%, 25% 100%, 100% 100%, 100% 0%);
+    background: linear-gradient(to top, hotpink, lightblue);
+}
+
+#star  {
+    bottom: 100px;
+    right: 250px;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    background: linear-gradient(270deg, firebrick, darkblue);
+}
