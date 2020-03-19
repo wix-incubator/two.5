@@ -45,8 +45,8 @@ function getEffect({
     }
 
     if (rotation.active) {
-      rotateXFactor = (rotation.invertX ? -1 : 1) * rotation.max * (1 - y * 2);
-      rotateYFactor = (rotation.invertY ? -1 : 1) * rotation.max * (x * 2 - 1);
+      rotateXFactor = (rotation.invertX ? -1 : 1) * rotation.max * (y * 2 - 1);
+      rotateYFactor = (rotation.invertY ? -1 : 1) * rotation.max * (1 - x * 2);
     }
 
     layers.forEach((layer, index) => {

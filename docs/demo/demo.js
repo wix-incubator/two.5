@@ -2,7 +2,10 @@ import Two5 from './two.5.js';
 import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
 import Stats from '../../node_modules/stats.js/src/Stats.js';
 
-const container = document.querySelector('#container');
+const scenes = document.querySelector('[data-scene]');
+const imagesContainer = document.querySelector('#images-container');
+const shapesContainer = document.querySelector('#shapes-container');
+let currentContainer = imagesContainer;
 let two5;
 
 
@@ -24,7 +27,7 @@ function createInstance (config) {
 }
 
 two5 = createInstance({
-    layersContainer: container,
+    layersContainer: currentContainer,
     mouseTarget: null
 });
 
@@ -32,6 +35,7 @@ two5.on();
 setupStats();
 
 const two5Config = {
+    scene: 'images',
     hitRegion: null,
     elevation: 10,
     perspective: {
@@ -64,11 +68,30 @@ function getHandler (prop) {
 
 const gui = new dat.GUI();
 
+gui.add(two5Config, 'scene', ['images', 'shapes'])
+    .onChange(value => {
+        switch (value) {
+            case 'images':
+                currentContainer = imagesContainer;
+                scenes.dataset.scene = value;
+                break;
+            case 'shapes':
+                currentContainer = shapesContainer;
+                scenes.dataset.scene = value;
+                break;
+        }
+        two5.off();
+        const config = Object.assign(two5.config, {layersContainer: currentContainer});
+        two5 = createInstance(config);
+        two5.on();
+        setupStats();
+    });
+
 gui.add(two5Config, 'hitRegion', {screen: null, container: 'container'})
     .onChange(value => {
-        const mouseTarget = value && document.getElementById(value);
+        const mouseTarget = value && currentContainer;
         two5.off();
-        const config = Object.assign(two5.config, {mouseTarget, layersContainer: container});
+        const config = Object.assign(two5.config, {mouseTarget, layersContainer: currentContainer});
         two5 = createInstance(config);
         two5.on();
         setupStats();

@@ -50,8 +50,8 @@
       }
 
       if (rotation.active) {
-        rotateXFactor = (rotation.invertX ? -1 : 1) * rotation.max * (1 - y * 2);
-        rotateYFactor = (rotation.invertY ? -1 : 1) * rotation.max * (x * 2 - 1);
+        rotateXFactor = (rotation.invertX ? -1 : 1) * rotation.max * (y * 2 - 1);
+        rotateYFactor = (rotation.invertY ? -1 : 1) * rotation.max * (1 - x * 2);
       }
 
       layers.forEach((layer, index) => {
@@ -3227,7 +3227,10 @@
     };
   };
 
-  const container = document.querySelector('#container');
+  const scenes = document.querySelector('[data-scene]');
+  const imagesContainer = document.querySelector('#images-container');
+  const shapesContainer = document.querySelector('#shapes-container');
+  let currentContainer = imagesContainer;
   let two5;
   const stats = new Stats();
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -3248,12 +3251,13 @@
   }
 
   two5 = createInstance({
-    layersContainer: container,
+    layersContainer: currentContainer,
     mouseTarget: null
   });
   two5.on();
   setupStats();
   const two5Config = {
+    scene: 'images',
     hitRegion: null,
     elevation: 10,
     perspective: {
@@ -3285,15 +3289,36 @@
   }
 
   const gui = new GUI$1();
+  gui.add(two5Config, 'scene', ['images', 'shapes']).onChange(value => {
+    switch (value) {
+      case 'images':
+        currentContainer = imagesContainer;
+        scenes.dataset.scene = value;
+        break;
+
+      case 'shapes':
+        currentContainer = shapesContainer;
+        scenes.dataset.scene = value;
+        break;
+    }
+
+    two5.off();
+    const config = Object.assign(two5.config, {
+      layersContainer: currentContainer
+    });
+    two5 = createInstance(config);
+    two5.on();
+    setupStats();
+  });
   gui.add(two5Config, 'hitRegion', {
     screen: null,
     container: 'container'
   }).onChange(value => {
-    const mouseTarget = value && document.getElementById(value);
+    const mouseTarget = value && currentContainer;
     two5.off();
     const config = Object.assign(two5.config, {
       mouseTarget,
-      layersContainer: container
+      layersContainer: currentContainer
     });
     two5 = createInstance(config);
     two5.on();
