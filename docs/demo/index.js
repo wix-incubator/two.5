@@ -3314,6 +3314,7 @@
   const two5Config = {
     scene: 'images',
     hitRegion: null,
+    scenePerspective: 600,
     elevation: 10,
     perspective: {
       active: two5.config.perspectiveActive,
@@ -3393,6 +3394,7 @@
     setupStats();
   });
   gui.add(two5Config, 'elevation', 0, 40, 1).onChange(getHandler$1('elevation'));
+  gui.add(two5Config, 'scenePerspective', 100, 1000, 50).onChange(getHandler$1('scenePerspective'));
   const perspective = gui.addFolder('Perspective');
   perspective.add(two5Config.perspective, 'active').onChange(getHandler$1('perspectiveActive'));
   perspective.add(two5Config.perspective, 'invertX').onChange(getHandler$1('perspectiveInvertX'));
