@@ -44,23 +44,39 @@ export function getEffect ({
         let scaleYFactor;
 
         if (translation.active) {
-            translateXFactor = (translation.invertX ? -1 : 1) * translation.max * (2 * x - 1);
-            translateYFactor = (translation.invertY ? -1 : 1) * translation.max * (2 * y - 1);
+            translateXFactor = translation.active === 'y'
+                ? 0
+                : (translation.invertX ? -1 : 1) * translation.max * (2 * x - 1);
+            translateYFactor = translation.active === 'x'
+                ? 0
+                : (translation.invertY ? -1 : 1) * translation.max * (2 * y - 1);
         }
 
         if (rotation.active) {
-            rotateXFactor = (rotation.invertX ? -1 : 1) * rotation.max * (y * 2 - 1);
-            rotateYFactor = (rotation.invertY ? -1 : 1) * rotation.max * (1 - x * 2);
+            rotateXFactor = rotation.active === 'y'
+                ? 0
+                : (rotation.invertX ? -1 : 1) * rotation.max * (y * 2 - 1);
+            rotateYFactor = rotation.active === 'x'
+                ? 0
+                : (rotation.invertY ? -1 : 1) * rotation.max * (1 - x * 2);
         }
 
         if (skewing.active) {
-            skewXFactor = (skewing.invertX ? -1 : 1) * skewing.max * (1 - x * 2);
-            skewYFactor = (skewing.invertY ? -1 : 1) * skewing.max * (1 - y * 2);
+            skewXFactor = skewing.active === 'y'
+                ? 0
+                : (skewing.invertX ? -1 : 1) * skewing.max * (1 - x * 2);
+            skewYFactor = skewing.active === 'x'
+                ? 0
+                : (skewing.invertY ? -1 : 1) * skewing.max * (1 - y * 2);
         }
 
         if (scaling.active) {
-            scaleXFactor = (scaling.invertX ? -1 : 1) * scaling.max * (Math.abs(0.5 - x) * 2);
-            scaleYFactor = (scaling.invertY ? -1 : 1) * scaling.max * (Math.abs(0.5 - y) * 2);
+            scaleXFactor = scaling.active === 'y'
+                ? 0
+                : (scaling.invertX ? -1 : 1) * scaling.max * (Math.abs(0.5 - x) * 2);
+            scaleYFactor = scaling.active === 'x'
+                ? 0
+                : (scaling.invertY ? -1 : 1) * scaling.max * (Math.abs(0.5 - y) * 2);
         }
 
         layers.forEach((layer, index) => {
@@ -117,8 +133,12 @@ export function getEffect ({
         });
 
         if (perspective.active) {
-            const perspX = perspective.invertX ? x : (1 - x);
-            const perspY = perspective.invertY ? y : (1 - y);
+            const perspX = perspective.active === 'y'
+                ? 0
+                : perspective.invertX ? x : (1 - x);
+            const perspY = perspective.active === 'x'
+                ? 0
+                : perspective.invertY ? y : (1 - y);
 
             let a = 1, b = 0;
 

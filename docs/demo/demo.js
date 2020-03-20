@@ -73,6 +73,8 @@ const two5Config = {
 
 function getHandler (prop) {
     return v => {
+        if (v === 'true') v = true;
+        if (v === 'false') v = false;
         two5.config[prop] = v;
         two5.effects.length = 0;
         two5.setupEffects();
@@ -118,7 +120,7 @@ gui.add(two5Config, 'scenePerspective', 100, 1000, 50)
     .onChange(getHandler('scenePerspective'));
 
 const perspective = gui.addFolder('Perspective');
-perspective.add(two5Config.perspective, 'active')
+perspective.add(two5Config.perspective, 'active', {non: false, both: true, x: 'x', y: 'y'})
     .onChange(getHandler('perspectiveActive'));
 perspective.add(two5Config.perspective, 'invertX')
     .onChange(getHandler('perspectiveInvertX'));
@@ -128,7 +130,7 @@ perspective.add(two5Config.perspective, 'max', 0, 0.5, 0.05)
     .onChange(getHandler('perspectiveMax'));
 
 const translation = gui.addFolder('Translation');
-translation.add(two5Config.translation, 'active')
+translation.add(two5Config.translation, 'active', {non: false, both: true, x: 'x', y: 'y'})
     .onChange(getHandler('translationActive'));
 translation.add(two5Config.translation, 'invertX')
     .onChange(getHandler('translationInvertX'));
@@ -139,7 +141,7 @@ translation.add(two5Config.translation, 'max', 10, 150, 5)
 translation.open();
 
 const rotation = gui.addFolder('Rotation');
-rotation.add(two5Config.rotation, 'active')
+rotation.add(two5Config.rotation, 'active', {non: false, both: true, x: 'x', y: 'y'})
     .onChange(getHandler('rotationActive'));
 rotation.add(two5Config.rotation, 'invertX')
     .onChange(getHandler('rotationInvertX'));
@@ -149,7 +151,7 @@ rotation.add(two5Config.rotation, 'max', 10, 60, 1)
     .onChange(getHandler('rotationMax'));
 
 const skewing = gui.addFolder('Skewing');
-skewing.add(two5Config.skewing, 'active')
+skewing.add(two5Config.skewing, 'active', {non: false, both: true, x: 'x', y: 'y'})
     .onChange(getHandler('skewActive'));
 skewing.add(two5Config.skewing, 'invertX')
     .onChange(getHandler('skewInvertX'));
@@ -159,7 +161,7 @@ skewing.add(two5Config.skewing, 'max', 10, 60, 1)
     .onChange(getHandler('skewMax'));
 
 const scaling = gui.addFolder('Scaling');
-scaling.add(two5Config.scaling, 'active')
+scaling.add(two5Config.scaling, 'active', {non: false, both: true, x: 'x', y: 'y'})
     .onChange(getHandler('scaleActive'));
 scaling.add(two5Config.scaling, 'invertX')
     .onChange(getHandler('scaleInvertX'));

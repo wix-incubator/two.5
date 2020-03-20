@@ -49,23 +49,23 @@
       let scaleYFactor;
 
       if (translation.active) {
-        translateXFactor = (translation.invertX ? -1 : 1) * translation.max * (2 * x - 1);
-        translateYFactor = (translation.invertY ? -1 : 1) * translation.max * (2 * y - 1);
+        translateXFactor = translation.active === 'y' ? 0 : (translation.invertX ? -1 : 1) * translation.max * (2 * x - 1);
+        translateYFactor = translation.active === 'x' ? 0 : (translation.invertY ? -1 : 1) * translation.max * (2 * y - 1);
       }
 
       if (rotation.active) {
-        rotateXFactor = (rotation.invertX ? -1 : 1) * rotation.max * (y * 2 - 1);
-        rotateYFactor = (rotation.invertY ? -1 : 1) * rotation.max * (1 - x * 2);
+        rotateXFactor = rotation.active === 'y' ? 0 : (rotation.invertX ? -1 : 1) * rotation.max * (y * 2 - 1);
+        rotateYFactor = rotation.active === 'x' ? 0 : (rotation.invertY ? -1 : 1) * rotation.max * (1 - x * 2);
       }
 
       if (skewing.active) {
-        skewXFactor = (skewing.invertX ? -1 : 1) * skewing.max * (1 - x * 2);
-        skewYFactor = (skewing.invertY ? -1 : 1) * skewing.max * (1 - y * 2);
+        skewXFactor = skewing.active === 'y' ? 0 : (skewing.invertX ? -1 : 1) * skewing.max * (1 - x * 2);
+        skewYFactor = skewing.active === 'x' ? 0 : (skewing.invertY ? -1 : 1) * skewing.max * (1 - y * 2);
       }
 
       if (scaling.active) {
-        scaleXFactor = (scaling.invertX ? -1 : 1) * scaling.max * (Math.abs(0.5 - x) * 2);
-        scaleYFactor = (scaling.invertY ? -1 : 1) * scaling.max * (Math.abs(0.5 - y) * 2);
+        scaleXFactor = scaling.active === 'y' ? 0 : (scaling.invertX ? -1 : 1) * scaling.max * (Math.abs(0.5 - x) * 2);
+        scaleYFactor = scaling.active === 'x' ? 0 : (scaling.invertY ? -1 : 1) * scaling.max * (Math.abs(0.5 - y) * 2);
       }
 
       layers.forEach((layer, index) => {
@@ -115,8 +115,8 @@
       });
 
       if (perspective.active) {
-        const perspX = perspective.invertX ? x : 1 - x;
-        const perspY = perspective.invertY ? y : 1 - y;
+        const perspX = perspective.active === 'y' ? 0 : perspective.invertX ? x : 1 - x;
+        const perspY = perspective.active === 'x' ? 0 : perspective.invertY ? y : 1 - y;
         let a = 1,
             b = 0;
 
@@ -3396,28 +3396,53 @@
   gui.add(two5Config, 'elevation', 0, 40, 1).onChange(getHandler$1('elevation'));
   gui.add(two5Config, 'scenePerspective', 100, 1000, 50).onChange(getHandler$1('scenePerspective'));
   const perspective = gui.addFolder('Perspective');
-  perspective.add(two5Config.perspective, 'active').onChange(getHandler$1('perspectiveActive'));
+  perspective.add(two5Config.perspective, 'active', {
+    non: false,
+    both: true,
+    x: 'x',
+    y: 'y'
+  }).onChange(getHandler$1('perspectiveActive'));
   perspective.add(two5Config.perspective, 'invertX').onChange(getHandler$1('perspectiveInvertX'));
   perspective.add(two5Config.perspective, 'invertY').onChange(getHandler$1('perspectiveInvertY'));
   perspective.add(two5Config.perspective, 'max', 0, 0.5, 0.05).onChange(getHandler$1('perspectiveMax'));
   const translation = gui.addFolder('Translation');
-  translation.add(two5Config.translation, 'active').onChange(getHandler$1('translationActive'));
+  translation.add(two5Config.translation, 'active', {
+    non: false,
+    both: true,
+    x: 'x',
+    y: 'y'
+  }).onChange(getHandler$1('translationActive'));
   translation.add(two5Config.translation, 'invertX').onChange(getHandler$1('translationInvertX'));
   translation.add(two5Config.translation, 'invertY').onChange(getHandler$1('translationInvertY'));
   translation.add(two5Config.translation, 'max', 10, 150, 5).onChange(getHandler$1('translationMax'));
   translation.open();
   const rotation = gui.addFolder('Rotation');
-  rotation.add(two5Config.rotation, 'active').onChange(getHandler$1('rotationActive'));
+  rotation.add(two5Config.rotation, 'active', {
+    non: false,
+    both: true,
+    x: 'x',
+    y: 'y'
+  }).onChange(getHandler$1('rotationActive'));
   rotation.add(two5Config.rotation, 'invertX').onChange(getHandler$1('rotationInvertX'));
   rotation.add(two5Config.rotation, 'invertY').onChange(getHandler$1('rotationInvertY'));
   rotation.add(two5Config.rotation, 'max', 10, 60, 1).onChange(getHandler$1('rotationMax'));
   const skewing = gui.addFolder('Skewing');
-  skewing.add(two5Config.skewing, 'active').onChange(getHandler$1('skewActive'));
+  skewing.add(two5Config.skewing, 'active', {
+    non: false,
+    both: true,
+    x: 'x',
+    y: 'y'
+  }).onChange(getHandler$1('skewActive'));
   skewing.add(two5Config.skewing, 'invertX').onChange(getHandler$1('skewInvertX'));
   skewing.add(two5Config.skewing, 'invertY').onChange(getHandler$1('skewInvertY'));
   skewing.add(two5Config.skewing, 'max', 10, 60, 1).onChange(getHandler$1('skewMax'));
   const scaling = gui.addFolder('Scaling');
-  scaling.add(two5Config.scaling, 'active').onChange(getHandler$1('scaleActive'));
+  scaling.add(two5Config.scaling, 'active', {
+    non: false,
+    both: true,
+    x: 'x',
+    y: 'y'
+  }).onChange(getHandler$1('scaleActive'));
   scaling.add(two5Config.scaling, 'invertX').onChange(getHandler$1('scaleInvertX'));
   scaling.add(two5Config.scaling, 'invertY').onChange(getHandler$1('scaleInvertY'));
   scaling.add(two5Config.scaling, 'max', 0.1, 2, 0.1).onChange(getHandler$1('scaleMax'));
