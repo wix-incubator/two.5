@@ -3,11 +3,20 @@
   factory();
 }((function () { 'use strict';
 
+  function formatTransition({
+    property,
+    duration,
+    easing
+  }) {
+    return `${property} ${duration}ms ${easing}`;
+  }
+
   function getEffect({
     container,
     layers,
     elevation,
     scenePerspective,
+    transition,
     perspective,
     translation,
     rotation,
@@ -17,23 +26,38 @@
     let layerPerspective = '';
     /*
      * Init effect
+     * also set transition if required.
      */
 
     if (container) {
-      Object.assign(container.style, {
-        // 'transform-style': 'preserve-3d',
+      const containerStyle = {
         perspective: `${scenePerspective}px`
-      });
+      };
+
+      if (transition.active && perspective.active) {
+        containerStyle.transition = formatTransition({
+          property: 'perspective-origin',
+          ...transition
+        });
+      }
+
+      Object.assign(container.style, containerStyle);
     } else {
       layerPerspective = `perspective(${scenePerspective}px) `;
     }
 
-    layers.forEach(layer => {
-      Object.assign(layer.el.style, {
-        'transform-style': 'preserve-3d',
-        'pointer-events': 'none'
+    const layerStyle = {
+      'pointer-events': 'none'
+    };
+
+    if (transition.active) {
+      layerStyle.transition = formatTransition({
+        property: 'transform',
+        ...transition
       });
-    });
+    }
+
+    layers.forEach(layer => Object.assign(layer.el.style, layerStyle));
     return function tilt({
       x,
       y
@@ -171,6 +195,9 @@
     maxGamma: 30,
     scenePerspective: 600,
     elevation: 10,
+    transitionActive: false,
+    transitionDuration: 200,
+    transitionEasing: 'ease-out',
     perspectiveActive: false,
     perspectiveInvertX: false,
     perspectiveInvertY: false,
@@ -264,6 +291,11 @@
         layers: this.layers,
         scenePerspective: this.config.scenePerspective,
         elevation: this.config.elevation,
+        transition: {
+          active: this.config.transitionActive,
+          duration: this.config.transitionDuration,
+          easing: this.config.transitionEasing
+        },
         perspective: {
           active: this.config.perspectiveActive,
           invertX: this.config.perspectiveInvertX,
@@ -3316,6 +3348,11 @@
     hitRegion: null,
     scenePerspective: 600,
     elevation: 10,
+    transition: {
+      active: two5.config.transitionActive,
+      duration: two5.config.transitionDuration,
+      easing: two5.config.transitionEasing
+    },
     perspective: {
       active: two5.config.perspectiveActive,
       invertX: two5.config.perspectiveInvertX,
@@ -3350,6 +3387,8 @@
 
   function getHandler$1(prop) {
     return v => {
+      if (v === 'true') v = true;
+      if (v === 'false') v = false;
       two5.config[prop] = v;
       two5.effects.length = 0;
       two5.setupEffects();
@@ -3395,6 +3434,10 @@
   });
   gui.add(two5Config, 'elevation', 0, 40, 1).onChange(getHandler$1('elevation'));
   gui.add(two5Config, 'scenePerspective', 100, 1000, 50).onChange(getHandler$1('scenePerspective'));
+  const transition = gui.addFolder('Transition');
+  transition.add(two5Config.transition, 'active').onChange(getHandler$1('transitionActive'));
+  transition.add(two5Config.transition, 'duration', 50, 1000, 50).onChange(getHandler$1('transitionDuration'));
+  transition.add(two5Config.transition, 'easing', ['linear', 'ease-in', 'ease-out', 'ease-in-out']).onChange(getHandler$1('transitionEasing'));
   const perspective = gui.addFolder('Perspective');
   perspective.add(two5Config.perspective, 'active', {
     non: false,

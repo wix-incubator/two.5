@@ -11,6 +11,9 @@ const DEFAULTS = {
     maxGamma: 30,
     scenePerspective: 600,
     elevation: 10,
+    transitionActive: false,
+    transitionDuration: 200,
+    transitionEasing: 'ease-out',
     perspectiveActive: false,
     perspectiveInvertX: false,
     perspectiveInvertY: false,
@@ -108,6 +111,11 @@ export default class Two5 {
             layers: this.layers,
             scenePerspective: this.config.scenePerspective,
             elevation: this.config.elevation,
+            transition: {
+                active: this.config.transitionActive,
+                duration: this.config.transitionDuration,
+                easing: this.config.transitionEasing
+            },
             perspective: {
                 active: this.config.perspectiveActive,
                 invertX: this.config.perspectiveInvertX,

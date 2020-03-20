@@ -1,8 +1,17 @@
+function formatTransition({
+  property,
+  duration,
+  easing
+}) {
+  return `${property} ${duration}ms ${easing}`;
+}
+
 function getEffect({
   container,
   layers,
   elevation,
   scenePerspective,
+  transition,
   perspective,
   translation,
   rotation,
@@ -12,23 +21,38 @@ function getEffect({
   let layerPerspective = '';
   /*
    * Init effect
+   * also set transition if required.
    */
 
   if (container) {
-    Object.assign(container.style, {
-      // 'transform-style': 'preserve-3d',
+    const containerStyle = {
       perspective: `${scenePerspective}px`
-    });
+    };
+
+    if (transition.active && perspective.active) {
+      containerStyle.transition = formatTransition({
+        property: 'perspective-origin',
+        ...transition
+      });
+    }
+
+    Object.assign(container.style, containerStyle);
   } else {
     layerPerspective = `perspective(${scenePerspective}px) `;
   }
 
-  layers.forEach(layer => {
-    Object.assign(layer.el.style, {
-      'transform-style': 'preserve-3d',
-      'pointer-events': 'none'
+  const layerStyle = {
+    'pointer-events': 'none'
+  };
+
+  if (transition.active) {
+    layerStyle.transition = formatTransition({
+      property: 'transform',
+      ...transition
     });
-  });
+  }
+
+  layers.forEach(layer => Object.assign(layer.el.style, layerStyle));
   return function tilt({
     x,
     y
@@ -166,6 +190,9 @@ const DEFAULTS = {
   maxGamma: 30,
   scenePerspective: 600,
   elevation: 10,
+  transitionActive: false,
+  transitionDuration: 200,
+  transitionEasing: 'ease-out',
   perspectiveActive: false,
   perspectiveInvertX: false,
   perspectiveInvertY: false,
@@ -258,6 +285,11 @@ class Two5 {
       layers: this.layers,
       scenePerspective: this.config.scenePerspective,
       elevation: this.config.elevation,
+      transition: {
+        active: this.config.transitionActive,
+        duration: this.config.transitionDuration,
+        easing: this.config.transitionEasing
+      },
       perspective: {
         active: this.config.perspectiveActive,
         invertX: this.config.perspectiveInvertX,

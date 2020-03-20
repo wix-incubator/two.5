@@ -1,8 +1,13 @@
+function formatTransition ({property, duration, easing}) {
+    return `${property} ${duration}ms ${easing}`;
+}
+
 export function getEffect ({
     container,
     layers,
     elevation,
     scenePerspective,
+    transition,
     perspective,
     translation,
     rotation,
@@ -13,23 +18,32 @@ export function getEffect ({
 
     /*
      * Init effect
+     * also set transition if required.
      */
     if (container) {
-        Object.assign(container.style, {
-            // 'transform-style': 'preserve-3d',
+        const containerStyle = {
             perspective: `${scenePerspective}px`
-        });
+        };
+
+        if (transition.active && perspective.active) {
+            containerStyle.transition = formatTransition({property: 'perspective-origin', ...transition});
+        }
+
+        Object.assign(container.style, containerStyle);
     }
     else {
         layerPerspective = `perspective(${scenePerspective}px) `;
     }
 
-    layers.forEach(layer => {
-        Object.assign(layer.el.style, {
-            'transform-style': 'preserve-3d',
-            'pointer-events': 'none'
-        });
-    });
+    const layerStyle = {
+        'pointer-events': 'none'
+    };
+
+    if (transition.active) {
+        layerStyle.transition = formatTransition({property: 'transform', ...transition});
+    }
+
+    layers.forEach(layer => Object.assign(layer.el.style, layerStyle));
 
     return function tilt ({x, y}) {
         const len = layers.length;

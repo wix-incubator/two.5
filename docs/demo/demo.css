@@ -31,6 +31,7 @@ main {
 #hexagon {
     top: 100px;
     right: 230px;
+    -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     background: linear-gradient(135deg, cornflowerblue, chocolate);
 }
@@ -45,6 +46,7 @@ main {
 #triangle {
     top: 200px;
     left: 250px;
+    -webkit-clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
     background: linear-gradient(to bottom, tomato, steelblue);
 }
@@ -52,6 +54,7 @@ main {
 #frame {
     top: 100px;
     right: 200px;
+    -webkit-clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 25%, 75% 25%, 75% 75%, 25% 75%, 25% 100%, 100% 100%, 100% 0%);
     clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 25%, 75% 25%, 75% 75%, 25% 75%, 25% 100%, 100% 100%, 100% 0%);
     background: linear-gradient(to top, hotpink, lightblue);
 }
@@ -59,6 +62,7 @@ main {
 #star  {
     bottom: 100px;
     right: 250px;
+    -webkit-clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
     clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
     background: linear-gradient(270deg, firebrick, darkblue);
 }

@@ -39,6 +39,11 @@ const two5Config = {
     hitRegion: null,
     scenePerspective: 600,
     elevation: 10,
+    transition: {
+        active: two5.config.transitionActive,
+        duration: two5.config.transitionDuration,
+        easing: two5.config.transitionEasing
+    },
     perspective: {
         active: two5.config.perspectiveActive,
         invertX: two5.config.perspectiveInvertX,
@@ -118,6 +123,14 @@ gui.add(two5Config, 'elevation', 0, 40, 1)
 
 gui.add(two5Config, 'scenePerspective', 100, 1000, 50)
     .onChange(getHandler('scenePerspective'));
+
+const transition = gui.addFolder('Transition');
+transition.add(two5Config.transition, 'active')
+    .onChange(getHandler('transitionActive'));
+transition.add(two5Config.transition, 'duration', 50, 1000, 50)
+    .onChange(getHandler('transitionDuration'));
+transition.add(two5Config.transition, 'easing', ['linear', 'ease-in', 'ease-out', 'ease-in-out'])
+    .onChange(getHandler('transitionEasing'));
 
 const perspective = gui.addFolder('Perspective');
 perspective.add(two5Config.perspective, 'active', {non: false, both: true, x: 'x', y: 'y'})
