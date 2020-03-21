@@ -38,7 +38,7 @@ function getEffect({
 
     Object.assign(container.style, containerStyle);
   } else {
-    // if there's no container we set perspective() as part of transform of each layer
+    // if there's no container set perspective() as part of transform of each layer
     layerPerspective = `perspective(${scenePerspective}px) `;
   }
 
@@ -58,9 +58,7 @@ function getEffect({
     x,
     y
   }) {
-    const len = layers.length; // optimization for case where effects only changes container's style
-
-    let hasLayersEffect = false;
+    const len = layers.length;
     let translateXFactor;
     let translateYFactor;
     let rotateXFactor;
@@ -71,30 +69,26 @@ function getEffect({
     let scaleYFactor;
 
     if (translation.active) {
-      hasLayersEffect = true;
       translateXFactor = translation.active === 'y' ? 0 : (translation.invertX ? -1 : 1) * translation.max * (2 * x - 1);
       translateYFactor = translation.active === 'x' ? 0 : (translation.invertY ? -1 : 1) * translation.max * (2 * y - 1);
     }
 
     if (rotation.active) {
-      hasLayersEffect = true;
       rotateXFactor = rotation.active === 'y' ? 0 : (rotation.invertX ? -1 : 1) * rotation.max * (y * 2 - 1);
       rotateYFactor = rotation.active === 'x' ? 0 : (rotation.invertY ? -1 : 1) * rotation.max * (1 - x * 2);
     }
 
     if (skewing.active) {
-      hasLayersEffect = true;
       skewXFactor = skewing.active === 'y' ? 0 : (skewing.invertX ? -1 : 1) * skewing.max * (1 - x * 2);
       skewYFactor = skewing.active === 'x' ? 0 : (skewing.invertY ? -1 : 1) * skewing.max * (1 - y * 2);
     }
 
     if (scaling.active) {
-      hasLayersEffect = true;
       scaleXFactor = scaling.active === 'y' ? 0 : (scaling.invertX ? -1 : 1) * scaling.max * (Math.abs(0.5 - x) * 2);
       scaleYFactor = scaling.active === 'x' ? 0 : (scaling.invertY ? -1 : 1) * scaling.max * (Math.abs(0.5 - y) * 2);
     }
 
-    hasLayersEffect && layers.forEach((layer, index) => {
+    layers.forEach((layer, index) => {
       const depth = (index + 1) / len;
       let translatePart = '';
       const translateZVal = elevation * (index + 1);
