@@ -79,51 +79,31 @@ export default class Two5 {
     }
 
     setupEvents () {
-        this.hasOrientationSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
+        const gyroscoeHandler = getGyroscope({
+            samples: this.config.gyroscopeSamples,
+            maxBeta: this.config.maxBeta,
+            maxGamma: this.config.maxGamma,
+            progress: this.progress
+        });
 
-        if (this.hasOrientationSupport) {
-            this.tiltTarget = window;
-
-            this.orientationHandler = getGyroscope({
-                target: this.progress,
-                samples: this.config.gyroscopeSamples,
-                maxBeta: this.config.maxBeta,
-                maxGamma: this.config.maxGamma
-            });
-
-            this.tiltTarget.addEventListener('deviceorientation', this.orientationHandler);
+        if (gyroscoeHandler) {
+            this.tiltHandler = gyroscoeHandler;
         }
         else {
-            if (this.config.mouseTarget) {
-                this.tiltTarget = this.config.mouseTarget;
-                this.rect = clone(this.tiltTarget.getBoundingClientRect().toJSON());
-            }
-            else {
-                this.tiltTarget = window;
-                this.rect = {
-                    left: 0,
-                    top: 0,
-                    width: window.innerWidth,
-                    height: window.innerHeight
-                };
-            }
-
-            this.hoverHandler = getHover({
-                target: this.progress,
-                rect: this.rect
+            /*
+             * No deviceorientation support
+             */
+            this.tiltHandler = getHover({
+                target: this.config.mouseTarget,
+                progress: this.progress
             });
-
-            this.tiltTarget.addEventListener('mousemove', this.hoverHandler);
         }
+
+        this.tiltHandler.on();
     }
 
     teardownEvents () {
-        if (this.hasOrientationSupport) {
-            this.tiltTarget.removeEventListener('deviceorientation', this.orientationHandler);
-        }
-        else {
-            this.tiltTarget.removeEventListener('mousemove', this.hoverHandler);
-        }
+        this.tiltHandler.off();
     }
 
     setupEffects () {

@@ -166,15 +166,30 @@
 
   function getHandler({
     target,
-    rect
+    progress
   }) {
+    let rect;
+
+    if (target && target !== window) {
+      rect = clone(target.getBoundingClientRect().toJSON());
+    } else {
+      target = window;
+      rect = {
+        left: 0,
+        top: 0,
+        width: window.innerWidth,
+        height: window.innerHeight
+      };
+    }
+
     const {
       width,
       height,
       left,
       top
     } = rect;
-    return function handler(event) {
+
+    function handler(event) {
       const {
         clientX,
         clientY
@@ -182,21 +197,42 @@
 
       const x = clamp(0, 1, (clientX - left) / width);
       const y = clamp(0, 1, (clientY - top) / height);
-      target.x = x;
-      target.y = y;
+      progress.x = x;
+      progress.y = y;
+    }
+
+    function on(config) {
+      target.addEventListener('mousemove', handler, config || false);
+    }
+
+    function off(config) {
+      target.removeEventListener('mousemove', handler, config || false);
+    }
+
+    return {
+      on,
+      off,
+      handler
     };
   }
 
   function getHandler$1({
-    target,
     samples,
     maxBeta,
-    maxGamma
+    maxGamma,
+    progress
   }) {
+    const hasSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
+
+    if (!hasSupport) {
+      return null;
+    }
+
     const totalAngleX = maxGamma * 2;
     const totalAngleY = maxBeta * 2;
     let lastGammaZero, lastBetaZero, gammaZero, betaZero;
-    return function handler(event) {
+
+    function handler(event) {
       if (event.gamma === null || event.beta === null) {
         return;
       } // initial angles calibration
@@ -220,8 +256,22 @@
 
       const x = clamp(0, 1, (event.gamma - gammaZero + maxGamma) / totalAngleX);
       const y = clamp(0, 1, (event.beta - betaZero + maxBeta) / totalAngleY);
-      target.x = x;
-      target.y = y;
+      progress.x = x;
+      progress.y = y;
+    }
+
+    function on(config) {
+      window.addEventListener('deviceorientation', handler, config || false);
+    }
+
+    function off(config) {
+      window.removeEventListener('deviceorientation', handler, config || false);
+    }
+
+    return {
+      on,
+      off,
+      handler
     };
   }
 
@@ -299,45 +349,30 @@
     }
 
     setupEvents() {
-      this.hasOrientationSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
+      const gyroscoeHandler = getHandler$1({
+        samples: this.config.gyroscopeSamples,
+        maxBeta: this.config.maxBeta,
+        maxGamma: this.config.maxGamma,
+        progress: this.progress
+      });
 
-      if (this.hasOrientationSupport) {
-        this.tiltTarget = window;
-        this.orientationHandler = getHandler$1({
-          target: this.progress,
-          samples: this.config.gyroscopeSamples,
-          maxBeta: this.config.maxBeta,
-          maxGamma: this.config.maxGamma
-        });
-        this.tiltTarget.addEventListener('deviceorientation', this.orientationHandler);
+      if (gyroscoeHandler) {
+        this.tiltHandler = gyroscoeHandler;
       } else {
-        if (this.config.mouseTarget) {
-          this.tiltTarget = this.config.mouseTarget;
-          this.rect = clone(this.tiltTarget.getBoundingClientRect().toJSON());
-        } else {
-          this.tiltTarget = window;
-          this.rect = {
-            left: 0,
-            top: 0,
-            width: window.innerWidth,
-            height: window.innerHeight
-          };
-        }
-
-        this.hoverHandler = getHandler({
-          target: this.progress,
-          rect: this.rect
+        /*
+         * No deviceorientation support
+         */
+        this.tiltHandler = getHandler({
+          target: this.config.mouseTarget,
+          progress: this.progress
         });
-        this.tiltTarget.addEventListener('mousemove', this.hoverHandler);
       }
+
+      this.tiltHandler.on();
     }
 
     teardownEvents() {
-      if (this.hasOrientationSupport) {
-        this.tiltTarget.removeEventListener('deviceorientation', this.orientationHandler);
-      } else {
-        this.tiltTarget.removeEventListener('mousemove', this.hoverHandler);
-      }
+      this.tiltHandler.off();
     }
 
     setupEffects() {
