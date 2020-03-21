@@ -1,6 +1,6 @@
 import { clamp } from '../utilities';
 
-export default function getHandler ({target, samples, maxBeta, maxGamma}) {
+export function getHandler ({target, samples, maxBeta, maxGamma}) {
     const totalAngleX = maxGamma * 2;
     const totalAngleY = maxBeta * 2;
 
@@ -28,8 +28,8 @@ export default function getHandler ({target, samples, maxBeta, maxGamma}) {
         }
 
         // get angles progress
-        const x = clamp(0, 1, (event.gamma - maxGamma - gammaZero) / totalAngleX);
-        const y = clamp(0, 1, (event.beta - maxBeta - betaZero) / totalAngleY);
+        const x = clamp(0, 1, (event.gamma - gammaZero + maxGamma) / totalAngleX);
+        const y = clamp(0, 1, (event.beta -  betaZero + maxBeta) / totalAngleY);
 
         target.x = x;
         target.y = y;

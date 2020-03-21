@@ -24,8 +24,8 @@
     "rollup": "^1.27.8",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-filesize": "^6.2.1",
-    "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-progress": "^1.1.1",
     "stats.js": "^0.17.0"
-  }
+  },
+  "dependencies": {}
 }

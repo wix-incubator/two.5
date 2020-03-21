@@ -187,12 +187,50 @@
     };
   }
 
+  function getHandler$1({
+    target,
+    samples,
+    maxBeta,
+    maxGamma
+  }) {
+    const totalAngleX = maxGamma * 2;
+    const totalAngleY = maxBeta * 2;
+    let lastGammaZero, lastBetaZero, gammaZero, betaZero;
+    return function handler(event) {
+      if (event.gamma === null || event.beta === null) {
+        return;
+      } // initial angles calibration
+
+
+      if (samples > 0) {
+        lastGammaZero = gammaZero;
+        lastBetaZero = betaZero;
+
+        if (gammaZero == null) {
+          gammaZero = event.gamma;
+          betaZero = event.beta;
+        } else {
+          gammaZero = (event.gamma + lastGammaZero) / 2;
+          betaZero = (event.beta + lastBetaZero) / 2;
+        }
+
+        samples -= 1;
+      } // get angles progress
+
+
+      const x = clamp(0, 1, (event.gamma - gammaZero + maxGamma) / totalAngleX);
+      const y = clamp(0, 1, (event.beta - betaZero + maxBeta) / totalAngleY);
+      target.x = x;
+      target.y = y;
+    };
+  }
+
   const DEFAULTS = {
     mouseTarget: null,
     layersContainer: null,
-    samples: 10,
-    maxBeta: 30,
-    maxGamma: 30,
+    gyroscopeSamples: 3,
+    maxBeta: 15,
+    maxGamma: 15,
     scenePerspective: 600,
     elevation: 10,
     transitionActive: false,
@@ -261,28 +299,45 @@
     }
 
     setupEvents() {
-      if (this.config.mouseTarget) {
-        this.tiltTarget = this.config.mouseTarget;
-        this.rect = clone(this.tiltTarget.getBoundingClientRect().toJSON());
-      } else {
-        this.tiltTarget = window;
-        this.rect = {
-          left: 0,
-          top: 0,
-          width: window.innerWidth,
-          height: window.innerHeight
-        };
-      }
+      this.hasOrientationSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 
-      this.hoverHandler = getHandler({
-        target: this.progress,
-        rect: this.rect
-      });
-      this.tiltTarget.addEventListener('mousemove', this.hoverHandler);
+      if (this.hasOrientationSupport) {
+        this.tiltTarget = window;
+        this.orientationHandler = getHandler$1({
+          target: this.progress,
+          samples: this.config.gyroscopeSamples,
+          maxBeta: this.config.maxBeta,
+          maxGamma: this.config.maxGamma
+        });
+        this.tiltTarget.addEventListener('deviceorientation', this.orientationHandler);
+      } else {
+        if (this.config.mouseTarget) {
+          this.tiltTarget = this.config.mouseTarget;
+          this.rect = clone(this.tiltTarget.getBoundingClientRect().toJSON());
+        } else {
+          this.tiltTarget = window;
+          this.rect = {
+            left: 0,
+            top: 0,
+            width: window.innerWidth,
+            height: window.innerHeight
+          };
+        }
+
+        this.hoverHandler = getHandler({
+          target: this.progress,
+          rect: this.rect
+        });
+        this.tiltTarget.addEventListener('mousemove', this.hoverHandler);
+      }
     }
 
     teardownEvents() {
-      this.tiltTarget.removeEventListener('mousemove', this.hoverHandler);
+      if (this.hasOrientationSupport) {
+        this.tiltTarget.removeEventListener('deviceorientation', this.orientationHandler);
+      } else {
+        this.tiltTarget.removeEventListener('mousemove', this.hoverHandler);
+      }
     }
 
     setupEffects() {
@@ -328,6 +383,10 @@
         }
       });
       this.effects.push(tilt);
+    }
+
+    teardownEffects() {
+      this.effects.length = 0;
     }
 
   }
@@ -3385,12 +3444,12 @@
     }
   };
 
-  function getHandler$1(prop) {
+  function getHandler$2(prop) {
     return v => {
       if (v === 'true') v = true;
       if (v === 'false') v = false;
       two5.config[prop] = v;
-      two5.effects.length = 0;
+      two5.teardownEffects();
       two5.setupEffects();
       setupStats();
     };
@@ -3432,32 +3491,32 @@
     two5.on();
     setupStats();
   });
-  gui.add(two5Config, 'elevation', 0, 40, 1).onChange(getHandler$1('elevation'));
-  gui.add(two5Config, 'scenePerspective', 100, 1000, 50).onChange(getHandler$1('scenePerspective'));
+  gui.add(two5Config, 'elevation', 0, 40, 1).onChange(getHandler$2('elevation'));
+  gui.add(two5Config, 'scenePerspective', 100, 1000, 50).onChange(getHandler$2('scenePerspective'));
   const transition = gui.addFolder('Transition');
-  transition.add(two5Config.transition, 'active').onChange(getHandler$1('transitionActive'));
-  transition.add(two5Config.transition, 'duration', 50, 1000, 50).onChange(getHandler$1('transitionDuration'));
-  transition.add(two5Config.transition, 'easing', ['linear', 'ease-in', 'ease-out', 'ease-in-out']).onChange(getHandler$1('transitionEasing'));
+  transition.add(two5Config.transition, 'active').onChange(getHandler$2('transitionActive'));
+  transition.add(two5Config.transition, 'duration', 50, 1000, 50).onChange(getHandler$2('transitionDuration'));
+  transition.add(two5Config.transition, 'easing', ['linear', 'ease-in', 'ease-out', 'ease-in-out']).onChange(getHandler$2('transitionEasing'));
   const perspective = gui.addFolder('Perspective');
   perspective.add(two5Config.perspective, 'active', {
     non: false,
     both: true,
     x: 'x',
     y: 'y'
-  }).onChange(getHandler$1('perspectiveActive'));
-  perspective.add(two5Config.perspective, 'invertX').onChange(getHandler$1('perspectiveInvertX'));
-  perspective.add(two5Config.perspective, 'invertY').onChange(getHandler$1('perspectiveInvertY'));
-  perspective.add(two5Config.perspective, 'max', 0, 0.5, 0.05).onChange(getHandler$1('perspectiveMax'));
+  }).onChange(getHandler$2('perspectiveActive'));
+  perspective.add(two5Config.perspective, 'invertX').onChange(getHandler$2('perspectiveInvertX'));
+  perspective.add(two5Config.perspective, 'invertY').onChange(getHandler$2('perspectiveInvertY'));
+  perspective.add(two5Config.perspective, 'max', 0, 0.5, 0.05).onChange(getHandler$2('perspectiveMax'));
   const translation = gui.addFolder('Translation');
   translation.add(two5Config.translation, 'active', {
     non: false,
     both: true,
     x: 'x',
     y: 'y'
-  }).onChange(getHandler$1('translationActive'));
-  translation.add(two5Config.translation, 'invertX').onChange(getHandler$1('translationInvertX'));
-  translation.add(two5Config.translation, 'invertY').onChange(getHandler$1('translationInvertY'));
-  translation.add(two5Config.translation, 'max', 10, 150, 5).onChange(getHandler$1('translationMax'));
+  }).onChange(getHandler$2('translationActive'));
+  translation.add(two5Config.translation, 'invertX').onChange(getHandler$2('translationInvertX'));
+  translation.add(two5Config.translation, 'invertY').onChange(getHandler$2('translationInvertY'));
+  translation.add(two5Config.translation, 'max', 10, 150, 5).onChange(getHandler$2('translationMax'));
   translation.open();
   const rotation = gui.addFolder('Rotation');
   rotation.add(two5Config.rotation, 'active', {
@@ -3465,29 +3524,29 @@
     both: true,
     x: 'x',
     y: 'y'
-  }).onChange(getHandler$1('rotationActive'));
-  rotation.add(two5Config.rotation, 'invertX').onChange(getHandler$1('rotationInvertX'));
-  rotation.add(two5Config.rotation, 'invertY').onChange(getHandler$1('rotationInvertY'));
-  rotation.add(two5Config.rotation, 'max', 10, 60, 1).onChange(getHandler$1('rotationMax'));
+  }).onChange(getHandler$2('rotationActive'));
+  rotation.add(two5Config.rotation, 'invertX').onChange(getHandler$2('rotationInvertX'));
+  rotation.add(two5Config.rotation, 'invertY').onChange(getHandler$2('rotationInvertY'));
+  rotation.add(two5Config.rotation, 'max', 10, 60, 1).onChange(getHandler$2('rotationMax'));
   const skewing = gui.addFolder('Skewing');
   skewing.add(two5Config.skewing, 'active', {
     non: false,
     both: true,
     x: 'x',
     y: 'y'
-  }).onChange(getHandler$1('skewActive'));
-  skewing.add(two5Config.skewing, 'invertX').onChange(getHandler$1('skewInvertX'));
-  skewing.add(two5Config.skewing, 'invertY').onChange(getHandler$1('skewInvertY'));
-  skewing.add(two5Config.skewing, 'max', 10, 60, 1).onChange(getHandler$1('skewMax'));
+  }).onChange(getHandler$2('skewActive'));
+  skewing.add(two5Config.skewing, 'invertX').onChange(getHandler$2('skewInvertX'));
+  skewing.add(two5Config.skewing, 'invertY').onChange(getHandler$2('skewInvertY'));
+  skewing.add(two5Config.skewing, 'max', 10, 60, 1).onChange(getHandler$2('skewMax'));
   const scaling = gui.addFolder('Scaling');
   scaling.add(two5Config.scaling, 'active', {
     non: false,
     both: true,
     x: 'x',
     y: 'y'
-  }).onChange(getHandler$1('scaleActive'));
-  scaling.add(two5Config.scaling, 'invertX').onChange(getHandler$1('scaleInvertX'));
-  scaling.add(two5Config.scaling, 'invertY').onChange(getHandler$1('scaleInvertY'));
-  scaling.add(two5Config.scaling, 'max', 0.1, 2, 0.1).onChange(getHandler$1('scaleMax'));
+  }).onChange(getHandler$2('scaleActive'));
+  scaling.add(two5Config.scaling, 'invertX').onChange(getHandler$2('scaleInvertX'));
+  scaling.add(two5Config.scaling, 'invertY').onChange(getHandler$2('scaleInvertY'));
+  scaling.add(two5Config.scaling, 'max', 0.1, 2, 0.1).onChange(getHandler$2('scaleMax'));
 
 })));

@@ -81,7 +81,7 @@ function getHandler (prop) {
         if (v === 'true') v = true;
         if (v === 'false') v = false;
         two5.config[prop] = v;
-        two5.effects.length = 0;
+        two5.teardownEffects();
         two5.setupEffects();
         setupStats();
     };

@@ -1,7 +1,6 @@
 import progress from 'rollup-plugin-progress';
 import filesize from 'rollup-plugin-filesize';
 import babel from 'rollup-plugin-babel';
-import nodeResolve from 'rollup-plugin-node-resolve';
 
 const config = {
     input: 'demo.js',
@@ -15,12 +14,6 @@ const config = {
         progress({
             clearLine: false
         }),
-        // nodeResolve({
-        //     module: true,
-        //     main: true,
-        //     browser: true,
-        //     preferBuiltins: false
-        // }),
         babel(),
         filesize()
     ]

@@ -182,12 +182,50 @@ function getHandler({
   };
 }
 
+function getHandler$1({
+  target,
+  samples,
+  maxBeta,
+  maxGamma
+}) {
+  const totalAngleX = maxGamma * 2;
+  const totalAngleY = maxBeta * 2;
+  let lastGammaZero, lastBetaZero, gammaZero, betaZero;
+  return function handler(event) {
+    if (event.gamma === null || event.beta === null) {
+      return;
+    } // initial angles calibration
+
+
+    if (samples > 0) {
+      lastGammaZero = gammaZero;
+      lastBetaZero = betaZero;
+
+      if (gammaZero == null) {
+        gammaZero = event.gamma;
+        betaZero = event.beta;
+      } else {
+        gammaZero = (event.gamma + lastGammaZero) / 2;
+        betaZero = (event.beta + lastBetaZero) / 2;
+      }
+
+      samples -= 1;
+    } // get angles progress
+
+
+    const x = clamp(0, 1, (event.gamma - gammaZero + maxGamma) / totalAngleX);
+    const y = clamp(0, 1, (event.beta - betaZero + maxBeta) / totalAngleY);
+    target.x = x;
+    target.y = y;
+  };
+}
+
 const DEFAULTS = {
   mouseTarget: null,
   layersContainer: null,
-  samples: 10,
-  maxBeta: 30,
-  maxGamma: 30,
+  gyroscopeSamples: 3,
+  maxBeta: 15,
+  maxGamma: 15,
   scenePerspective: 600,
   elevation: 10,
   transitionActive: false,
@@ -255,28 +293,45 @@ class Two5 {
   }
 
   setupEvents() {
-    if (this.config.mouseTarget) {
-      this.tiltTarget = this.config.mouseTarget;
-      this.rect = clone(this.tiltTarget.getBoundingClientRect().toJSON());
-    } else {
-      this.tiltTarget = window;
-      this.rect = {
-        left: 0,
-        top: 0,
-        width: window.innerWidth,
-        height: window.innerHeight
-      };
-    }
+    this.hasOrientationSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 
-    this.hoverHandler = getHandler({
-      target: this.progress,
-      rect: this.rect
-    });
-    this.tiltTarget.addEventListener('mousemove', this.hoverHandler);
+    if (this.hasOrientationSupport) {
+      this.tiltTarget = window;
+      this.orientationHandler = getHandler$1({
+        target: this.progress,
+        samples: this.config.gyroscopeSamples,
+        maxBeta: this.config.maxBeta,
+        maxGamma: this.config.maxGamma
+      });
+      this.tiltTarget.addEventListener('deviceorientation', this.orientationHandler);
+    } else {
+      if (this.config.mouseTarget) {
+        this.tiltTarget = this.config.mouseTarget;
+        this.rect = clone(this.tiltTarget.getBoundingClientRect().toJSON());
+      } else {
+        this.tiltTarget = window;
+        this.rect = {
+          left: 0,
+          top: 0,
+          width: window.innerWidth,
+          height: window.innerHeight
+        };
+      }
+
+      this.hoverHandler = getHandler({
+        target: this.progress,
+        rect: this.rect
+      });
+      this.tiltTarget.addEventListener('mousemove', this.hoverHandler);
+    }
   }
 
   teardownEvents() {
-    this.tiltTarget.removeEventListener('mousemove', this.hoverHandler);
+    if (this.hasOrientationSupport) {
+      this.tiltTarget.removeEventListener('deviceorientation', this.orientationHandler);
+    } else {
+      this.tiltTarget.removeEventListener('mousemove', this.hoverHandler);
+    }
   }
 
   setupEffects() {
@@ -322,6 +377,10 @@ class Two5 {
       }
     });
     this.effects.push(tilt);
+  }
+
+  teardownEffects() {
+    this.effects.length = 0;
   }
 
 }

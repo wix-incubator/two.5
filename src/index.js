@@ -1,14 +1,14 @@
 import { getEffect as getTiltEffect } from './effects/tilt.js';
 import { getHandler as getHover } from './events/hover.js';
-// import * as getGyroscope from './events/gyroscope';
+import { getHandler as getGyroscope } from './events/gyroscope';
 import { clone } from './utilities.js';
 
 const DEFAULTS = {
     mouseTarget: null,
     layersContainer: null,
-    samples: 10,
-    maxBeta: 30,
-    maxGamma: 30,
+    gyroscopeSamples: 3,
+    maxBeta: 15,
+    maxGamma: 15,
     scenePerspective: 600,
     elevation: 10,
     transitionActive: false,
@@ -79,30 +79,51 @@ export default class Two5 {
     }
 
     setupEvents () {
-        if (this.config.mouseTarget) {
-            this.tiltTarget = this.config.mouseTarget;
-            this.rect = clone(this.tiltTarget.getBoundingClientRect().toJSON());
+        this.hasOrientationSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
+
+        if (this.hasOrientationSupport) {
+            this.tiltTarget = window;
+
+            this.orientationHandler = getGyroscope({
+                target: this.progress,
+                samples: this.config.gyroscopeSamples,
+                maxBeta: this.config.maxBeta,
+                maxGamma: this.config.maxGamma
+            });
+
+            this.tiltTarget.addEventListener('deviceorientation', this.orientationHandler);
         }
         else {
-            this.tiltTarget = window;
-            this.rect = {
-                left: 0,
-                top: 0,
-                width: window.innerWidth,
-                height: window.innerHeight
-            };
+            if (this.config.mouseTarget) {
+                this.tiltTarget = this.config.mouseTarget;
+                this.rect = clone(this.tiltTarget.getBoundingClientRect().toJSON());
+            }
+            else {
+                this.tiltTarget = window;
+                this.rect = {
+                    left: 0,
+                    top: 0,
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                };
+            }
+
+            this.hoverHandler = getHover({
+                target: this.progress,
+                rect: this.rect
+            });
+
+            this.tiltTarget.addEventListener('mousemove', this.hoverHandler);
         }
-
-        this.hoverHandler = getHover({
-            target: this.progress,
-            rect: this.rect
-        });
-
-        this.tiltTarget.addEventListener('mousemove', this.hoverHandler);
     }
 
     teardownEvents () {
-        this.tiltTarget.removeEventListener('mousemove', this.hoverHandler);
+        if (this.hasOrientationSupport) {
+            this.tiltTarget.removeEventListener('deviceorientation', this.orientationHandler);
+        }
+        else {
+            this.tiltTarget.removeEventListener('mousemove', this.hoverHandler);
+        }
     }
 
     setupEffects () {
@@ -149,5 +170,9 @@ export default class Two5 {
         });
 
         this.effects.push(tilt);
+    }
+
+    teardownEffects () {
+        this.effects.length = 0;
     }
 }
