@@ -80,8 +80,8 @@
         let rotatePart = '';
 
         if (layer.rotationActive) {
-          const rotateXVal = layer.rotationActive === 'y' ? 0 : (layer.rotationInvertX ? -1 : 1) * layer.rotationMax * (y * 2 - 1) * depth;
-          const rotateYVal = layer.rotationActive === 'x' ? 0 : (layer.rotationInvertY ? -1 : 1) * layer.rotationMax * (1 - x * 2) * depth;
+          const rotateXVal = layer.rotationActive === 'y' ? 0 : (layer.rotationInvertX ? -1 : 1) * layer.rotationMax * (1 - y * 2) * depth;
+          const rotateYVal = layer.rotationActive === 'x' ? 0 : (layer.rotationInvertY ? -1 : 1) * layer.rotationMax * (x * 2 - 1) * depth;
           rotatePart = `rotateX(${rotateXVal}deg) rotateY(${rotateYVal}deg)`;
         } else {
           rotatePart = 'rotateX(0deg) rotateY(0deg)';
@@ -3457,7 +3457,7 @@
         };
       }(this.getSceneHandler('transitionActive')));
       this.transition.add(this.two5Config.transition, 'duration', 50, 1000, 50).onChange(this.getSceneHandler('transitionDuration'));
-      this.transition.add(this.two5Config.transition, 'easing', ['linear', 'ease-in', 'ease-out', 'ease-in-out']).onChange(this.getSceneHandler('transitionEasing'));
+      this.transition.add(this.two5Config.transition, 'easing', ['linear', 'ease-out']).onChange(this.getSceneHandler('transitionEasing'));
       this.effects = this.gui.addFolder('Effects');
       this.createEffectControls(this.effects, this.two5Config); // assuming we're starting with `Images` scene here
 
