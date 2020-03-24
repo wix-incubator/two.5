@@ -70,6 +70,7 @@ class Demo {
             .onChange(this.getSceneHandler('transitionEasing'));
 
         this.elementsFolder = this.gui.addFolder('Elements');
+        this.elementsFolder.open();
 
         this.two5.layers.forEach((layer, index) => {
             const layerFolder = this.elementsFolder.addFolder(layer.el.id);
