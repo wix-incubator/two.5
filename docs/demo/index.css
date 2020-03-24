@@ -1,0 +1,29 @@
+body {
+    font-family: 'Josefin Sans', 'sans-serif';
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30vh;
+}
+
+nav h1 {
+    width: 100%;
+    text-align: center;
+    font-size: 4em;
+}
+
+nav ul {
+    display: flex;
+    width: 100%;
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    flex: 1 1 auto;
+    text-align: center;
+    font-size: 2em;
+}
