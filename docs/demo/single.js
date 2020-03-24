@@ -7,7 +7,7 @@ stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom);
 
 const container = document.querySelector('main');
-const layers = [...container.querySelectorAll('img, h1, h2')];
+const layers = [...container.querySelectorAll('img, h1, h2')].map(el => ({el, depth: 1}));
 
 class Demo {
     constructor () {
@@ -89,6 +89,7 @@ class Demo {
 
     createEffectConfig (config) {
         return {
+            depth: config.depth,
             perspective: {
                 active: config.perspectiveActive,
                 invertX: config.perspectiveInvertX,
@@ -165,6 +166,9 @@ class Demo {
             ? prop => this.getSceneHandler(prop)
             : (prop, index) => this.getLayerHandler(prop, index);
 
+        folder.add(config, 'depth', 0.2, 1, 0.2)
+            .onChange(getHandler('depth', targetIndex));
+
         const perspective = folder.addFolder('Perspective');
         perspective.add(config.perspective, 'active', {non: false, both: true, x: 'x', y: 'y'})
             .onChange(getHandler('perspectiveActive', targetIndex));
@@ -184,7 +188,6 @@ class Demo {
             .onChange(getHandler('translationInvertY', targetIndex));
         translation.add(config.translation, 'max', 10, 150, 5)
             .onChange(getHandler('translationMax', targetIndex));
-        translation.open();
 
         const rotation = folder.addFolder('Rotation');
         rotation.add(config.rotation, 'active', {non: false, both: true, x: 'x', y: 'y'})

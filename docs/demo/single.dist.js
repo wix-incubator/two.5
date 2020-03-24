@@ -3369,7 +3369,10 @@
 
   document.body.appendChild(stats.dom);
   const container = document.querySelector('main');
-  const layers = [...container.querySelectorAll('img, h1, h2')];
+  const layers = [...container.querySelectorAll('img, h1, h2')].map(el => ({
+    el,
+    depth: 1
+  }));
 
   class Demo {
     constructor() {
@@ -3436,6 +3439,7 @@
 
     createEffectConfig(config) {
       return {
+        depth: config.depth,
         perspective: {
           active: config.perspectiveActive,
           invertX: config.perspectiveInvertX,
@@ -3505,6 +3509,7 @@
 
     createEffectControls(folder, config, targetIndex) {
       const getHandler = config === this.two5Config ? prop => this.getSceneHandler(prop) : (prop, index) => this.getLayerHandler(prop, index);
+      folder.add(config, 'depth', 0.2, 1, 0.2).onChange(getHandler('depth', targetIndex));
       const perspective = folder.addFolder('Perspective');
       perspective.add(config.perspective, 'active', {
         non: false,
@@ -3525,7 +3530,6 @@
       translation.add(config.translation, 'invertX').onChange(getHandler('translationInvertX', targetIndex));
       translation.add(config.translation, 'invertY').onChange(getHandler('translationInvertY', targetIndex));
       translation.add(config.translation, 'max', 10, 150, 5).onChange(getHandler('translationMax', targetIndex));
-      translation.open();
       const rotation = folder.addFolder('Rotation');
       rotation.add(config.rotation, 'active', {
         non: false,
