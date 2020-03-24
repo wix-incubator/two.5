@@ -2,19 +2,10 @@ function formatTransition ({property, duration, easing}) {
     return `${property} ${duration}ms ${easing}`;
 }
 
-export function getEffect ({
-    container,
-    layers,
-    elevation,
-    scenePerspective,
-    transition,
-    perspective,
-    translation,
-    rotation,
-    skewing,
-    scaling
-}) {
-    let layerPerspective = '';
+export function getEffect (config) {
+    const container = config.container;
+    const layers = config.layers;
+    const perspectiveZ = config.perspectiveZ;
 
     /*
      * Init effect
@@ -22,88 +13,60 @@ export function getEffect ({
      */
     if (container) {
         const containerStyle = {
-            perspective: `${scenePerspective}px`
+            perspective: `${perspectiveZ}px`
         };
 
-        if (transition.active && perspective.active) {
-            containerStyle.transition = formatTransition({property: 'perspective-origin', ...transition});
+        if (config.transitionActive && config.perspectiveActive) {
+            containerStyle.transition = formatTransition({
+                property: 'perspective-origin',
+                duration: config.transitionDuration,
+                easing: config.transitionEasing
+            });
         }
 
         Object.assign(container.style, containerStyle);
     }
-    else {
-        // if there's no container set perspective() as part of transform of each layer
-        layerPerspective = `perspective(${scenePerspective}px) `;
-    }
 
-    const layerStyle = {
-        'pointer-events': 'none'
-    };
+    /*
+     * Setup layers styling
+     */
+    layers.forEach(layer => {
+        const layerStyle = {};
 
-    if (transition.active) {
-        layerStyle.transition = formatTransition({property: 'transform', ...transition});
-    }
+        if (!layer.allowPointer) {
+            layerStyle['pointer-events'] = 'none';
+        }
 
-    layers.forEach(layer => Object.assign(layer.el.style, layerStyle));
+        if (layer.transitionActive) {
+            layerStyle.transition = formatTransition({
+                property: 'transform',
+                duration: layer.transitionDuration,
+                easing: layer.transitionEasing
+            });
+        }
+        else {
+            delete layerStyle.transition;
+        }
+
+        return Object.assign(layer.el.style, layerStyle);
+    });
 
     return function tilt ({x, y}) {
         const len = layers.length;
 
-        let translateXFactor;
-        let translateYFactor;
-        let rotateXFactor;
-        let rotateYFactor;
-        let skewXFactor;
-        let skewYFactor;
-        let scaleXFactor;
-        let scaleYFactor;
-
-        if (translation.active) {
-            translateXFactor = translation.active === 'y'
-                ? 0
-                : (translation.invertX ? -1 : 1) * translation.max * (2 * x - 1);
-            translateYFactor = translation.active === 'x'
-                ? 0
-                : (translation.invertY ? -1 : 1) * translation.max * (2 * y - 1);
-        }
-
-        if (rotation.active) {
-            rotateXFactor = rotation.active === 'y'
-                ? 0
-                : (rotation.invertX ? -1 : 1) * rotation.max * (y * 2 - 1);
-            rotateYFactor = rotation.active === 'x'
-                ? 0
-                : (rotation.invertY ? -1 : 1) * rotation.max * (1 - x * 2);
-        }
-
-        if (skewing.active) {
-            skewXFactor = skewing.active === 'y'
-                ? 0
-                : (skewing.invertX ? -1 : 1) * skewing.max * (1 - x * 2);
-            skewYFactor = skewing.active === 'x'
-                ? 0
-                : (skewing.invertY ? -1 : 1) * skewing.max * (1 - y * 2);
-        }
-
-        if (scaling.active) {
-            scaleXFactor = scaling.active === 'y'
-                ? 0
-                : (scaling.invertX ? -1 : 1) * scaling.max * (Math.abs(0.5 - x) * 2);
-            scaleYFactor = scaling.active === 'x'
-                ? 0
-                : (scaling.invertY ? -1 : 1) * scaling.max * (Math.abs(0.5 - y) * 2);
-        }
-
         layers.forEach((layer, index) => {
-            const depth = (index + 1) / len;
+            const depth = layer.depth || (index + 1) / len;
+
+            const translateZVal =  layer.elevation !== null ? layer.elevation : config.elevation * (index + 1);
 
             let translatePart = '';
-
-            const translateZVal = elevation * (index + 1);
-
-            if (translation.active) {
-                const translateXVal = translateXFactor * depth;
-                const translateYVal = translateYFactor * depth;
+            if (layer.translationActive) {
+                const translateXVal = layer.translationActive === 'y'
+                    ? 0
+                    : (layer.translationInvertX ? -1 : 1) * layer.translationMax * (2 * x - 1) * depth;
+                const translateYVal = layer.translationActive === 'x'
+                    ? 0
+                    : (layer.translationInvertY ? -1 : 1) * layer.translationMax * (2 * y - 1) * depth;
 
                 translatePart = `translate3d(${translateXVal}px, ${translateYVal}px, ${translateZVal}px)`;
             }
@@ -112,9 +75,13 @@ export function getEffect ({
             }
 
             let rotatePart = '';
-            if (rotation.active) {
-                const rotateXVal = rotateXFactor * depth;
-                const rotateYVal = rotateYFactor * depth;
+            if (layer.rotationActive) {
+                const rotateXVal = layer.rotationActive === 'y'
+                    ? 0
+                    : (layer.rotationInvertX ? -1 : 1) * layer.rotationMax * (y * 2 - 1) * depth;
+                const rotateYVal = layer.rotationActive === 'x'
+                    ? 0
+                    : (layer.rotationInvertY ? -1 : 1) * layer.rotationMax * (1 - x * 2) * depth;
 
                 rotatePart = `rotateX(${rotateXVal}deg) rotateY(${rotateYVal}deg)`;
             }
@@ -123,9 +90,13 @@ export function getEffect ({
             }
 
             let skewPart = '';
-            if (skewing.active) {
-                const skewXVal = skewXFactor * depth;
-                const skewYVal = skewYFactor * depth;
+            if (layer.skewActive) {
+                const skewXVal = layer.skewActive === 'y'
+                    ? 0
+                    : (layer.skewInvertX ? -1 : 1) * layer.skewMax * (1 - x * 2) * depth;
+                const skewYVal = layer.skewActive === 'x'
+                    ? 0
+                    : (layer.skewInvertY ? -1 : 1) * layer.skewMax * (1 - y * 2) * depth;
 
                 skewPart = `skew(${skewXVal}deg, ${skewYVal}deg)`;
             }
@@ -134,9 +105,13 @@ export function getEffect ({
             }
 
             let scalePart = '';
-            if (scaling.active) {
-                const scaleXVal = 1 + scaleXFactor * depth;
-                const scaleYVal = 1 + scaleYFactor * depth;
+            if (layer.scaleActive) {
+                const scaleXVal = layer.scaleActive === 'y'
+                    ? 1
+                    : 1 + (layer.scaleInvertX ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - x) * 2) * depth;
+                const scaleYVal = layer.scaleActive === 'x'
+                    ? 1
+                    : 1 + (layer.scaleInvertY ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - y) * 2) * depth;
 
                 scalePart = `scale(${scaleXVal}, ${scaleYVal})`;
             }
@@ -144,22 +119,31 @@ export function getEffect ({
                 scalePart = 'scale(1, 1)';
             }
 
-            layer.el.style.transform = `${layerPerspective}${translatePart} ${scalePart} ${skewPart} ${rotatePart}`;
+            let layerPerspectiveZ = '';
+
+            if (layer.perspectiveZ) {
+                layerPerspectiveZ = `perspective(${layer.perspectiveZ}px) `;
+            }
+            else if (!container) {
+                layerPerspectiveZ = `perspective(${config.perspectiveZ}px) `;
+            }
+
+            layer.el.style.transform = `${layerPerspectiveZ}${translatePart} ${scalePart} ${skewPart} ${rotatePart}`;
         });
 
-        if (perspective.active) {
-            const perspX = perspective.active === 'y'
+        if (config.perspectiveActive) {
+            const perspX = config.perspectiveActive === 'y'
                 ? 0
-                : perspective.invertX ? x : (1 - x);
-            const perspY = perspective.active === 'x'
+                : config.perspectiveInvertX ? x : (1 - x);
+            const perspY = config.perspectiveActive === 'x'
                 ? 0
-                : perspective.invertY ? y : (1 - y);
+                : config.perspectiveInvertY ? y : (1 - y);
 
             let a = 1, b = 0;
 
-            if (perspective.max) {
-                a = 1 + 2 * perspective.max;
-                b = perspective.max;
+            if (config.perspectiveMax) {
+                a = 1 + 2 * config.perspectiveMax;
+                b = config.perspectiveMax;
             }
 
             container.style.perspectiveOrigin = `${(perspX * a - b) * 100}% ${(perspY * a - b) * 100}%`;

@@ -11,19 +11,10 @@
     return `${property} ${duration}ms ${easing}`;
   }
 
-  function getEffect({
-    container,
-    layers,
-    elevation,
-    scenePerspective,
-    transition,
-    perspective,
-    translation,
-    rotation,
-    skewing,
-    scaling
-  }) {
-    let layerPerspective = '';
+  function getEffect(config) {
+    const container = config.container;
+    const layers = config.layers;
+    const perspectiveZ = config.perspectiveZ;
     /*
      * Init effect
      * also set transition if required.
@@ -31,76 +22,56 @@
 
     if (container) {
       const containerStyle = {
-        perspective: `${scenePerspective}px`
+        perspective: `${perspectiveZ}px`
       };
 
-      if (transition.active && perspective.active) {
+      if (config.transitionActive && config.perspectiveActive) {
         containerStyle.transition = formatTransition({
           property: 'perspective-origin',
-          ...transition
+          duration: config.transitionDuration,
+          easing: config.transitionEasing
         });
       }
 
       Object.assign(container.style, containerStyle);
-    } else {
-      // if there's no container set perspective() as part of transform of each layer
-      layerPerspective = `perspective(${scenePerspective}px) `;
     }
+    /*
+     * Setup layers styling
+     */
 
-    const layerStyle = {
-      'pointer-events': 'none'
-    };
 
-    if (transition.active) {
-      layerStyle.transition = formatTransition({
-        property: 'transform',
-        ...transition
-      });
-    }
+    layers.forEach(layer => {
+      const layerStyle = {};
 
-    layers.forEach(layer => Object.assign(layer.el.style, layerStyle));
+      if (!layer.allowPointer) {
+        layerStyle['pointer-events'] = 'none';
+      }
+
+      if (layer.transitionActive) {
+        layerStyle.transition = formatTransition({
+          property: 'transform',
+          duration: layer.transitionDuration,
+          easing: layer.transitionEasing
+        });
+      } else {
+        delete layerStyle.transition;
+      }
+
+      return Object.assign(layer.el.style, layerStyle);
+    });
     return function tilt({
       x,
       y
     }) {
       const len = layers.length;
-      let translateXFactor;
-      let translateYFactor;
-      let rotateXFactor;
-      let rotateYFactor;
-      let skewXFactor;
-      let skewYFactor;
-      let scaleXFactor;
-      let scaleYFactor;
-
-      if (translation.active) {
-        translateXFactor = translation.active === 'y' ? 0 : (translation.invertX ? -1 : 1) * translation.max * (2 * x - 1);
-        translateYFactor = translation.active === 'x' ? 0 : (translation.invertY ? -1 : 1) * translation.max * (2 * y - 1);
-      }
-
-      if (rotation.active) {
-        rotateXFactor = rotation.active === 'y' ? 0 : (rotation.invertX ? -1 : 1) * rotation.max * (y * 2 - 1);
-        rotateYFactor = rotation.active === 'x' ? 0 : (rotation.invertY ? -1 : 1) * rotation.max * (1 - x * 2);
-      }
-
-      if (skewing.active) {
-        skewXFactor = skewing.active === 'y' ? 0 : (skewing.invertX ? -1 : 1) * skewing.max * (1 - x * 2);
-        skewYFactor = skewing.active === 'x' ? 0 : (skewing.invertY ? -1 : 1) * skewing.max * (1 - y * 2);
-      }
-
-      if (scaling.active) {
-        scaleXFactor = scaling.active === 'y' ? 0 : (scaling.invertX ? -1 : 1) * scaling.max * (Math.abs(0.5 - x) * 2);
-        scaleYFactor = scaling.active === 'x' ? 0 : (scaling.invertY ? -1 : 1) * scaling.max * (Math.abs(0.5 - y) * 2);
-      }
-
       layers.forEach((layer, index) => {
-        const depth = (index + 1) / len;
+        const depth = layer.depth || (index + 1) / len;
+        const translateZVal = layer.elevation !== null ? layer.elevation : config.elevation * (index + 1);
         let translatePart = '';
-        const translateZVal = elevation * (index + 1);
 
-        if (translation.active) {
-          const translateXVal = translateXFactor * depth;
-          const translateYVal = translateYFactor * depth;
+        if (layer.translationActive) {
+          const translateXVal = layer.translationActive === 'y' ? 0 : (layer.translationInvertX ? -1 : 1) * layer.translationMax * (2 * x - 1) * depth;
+          const translateYVal = layer.translationActive === 'x' ? 0 : (layer.translationInvertY ? -1 : 1) * layer.translationMax * (2 * y - 1) * depth;
           translatePart = `translate3d(${translateXVal}px, ${translateYVal}px, ${translateZVal}px)`;
         } else {
           translatePart = `translateZ(${translateZVal}px)`;
@@ -108,9 +79,9 @@
 
         let rotatePart = '';
 
-        if (rotation.active) {
-          const rotateXVal = rotateXFactor * depth;
-          const rotateYVal = rotateYFactor * depth;
+        if (layer.rotationActive) {
+          const rotateXVal = layer.rotationActive === 'y' ? 0 : (layer.rotationInvertX ? -1 : 1) * layer.rotationMax * (y * 2 - 1) * depth;
+          const rotateYVal = layer.rotationActive === 'x' ? 0 : (layer.rotationInvertY ? -1 : 1) * layer.rotationMax * (1 - x * 2) * depth;
           rotatePart = `rotateX(${rotateXVal}deg) rotateY(${rotateYVal}deg)`;
         } else {
           rotatePart = 'rotateX(0deg) rotateY(0deg)';
@@ -118,9 +89,9 @@
 
         let skewPart = '';
 
-        if (skewing.active) {
-          const skewXVal = skewXFactor * depth;
-          const skewYVal = skewYFactor * depth;
+        if (layer.skewActive) {
+          const skewXVal = layer.skewActive === 'y' ? 0 : (layer.skewInvertX ? -1 : 1) * layer.skewMax * (1 - x * 2) * depth;
+          const skewYVal = layer.skewActive === 'x' ? 0 : (layer.skewInvertY ? -1 : 1) * layer.skewMax * (1 - y * 2) * depth;
           skewPart = `skew(${skewXVal}deg, ${skewYVal}deg)`;
         } else {
           skewPart = 'skew(0deg, 0deg)';
@@ -128,26 +99,34 @@
 
         let scalePart = '';
 
-        if (scaling.active) {
-          const scaleXVal = 1 + scaleXFactor * depth;
-          const scaleYVal = 1 + scaleYFactor * depth;
+        if (layer.scaleActive) {
+          const scaleXVal = layer.scaleActive === 'y' ? 1 : 1 + (layer.scaleInvertX ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - x) * 2) * depth;
+          const scaleYVal = layer.scaleActive === 'x' ? 1 : 1 + (layer.scaleInvertY ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - y) * 2) * depth;
           scalePart = `scale(${scaleXVal}, ${scaleYVal})`;
         } else {
           scalePart = 'scale(1, 1)';
         }
 
-        layer.el.style.transform = `${layerPerspective}${translatePart} ${scalePart} ${skewPart} ${rotatePart}`;
+        let layerPerspectiveZ = '';
+
+        if (layer.perspectiveZ) {
+          layerPerspectiveZ = `perspective(${layer.perspectiveZ}px) `;
+        } else if (!container) {
+          layerPerspectiveZ = `perspective(${config.perspectiveZ}px) `;
+        }
+
+        layer.el.style.transform = `${layerPerspectiveZ}${translatePart} ${scalePart} ${skewPart} ${rotatePart}`;
       });
 
-      if (perspective.active) {
-        const perspX = perspective.active === 'y' ? 0 : perspective.invertX ? x : 1 - x;
-        const perspY = perspective.active === 'x' ? 0 : perspective.invertY ? y : 1 - y;
+      if (config.perspectiveActive) {
+        const perspX = config.perspectiveActive === 'y' ? 0 : config.perspectiveInvertX ? x : 1 - x;
+        const perspY = config.perspectiveActive === 'x' ? 0 : config.perspectiveInvertY ? y : 1 - y;
         let a = 1,
             b = 0;
 
-        if (perspective.max) {
-          a = 1 + 2 * perspective.max;
-          b = perspective.max;
+        if (config.perspectiveMax) {
+          a = 1 + 2 * config.perspectiveMax;
+          b = config.perspectiveMax;
         }
 
         container.style.perspectiveOrigin = `${(perspX * a - b) * 100}% ${(perspY * a - b) * 100}%`;
@@ -279,10 +258,11 @@
   const DEFAULTS = {
     mouseTarget: null,
     layersContainer: null,
+    layers: null,
     gyroscopeSamples: 3,
     maxBeta: 15,
     maxGamma: 15,
-    scenePerspective: 600,
+    perspectiveZ: 600,
     elevation: 10,
     transitionActive: false,
     transitionDuration: 200,
@@ -308,6 +288,10 @@
     scaleInvertY: false,
     scaleMax: 0.5
   };
+  const LAYER_PROPS_WITH_DEFAULT = {
+    perspectiveZ: null,
+    elevation: null
+  };
 
   class Two5 {
     constructor(config = {}) {
@@ -316,20 +300,28 @@
         x: 0,
         y: 0
       };
-      let layersContainer;
-
-      if (this.config.layersContainer) {
-        layersContainer = this.config.layersContainer;
-        this.container = layersContainer;
-      } else {
-        layersContainer = window.document.body;
-        this.container = null;
-      }
-
-      this.layers = [...layersContainer.querySelectorAll('[data-tilt-layer]')].map(el => ({
-        el
-      }));
+      this.container = this.config.layersContainer || null;
+      this.createLayers();
       this.effects = [];
+    }
+
+    createLayers() {
+      const layersContainer = this.container || window.document.body;
+      this.layers = this.config.layers || [...layersContainer.querySelectorAll('[data-tilt-layer]')];
+      this.layers = this.layers.map(layer => {
+        let config;
+
+        if (layer instanceof Element) {
+          config = clone(this.config, {
+            el: layer,
+            ...LAYER_PROPS_WITH_DEFAULT
+          }, layer.dataset);
+        } else if (typeof layer == 'object' && layer) {
+          config = clone(this.config, LAYER_PROPS_WITH_DEFAULT, layer);
+        }
+
+        return config;
+      }).filter(x => x);
     }
 
     on() {
@@ -377,47 +369,10 @@
     }
 
     setupEffects() {
-      const tilt = getEffect({
+      const tilt = getEffect(clone(this.config, {
         container: this.container,
-        layers: this.layers,
-        scenePerspective: this.config.scenePerspective,
-        elevation: this.config.elevation,
-        transition: {
-          active: this.config.transitionActive,
-          duration: this.config.transitionDuration,
-          easing: this.config.transitionEasing
-        },
-        perspective: {
-          active: this.config.perspectiveActive,
-          invertX: this.config.perspectiveInvertX,
-          invertY: this.config.perspectiveInvertY,
-          max: this.config.perspectiveMax
-        },
-        translation: {
-          active: this.config.translationActive,
-          invertX: this.config.translationInvertX,
-          invertY: this.config.translationInvertY,
-          max: this.config.translationMax
-        },
-        rotation: {
-          active: this.config.rotationActive,
-          invertX: this.config.rotationInvertX,
-          invertY: this.config.rotationInvertY,
-          max: this.config.rotationMax
-        },
-        skewing: {
-          active: this.config.skewActive,
-          invertX: this.config.skewInvertX,
-          invertY: this.config.skewInvertY,
-          max: this.config.skewMax
-        },
-        scaling: {
-          active: this.config.scaleActive,
-          invertX: this.config.scaleInvertX,
-          invertY: this.config.scaleInvertY,
-          max: this.config.scaleMax
-        }
-      });
+        layers: this.layers
+      }));
       this.effects.push(tilt);
     }
 
@@ -3409,180 +3364,250 @@
     };
   };
 
-  const scenes = document.querySelector('[data-scene]');
-  const imagesContainer = document.querySelector('#images-container');
-  const shapesContainer = document.querySelector('#shapes-container');
-  let currentContainer = imagesContainer;
-  let two5;
   const stats = new Stats();
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 
   document.body.appendChild(stats.dom);
+  const scenes = document.querySelector('[data-scene]');
+  const imagesContainer = scenes.querySelector('#images-container');
+  const shapesContainer = scenes.querySelector('#shapes-container');
 
-  function setupStats() {
-    two5.effects.unshift(function () {
-      stats.begin();
-    });
-    two5.effects.push(function () {
-      stats.end();
-    });
-  }
+  class Demo {
+    constructor() {
+      this.currentContainer = imagesContainer;
+      this.two5 = new Two5({
+        layersContainer: this.currentContainer,
+        mouseTarget: null
+      });
+      this.two5.on();
+      this.setupStats();
+      this.two5Config = {
+        scene: 'images',
+        hitRegion: null,
+        perspectiveZ: 600,
+        elevation: 10,
+        ...this.createEffectConfig(this.two5.config),
+        layers: this.createLayersConfig()
+      };
+      this.sceneLayers = {};
+      this.sceneLayers[this.two5Config.scene] = this.two5.layers;
+      this.gui = new GUI$1();
+      this.gui.add(this.two5Config, 'scene', ['images', 'shapes']).onChange(value => {
+        this.currentLayersFolder.hide();
 
-  function createInstance(config) {
-    return new Two5(config);
-  }
+        switch (value) {
+          case 'images':
+            this.currentContainer = imagesContainer;
+            scenes.dataset.scene = value;
+            this.currentLayersFolder = this.imagesLayersFolder;
+            break;
 
-  two5 = createInstance({
-    layersContainer: currentContainer,
-    mouseTarget: null
-  });
-  two5.on();
-  setupStats();
-  const two5Config = {
-    scene: 'images',
-    hitRegion: null,
-    scenePerspective: 600,
-    elevation: 10,
-    transition: {
-      active: two5.config.transitionActive,
-      duration: two5.config.transitionDuration,
-      easing: two5.config.transitionEasing
-    },
-    perspective: {
-      active: two5.config.perspectiveActive,
-      invertX: two5.config.perspectiveInvertX,
-      invertY: two5.config.perspectiveInvertY,
-      max: two5.config.perspectiveMax
-    },
-    translation: {
-      active: two5.config.translationActive,
-      invertX: two5.config.translationInvertX,
-      invertY: two5.config.translationInvertY,
-      max: two5.config.translationMax
-    },
-    rotation: {
-      active: two5.config.rotationActive,
-      invertX: two5.config.rotationInvertX,
-      invertY: two5.config.rotationInvertY,
-      max: two5.config.rotationMax
-    },
-    skewing: {
-      active: two5.config.skewActive,
-      invertX: two5.config.skewInvertX,
-      invertY: two5.config.skewInvertY,
-      max: two5.config.skewMax
-    },
-    scaling: {
-      active: two5.config.scaleActive,
-      invertX: two5.config.scaleInvertX,
-      invertY: two5.config.scaleInvertY,
-      max: two5.config.scaleMax
+          case 'shapes':
+            this.currentContainer = shapesContainer;
+            scenes.dataset.scene = value;
+            this.currentLayersFolder = this.shapesLayersFolder;
+            break;
+        }
+
+        this.two5.off();
+        this.two5.config.layersContainer = this.two5.container = this.currentContainer;
+
+        if (this.sceneLayers[value]) {
+          this.two5.layers = this.sceneLayers[value];
+          this.currentLayersFolder.show();
+        } else {
+          this.two5.createLayers();
+          this.sceneLayers[value] = this.two5.layers;
+
+          if (value === 'shapes') {
+            this.currentLayersFolder = this.shapesLayersFolder = this.gui.addFolder('Shapes layers');
+            this.two5.layers.forEach((layer, index) => {
+              const layerFolder = this.shapesLayersFolder.addFolder(`Layer ${index + 1}`);
+              this.createEffectControls(layerFolder, this.two5Config.layers[index], index);
+            });
+          }
+        }
+
+        this.two5.on();
+        this.setupStats();
+      });
+      this.gui.add(this.two5Config, 'hitRegion', {
+        screen: null,
+        container: 'container'
+      }).onChange(value => {
+        const mouseTarget = value && this.currentContainer;
+        this.two5.off();
+        this.two5.config.mouseTarget = mouseTarget;
+        this.two5.config.layersContainer = this.two5.container = this.currentContainer;
+        this.two5.on();
+        this.setupStats();
+      });
+      this.sceneConfig = this.gui.addFolder('Scene config');
+      this.sceneConfig.add(this.two5Config, 'elevation', 0, 40, 1).onChange(this.getSceneHandler('elevation'));
+      this.sceneConfig.add(this.two5Config, 'perspectiveZ', 100, 1000, 50).onChange(this.getSceneHandler('perspectiveZ'));
+      this.transition = this.gui.addFolder('Transition');
+      this.transition.add(this.two5Config.transition, 'active').onChange(function (handler) {
+        return v => {
+          if (v === false) {
+            this.two5.container.style.transition = '';
+            this.two5.layers.forEach(layer => layer.el.style.transition = '');
+          }
+
+          return handler(v);
+        };
+      }(this.getSceneHandler('transitionActive')));
+      this.transition.add(this.two5Config.transition, 'duration', 50, 1000, 50).onChange(this.getSceneHandler('transitionDuration'));
+      this.transition.add(this.two5Config.transition, 'easing', ['linear', 'ease-in', 'ease-out', 'ease-in-out']).onChange(this.getSceneHandler('transitionEasing'));
+      this.effects = this.gui.addFolder('Effects');
+      this.createEffectControls(this.effects, this.two5Config); // assuming we're starting with `Images` scene here
+
+      this.currentLayersFolder = this.imagesLayersFolder = this.gui.addFolder('Images layers');
+      this.two5.layers.forEach((layer, index) => {
+        const layerFolder = this.imagesLayersFolder.addFolder(`Layer ${index + 1}`);
+        this.createEffectControls(layerFolder, this.two5Config.layers[index], index);
+      });
     }
-  };
 
-  function getHandler$2(prop) {
-    return v => {
-      if (v === 'true') v = true;
-      if (v === 'false') v = false;
-      two5.config[prop] = v;
-      two5.teardownEffects();
-      two5.setupEffects();
-      setupStats();
-    };
-  }
-
-  const gui = new GUI$1();
-  gui.add(two5Config, 'scene', ['images', 'shapes']).onChange(value => {
-    switch (value) {
-      case 'images':
-        currentContainer = imagesContainer;
-        scenes.dataset.scene = value;
-        break;
-
-      case 'shapes':
-        currentContainer = shapesContainer;
-        scenes.dataset.scene = value;
-        break;
+    setupStats() {
+      this.two5.effects.unshift(function () {
+        stats.begin();
+      });
+      this.two5.effects.push(function () {
+        stats.end();
+      });
     }
 
-    two5.off();
-    const config = Object.assign(two5.config, {
-      layersContainer: currentContainer
-    });
-    two5 = createInstance(config);
-    two5.on();
-    setupStats();
-  });
-  gui.add(two5Config, 'hitRegion', {
-    screen: null,
-    container: 'container'
-  }).onChange(value => {
-    const mouseTarget = value && currentContainer;
-    two5.off();
-    const config = Object.assign(two5.config, {
-      mouseTarget,
-      layersContainer: currentContainer
-    });
-    two5 = createInstance(config);
-    two5.on();
-    setupStats();
-  });
-  gui.add(two5Config, 'elevation', 0, 40, 1).onChange(getHandler$2('elevation'));
-  gui.add(two5Config, 'scenePerspective', 100, 1000, 50).onChange(getHandler$2('scenePerspective'));
-  const transition = gui.addFolder('Transition');
-  transition.add(two5Config.transition, 'active').onChange(getHandler$2('transitionActive'));
-  transition.add(two5Config.transition, 'duration', 50, 1000, 50).onChange(getHandler$2('transitionDuration'));
-  transition.add(two5Config.transition, 'easing', ['linear', 'ease-in', 'ease-out', 'ease-in-out']).onChange(getHandler$2('transitionEasing'));
-  const perspective = gui.addFolder('Perspective');
-  perspective.add(two5Config.perspective, 'active', {
-    non: false,
-    both: true,
-    x: 'x',
-    y: 'y'
-  }).onChange(getHandler$2('perspectiveActive'));
-  perspective.add(two5Config.perspective, 'invertX').onChange(getHandler$2('perspectiveInvertX'));
-  perspective.add(two5Config.perspective, 'invertY').onChange(getHandler$2('perspectiveInvertY'));
-  perspective.add(two5Config.perspective, 'max', 0, 0.5, 0.05).onChange(getHandler$2('perspectiveMax'));
-  const translation = gui.addFolder('Translation');
-  translation.add(two5Config.translation, 'active', {
-    non: false,
-    both: true,
-    x: 'x',
-    y: 'y'
-  }).onChange(getHandler$2('translationActive'));
-  translation.add(two5Config.translation, 'invertX').onChange(getHandler$2('translationInvertX'));
-  translation.add(two5Config.translation, 'invertY').onChange(getHandler$2('translationInvertY'));
-  translation.add(two5Config.translation, 'max', 10, 150, 5).onChange(getHandler$2('translationMax'));
-  translation.open();
-  const rotation = gui.addFolder('Rotation');
-  rotation.add(two5Config.rotation, 'active', {
-    non: false,
-    both: true,
-    x: 'x',
-    y: 'y'
-  }).onChange(getHandler$2('rotationActive'));
-  rotation.add(two5Config.rotation, 'invertX').onChange(getHandler$2('rotationInvertX'));
-  rotation.add(two5Config.rotation, 'invertY').onChange(getHandler$2('rotationInvertY'));
-  rotation.add(two5Config.rotation, 'max', 10, 60, 1).onChange(getHandler$2('rotationMax'));
-  const skewing = gui.addFolder('Skewing');
-  skewing.add(two5Config.skewing, 'active', {
-    non: false,
-    both: true,
-    x: 'x',
-    y: 'y'
-  }).onChange(getHandler$2('skewActive'));
-  skewing.add(two5Config.skewing, 'invertX').onChange(getHandler$2('skewInvertX'));
-  skewing.add(two5Config.skewing, 'invertY').onChange(getHandler$2('skewInvertY'));
-  skewing.add(two5Config.skewing, 'max', 10, 60, 1).onChange(getHandler$2('skewMax'));
-  const scaling = gui.addFolder('Scaling');
-  scaling.add(two5Config.scaling, 'active', {
-    non: false,
-    both: true,
-    x: 'x',
-    y: 'y'
-  }).onChange(getHandler$2('scaleActive'));
-  scaling.add(two5Config.scaling, 'invertX').onChange(getHandler$2('scaleInvertX'));
-  scaling.add(two5Config.scaling, 'invertY').onChange(getHandler$2('scaleInvertY'));
-  scaling.add(two5Config.scaling, 'max', 0.1, 2, 0.1).onChange(getHandler$2('scaleMax'));
+    createEffectConfig(config) {
+      return {
+        transition: {
+          active: config.transitionActive,
+          duration: config.transitionDuration,
+          easing: config.transitionEasing
+        },
+        perspective: {
+          active: config.perspectiveActive,
+          invertX: config.perspectiveInvertX,
+          invertY: config.perspectiveInvertY,
+          max: config.perspectiveMax
+        },
+        translation: {
+          active: config.translationActive,
+          invertX: config.translationInvertX,
+          invertY: config.translationInvertY,
+          max: config.translationMax
+        },
+        rotation: {
+          active: config.rotationActive,
+          invertX: config.rotationInvertX,
+          invertY: config.rotationInvertY,
+          max: config.rotationMax
+        },
+        skewing: {
+          active: config.skewActive,
+          invertX: config.skewInvertX,
+          invertY: config.skewInvertY,
+          max: config.skewMax
+        },
+        scaling: {
+          active: config.scaleActive,
+          invertX: config.scaleInvertX,
+          invertY: config.scaleInvertY,
+          max: config.scaleMax
+        }
+      };
+    }
+
+    createLayersConfig() {
+      return this.two5.layers.reduce((acc, layer, index) => {
+        acc[index] = this.createEffectConfig(layer);
+        return acc;
+      }, {});
+    }
+
+    getSceneHandler(prop) {
+      return v => {
+        if (v === 'true') v = true;
+        if (v === 'false') v = false;
+        this.two5.layers.forEach(layer => {
+          if (layer[prop] === this.two5.config[prop]) {
+            layer[prop] = v;
+          }
+        });
+        this.two5.config[prop] = v;
+        this.two5.teardownEffects();
+        this.two5.setupEffects();
+        this.setupStats();
+      };
+    }
+
+    getLayerHandler(prop, index) {
+      return v => {
+        if (v === 'true') v = true;
+        if (v === 'false') v = false;
+        this.two5.layers[index][prop] = v;
+        this.two5.teardownEffects();
+        this.two5.setupEffects();
+        this.setupStats();
+      };
+    }
+
+    createEffectControls(folder, config, targetIndex) {
+      const getHandler = config === this.two5Config ? prop => this.getSceneHandler(prop) : (prop, index) => this.getLayerHandler(prop, index);
+      const perspective = folder.addFolder('Perspective');
+      perspective.add(config.perspective, 'active', {
+        non: false,
+        both: true,
+        x: 'x',
+        y: 'y'
+      }).onChange(getHandler('perspectiveActive', targetIndex));
+      perspective.add(config.perspective, 'invertX').onChange(getHandler('perspectiveInvertX', targetIndex));
+      perspective.add(config.perspective, 'invertY').onChange(getHandler('perspectiveInvertY', targetIndex));
+      perspective.add(config.perspective, 'max', 0, 0.5, 0.05).onChange(getHandler('perspectiveMax', targetIndex));
+      const translation = folder.addFolder('Translation');
+      translation.add(config.translation, 'active', {
+        non: false,
+        both: true,
+        x: 'x',
+        y: 'y'
+      }).onChange(getHandler('translationActive', targetIndex));
+      translation.add(config.translation, 'invertX').onChange(getHandler('translationInvertX', targetIndex));
+      translation.add(config.translation, 'invertY').onChange(getHandler('translationInvertY', targetIndex));
+      translation.add(config.translation, 'max', 10, 150, 5).onChange(getHandler('translationMax', targetIndex));
+      translation.open();
+      const rotation = folder.addFolder('Rotation');
+      rotation.add(config.rotation, 'active', {
+        non: false,
+        both: true,
+        x: 'x',
+        y: 'y'
+      }).onChange(getHandler('rotationActive', targetIndex));
+      rotation.add(config.rotation, 'invertX').onChange(getHandler('rotationInvertX', targetIndex));
+      rotation.add(config.rotation, 'invertY').onChange(getHandler('rotationInvertY', targetIndex));
+      rotation.add(config.rotation, 'max', 10, 60, 1).onChange(getHandler('rotationMax', targetIndex));
+      const skewing = folder.addFolder('Skewing');
+      skewing.add(config.skewing, 'active', {
+        non: false,
+        both: true,
+        x: 'x',
+        y: 'y'
+      }).onChange(getHandler('skewActive', targetIndex));
+      skewing.add(config.skewing, 'invertX').onChange(getHandler('skewInvertX', targetIndex));
+      skewing.add(config.skewing, 'invertY').onChange(getHandler('skewInvertY', targetIndex));
+      skewing.add(config.skewing, 'max', 10, 60, 1).onChange(getHandler('skewMax', targetIndex));
+      const scaling = folder.addFolder('Scaling');
+      scaling.add(config.scaling, 'active', {
+        non: false,
+        both: true,
+        x: 'x',
+        y: 'y'
+      }).onChange(getHandler('scaleActive', targetIndex));
+      scaling.add(config.scaling, 'invertX').onChange(getHandler('scaleInvertX', targetIndex));
+      scaling.add(config.scaling, 'invertY').onChange(getHandler('scaleInvertY', targetIndex));
+      scaling.add(config.scaling, 'max', 0.1, 2, 0.1).onChange(getHandler('scaleMax', targetIndex));
+    }
+
+  }
+
+  const demo = new Demo();
 
 })));

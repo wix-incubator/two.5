@@ -6,10 +6,11 @@ import { clone } from './utilities.js';
 const DEFAULTS = {
     mouseTarget: null,
     layersContainer: null,
+    layers: null,
     gyroscopeSamples: 3,
     maxBeta: 15,
     maxGamma: 15,
-    scenePerspective: 600,
+    perspectiveZ: 600,
     elevation: 10,
     transitionActive: false,
     transitionDuration: 200,
@@ -36,6 +37,11 @@ const DEFAULTS = {
     scaleMax: 0.5
 };
 
+const LAYER_PROPS_WITH_DEFAULT = {
+    perspectiveZ: null,
+    elevation: null
+};
+
 export default class Two5 {
     constructor (config = {}) {
         this.config = clone(DEFAULTS, config);
@@ -44,19 +50,28 @@ export default class Two5 {
             y: 0
         };
 
-        let layersContainer;
+        this.container = this.config.layersContainer || null;
 
-        if (this.config.layersContainer) {
-            layersContainer = this.config.layersContainer;
-            this.container = layersContainer;
-        }
-        else {
-            layersContainer = window.document.body;
-            this.container = null;
-        }
+        this.createLayers();
 
-        this.layers = [...layersContainer.querySelectorAll('[data-tilt-layer]')].map(el => ({el}));
         this.effects = [];
+    }
+
+    createLayers () {
+        const layersContainer = this.container || window.document.body;
+        this.layers = this.config.layers || [...layersContainer.querySelectorAll('[data-tilt-layer]')];
+        this.layers = this.layers.map(layer => {
+            let config;
+
+            if (layer instanceof Element) {
+                config = clone(this.config, { el: layer, ...LAYER_PROPS_WITH_DEFAULT }, layer.dataset);
+            }
+            else if (typeof layer == 'object' && layer) {
+                config = clone(this.config, LAYER_PROPS_WITH_DEFAULT, layer);
+            }
+
+            return config;
+        }).filter(x => x);
     }
 
     on () {
@@ -107,47 +122,12 @@ export default class Two5 {
     }
 
     setupEffects () {
-        const tilt = getTiltEffect({
-            container: this.container,
-            layers: this.layers,
-            scenePerspective: this.config.scenePerspective,
-            elevation: this.config.elevation,
-            transition: {
-                active: this.config.transitionActive,
-                duration: this.config.transitionDuration,
-                easing: this.config.transitionEasing
-            },
-            perspective: {
-                active: this.config.perspectiveActive,
-                invertX: this.config.perspectiveInvertX,
-                invertY: this.config.perspectiveInvertY,
-                max: this.config.perspectiveMax
-            },
-            translation: {
-                active: this.config.translationActive,
-                invertX: this.config.translationInvertX,
-                invertY: this.config.translationInvertY,
-                max: this.config.translationMax
-            },
-            rotation: {
-                active: this.config.rotationActive,
-                invertX: this.config.rotationInvertX,
-                invertY: this.config.rotationInvertY,
-                max: this.config.rotationMax
-            },
-            skewing: {
-                active: this.config.skewActive,
-                invertX: this.config.skewInvertX,
-                invertY: this.config.skewInvertY,
-                max: this.config.skewMax
-            },
-            scaling: {
-                active: this.config.scaleActive,
-                invertX: this.config.scaleInvertX,
-                invertY: this.config.scaleInvertY,
-                max: this.config.scaleMax
-            }
-        });
+        const tilt = getTiltEffect(
+            clone(
+                this.config,
+                { container: this.container, layers: this.layers }
+            )
+        );
 
         this.effects.push(tilt);
     }
