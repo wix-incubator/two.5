@@ -1,3 +1,5 @@
+import { fixed } from '../utilities';
+
 function formatTransition ({property, duration, easing}) {
     return `${property} ${duration}ms ${easing}`;
 }
@@ -63,10 +65,10 @@ export function getEffect (config) {
             if (layer.translationActive) {
                 const translateXVal = layer.translationActive === 'y'
                     ? 0
-                    : (layer.translationInvertX ? -1 : 1) * layer.translationMax * (2 * x - 1) * depth;
+                    : fixed((layer.translationInvertX ? -1 : 1) * layer.translationMax * (2 * x - 1) * depth);
                 const translateYVal = layer.translationActive === 'x'
                     ? 0
-                    : (layer.translationInvertY ? -1 : 1) * layer.translationMax * (2 * y - 1) * depth;
+                    : fixed((layer.translationInvertY ? -1 : 1) * layer.translationMax * (2 * y - 1) * depth);
 
                 translatePart = `translate3d(${translateXVal}px, ${translateYVal}px, ${translateZVal}px)`;
             }
@@ -78,10 +80,10 @@ export function getEffect (config) {
             if (layer.rotationActive) {
                 const rotateXVal = layer.rotationActive === 'y'
                     ? 0
-                    : (layer.rotationInvertX ? -1 : 1) * layer.rotationMax * (1 - y * 2) * depth;
+                    : fixed((layer.rotationInvertX ? -1 : 1) * layer.rotationMax * (1 - y * 2) * depth);
                 const rotateYVal = layer.rotationActive === 'x'
                     ? 0
-                    : (layer.rotationInvertY ? -1 : 1) * layer.rotationMax * (x * 2 - 1) * depth;
+                    : fixed((layer.rotationInvertY ? -1 : 1) * layer.rotationMax * (x * 2 - 1) * depth);
 
                 rotatePart = `rotateX(${rotateXVal}deg) rotateY(${rotateYVal}deg)`;
             }
@@ -93,10 +95,10 @@ export function getEffect (config) {
             if (layer.skewActive) {
                 const skewXVal = layer.skewActive === 'y'
                     ? 0
-                    : (layer.skewInvertX ? -1 : 1) * layer.skewMax * (1 - x * 2) * depth;
+                    : fixed((layer.skewInvertX ? -1 : 1) * layer.skewMax * (1 - x * 2) * depth);
                 const skewYVal = layer.skewActive === 'x'
                     ? 0
-                    : (layer.skewInvertY ? -1 : 1) * layer.skewMax * (1 - y * 2) * depth;
+                    : fixed((layer.skewInvertY ? -1 : 1) * layer.skewMax * (1 - y * 2) * depth);
 
                 skewPart = `skew(${skewXVal}deg, ${skewYVal}deg)`;
             }
@@ -108,10 +110,10 @@ export function getEffect (config) {
             if (layer.scaleActive) {
                 const scaleXVal = layer.scaleActive === 'y'
                     ? 1
-                    : 1 + (layer.scaleInvertX ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - x) * 2) * depth;
+                    : 1 + fixed((layer.scaleInvertX ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - x) * 2) * depth);
                 const scaleYVal = layer.scaleActive === 'x'
                     ? 1
-                    : 1 + (layer.scaleInvertY ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - y) * 2) * depth;
+                    : 1 + fixed((layer.scaleInvertY ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - y) * 2) * depth);
 
                 scalePart = `scale(${scaleXVal}, ${scaleYVal})`;
             }
@@ -146,7 +148,7 @@ export function getEffect (config) {
                 b = config.perspectiveMax;
             }
 
-            container.style.perspectiveOrigin = `${(perspX * a - b) * 100}% ${(perspY * a - b) * 100}%`;
+            container.style.perspectiveOrigin = `${fixed(perspX * a - b, 3) * 100}% ${fixed(perspY * a - b, 3) * 100}%`;
         }
         else if (container) {
             container.style.perspectiveOrigin = '50% 50%';

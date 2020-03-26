@@ -25,6 +25,10 @@ class Demo {
             hitRegion: null,
             perspectiveZ: 0,
             elevation: 0,
+            animation: {
+                active: this.two5.config.animationActive,
+                friction: this.two5.config.animationFriction
+            },
             transition: {
                 active: this.two5.config.transitionActive,
                 duration: this.two5.config.transitionDuration,
@@ -51,6 +55,16 @@ class Demo {
 
         this.sceneConfig.add(this.two5Config, 'perspectiveZ', 100, 1000, 50)
             .onChange(this.getSceneHandler('perspectiveZ'));
+
+        this.animation = this.gui.addFolder('Animation');
+        this.animation.add(this.two5Config.animation, 'active')
+            .onChange(v => {
+                this.two5.config.animationActive = v;
+            });
+        this.animation.add(this.two5Config.animation, 'friction', 0, 0.9, 0.1)
+            .onChange(v => {
+                this.two5.config.animationFriction = v;
+            });
 
         this.transition = this.gui.addFolder('Transition');
         this.transition.add(this.two5Config.transition, 'active')

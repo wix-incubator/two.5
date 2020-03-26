@@ -1,7 +1,7 @@
 import { getEffect as getTiltEffect } from './effects/tilt.js';
 import { getHandler as getHover } from './events/hover.js';
 import { getHandler as getGyroscope } from './events/gyroscope';
-import { clone } from './utilities.js';
+import { clone, lerp } from './utilities.js';
 
 const DEFAULTS = {
     mouseTarget: null,
@@ -12,6 +12,8 @@ const DEFAULTS = {
     maxGamma: 15,
     perspectiveZ: 600,
     elevation: 10,
+    animationActive: false,
+    animationFriction: 0.4,
     transitionActive: false,
     transitionDuration: 200,
     transitionEasing: 'ease-out',
@@ -46,6 +48,10 @@ export default class Two5 {
     constructor (config = {}) {
         this.config = clone(DEFAULTS, config);
         this.progress = {
+            x: 0,
+            y: 0
+        };
+        this.currentProgress = {
             x: 0,
             y: 0
         };
@@ -90,7 +96,22 @@ export default class Two5 {
     loop () {
         this.animationFrame = window.requestAnimationFrame(() => this.loop());
 
-        this.effects.forEach(effect => effect(this.progress));
+        if (this.config.animationActive) {
+            this.lerp();
+        }
+
+        this.effects.forEach(
+            effect => effect(
+                this.config.animationActive
+                    ? this.currentProgress
+                    : this.progress
+            )
+        );
+    }
+
+    lerp () {
+        this.currentProgress.x = lerp(this.currentProgress.x, this.progress.x, 1 - this.config.animationFriction);
+        this.currentProgress.y = lerp(this.currentProgress.y, this.progress.y, 1 - this.config.animationFriction);
     }
 
     setupEvents () {

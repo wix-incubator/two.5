@@ -1,3 +1,19 @@
+function clamp(min, max, val) {
+  return Math.min(Math.max(min, val), max);
+}
+
+function fixed(num, digits = 2) {
+  return +num.toFixed(digits);
+}
+
+function clone(...objects) {
+  return Object.assign(Object.create(null), ...objects);
+}
+
+function lerp(a, b, t) {
+  return a * (1 - t) + b * t;
+}
+
 function formatTransition({
   property,
   duration,
@@ -65,8 +81,8 @@ function getEffect(config) {
       let translatePart = '';
 
       if (layer.translationActive) {
-        const translateXVal = layer.translationActive === 'y' ? 0 : (layer.translationInvertX ? -1 : 1) * layer.translationMax * (2 * x - 1) * depth;
-        const translateYVal = layer.translationActive === 'x' ? 0 : (layer.translationInvertY ? -1 : 1) * layer.translationMax * (2 * y - 1) * depth;
+        const translateXVal = layer.translationActive === 'y' ? 0 : fixed((layer.translationInvertX ? -1 : 1) * layer.translationMax * (2 * x - 1) * depth);
+        const translateYVal = layer.translationActive === 'x' ? 0 : fixed((layer.translationInvertY ? -1 : 1) * layer.translationMax * (2 * y - 1) * depth);
         translatePart = `translate3d(${translateXVal}px, ${translateYVal}px, ${translateZVal}px)`;
       } else {
         translatePart = `translateZ(${translateZVal}px)`;
@@ -75,8 +91,8 @@ function getEffect(config) {
       let rotatePart = '';
 
       if (layer.rotationActive) {
-        const rotateXVal = layer.rotationActive === 'y' ? 0 : (layer.rotationInvertX ? -1 : 1) * layer.rotationMax * (1 - y * 2) * depth;
-        const rotateYVal = layer.rotationActive === 'x' ? 0 : (layer.rotationInvertY ? -1 : 1) * layer.rotationMax * (x * 2 - 1) * depth;
+        const rotateXVal = layer.rotationActive === 'y' ? 0 : fixed((layer.rotationInvertX ? -1 : 1) * layer.rotationMax * (1 - y * 2) * depth);
+        const rotateYVal = layer.rotationActive === 'x' ? 0 : fixed((layer.rotationInvertY ? -1 : 1) * layer.rotationMax * (x * 2 - 1) * depth);
         rotatePart = `rotateX(${rotateXVal}deg) rotateY(${rotateYVal}deg)`;
       } else {
         rotatePart = 'rotateX(0deg) rotateY(0deg)';
@@ -85,8 +101,8 @@ function getEffect(config) {
       let skewPart = '';
 
       if (layer.skewActive) {
-        const skewXVal = layer.skewActive === 'y' ? 0 : (layer.skewInvertX ? -1 : 1) * layer.skewMax * (1 - x * 2) * depth;
-        const skewYVal = layer.skewActive === 'x' ? 0 : (layer.skewInvertY ? -1 : 1) * layer.skewMax * (1 - y * 2) * depth;
+        const skewXVal = layer.skewActive === 'y' ? 0 : fixed((layer.skewInvertX ? -1 : 1) * layer.skewMax * (1 - x * 2) * depth);
+        const skewYVal = layer.skewActive === 'x' ? 0 : fixed((layer.skewInvertY ? -1 : 1) * layer.skewMax * (1 - y * 2) * depth);
         skewPart = `skew(${skewXVal}deg, ${skewYVal}deg)`;
       } else {
         skewPart = 'skew(0deg, 0deg)';
@@ -95,8 +111,8 @@ function getEffect(config) {
       let scalePart = '';
 
       if (layer.scaleActive) {
-        const scaleXVal = layer.scaleActive === 'y' ? 1 : 1 + (layer.scaleInvertX ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - x) * 2) * depth;
-        const scaleYVal = layer.scaleActive === 'x' ? 1 : 1 + (layer.scaleInvertY ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - y) * 2) * depth;
+        const scaleXVal = layer.scaleActive === 'y' ? 1 : 1 + fixed((layer.scaleInvertX ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - x) * 2) * depth);
+        const scaleYVal = layer.scaleActive === 'x' ? 1 : 1 + fixed((layer.scaleInvertY ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - y) * 2) * depth);
         scalePart = `scale(${scaleXVal}, ${scaleYVal})`;
       } else {
         scalePart = 'scale(1, 1)';
@@ -124,19 +140,11 @@ function getEffect(config) {
         b = config.perspectiveMax;
       }
 
-      container.style.perspectiveOrigin = `${(perspX * a - b) * 100}% ${(perspY * a - b) * 100}%`;
+      container.style.perspectiveOrigin = `${fixed(perspX * a - b, 3) * 100}% ${fixed(perspY * a - b, 3) * 100}%`;
     } else if (container) {
       container.style.perspectiveOrigin = '50% 50%';
     }
   };
-}
-
-function clamp(min, max, val) {
-  return Math.min(Math.max(min, val), max);
-}
-
-function clone(...objects) {
-  return Object.assign(Object.create(null), ...objects);
 }
 
 function getHandler({
@@ -259,6 +267,8 @@ const DEFAULTS = {
   maxGamma: 15,
   perspectiveZ: 600,
   elevation: 10,
+  animationActive: false,
+  animationFriction: 0.4,
   transitionActive: false,
   transitionDuration: 200,
   transitionEasing: 'ease-out',
@@ -291,6 +301,10 @@ class Two5 {
   constructor(config = {}) {
     this.config = clone(DEFAULTS, config);
     this.progress = {
+      x: 0,
+      y: 0
+    };
+    this.currentProgress = {
       x: 0,
       y: 0
     };
@@ -332,7 +346,17 @@ class Two5 {
 
   loop() {
     this.animationFrame = window.requestAnimationFrame(() => this.loop());
-    this.effects.forEach(effect => effect(this.progress));
+
+    if (this.config.animationActive) {
+      this.lerp();
+    }
+
+    this.effects.forEach(effect => effect(this.config.animationActive ? this.currentProgress : this.progress));
+  }
+
+  lerp() {
+    this.currentProgress.x = lerp(this.currentProgress.x, this.progress.x, 1 - this.config.animationFriction);
+    this.currentProgress.y = lerp(this.currentProgress.y, this.progress.y, 1 - this.config.animationFriction);
   }
 
   setupEvents() {
