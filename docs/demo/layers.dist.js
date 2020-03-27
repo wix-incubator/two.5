@@ -135,8 +135,6 @@
       });
 
       if (config.perspectiveActive) {
-        const perspX = config.perspectiveActive === 'y' ? 0 : config.perspectiveInvertX ? x : 1 - x;
-        const perspY = config.perspectiveActive === 'x' ? 0 : config.perspectiveInvertY ? y : 1 - y;
         let a = 1,
             b = 0;
 
@@ -145,7 +143,9 @@
           b = config.perspectiveMax;
         }
 
-        container.style.perspectiveOrigin = `${fixed(perspX * a - b, 3) * 100}% ${fixed(perspY * a - b, 3) * 100}%`;
+        const perspX = config.perspectiveActive === 'y' ? 0.5 : (config.perspectiveInvertX ? 1 - x : x) * a - b;
+        const perspY = config.perspectiveActive === 'x' ? 0.5 : (config.perspectiveInvertY ? 1 - y : y) * a - b;
+        container.style.perspectiveOrigin = `${fixed(perspX, 3) * 100}% ${fixed(perspY, 3) * 100}%`;
       } else if (container) {
         container.style.perspectiveOrigin = '50% 50%';
       }
