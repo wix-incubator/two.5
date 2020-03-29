@@ -18,8 +18,8 @@ class Demo {
             layers
         });
 
-        this.two5.on();
         this.setupStats();
+        this.two5.on();
 
         this.two5Config = {
             hitRegion: null,
@@ -45,7 +45,6 @@ class Demo {
                 this.two5.off();
                 this.two5.config.mouseTarget = mouseTarget;
                 this.two5.on();
-                this.setupStats();
             });
 
         this.sceneConfig = this.gui.addFolder('Scene config');
@@ -94,12 +93,13 @@ class Demo {
     }
 
     setupStats () {
-        this.two5.effects.unshift(function () {
+        const _loop = this.two5.loop;
+
+        this.two5.loop = function () {
             stats.begin();
-        });
-        this.two5.effects.push(function () {
+            _loop.call(this);
             stats.end();
-        });
+        };
     }
 
     createEffectConfig (config) {
@@ -159,7 +159,6 @@ class Demo {
 
             this.two5.teardownEffects();
             this.two5.setupEffects();
-            this.setupStats();
         };
     }
 
@@ -172,7 +171,6 @@ class Demo {
 
             this.two5.teardownEffects();
             this.two5.setupEffects();
-            this.setupStats();
         };
     }
 

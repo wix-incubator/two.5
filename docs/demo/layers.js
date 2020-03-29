@@ -2,6 +2,36 @@ import Two5 from './two.5.js';
 import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
 import Stats from '../../node_modules/stats.js/src/Stats.js';
 
+const DEFAULTS = {
+    perspectiveZ: 600,
+    elevation: 10,
+    animationActive: false,
+    animationFriction: 0.4,
+    transitionActive: false,
+    transitionDuration: 200,
+    transitionEasing: 'ease-out',
+    perspectiveActive: false,
+    perspectiveInvertX: false,
+    perspectiveInvertY: false,
+    perspectiveMax: 0,
+    translationActive: false,
+    translationInvertX: false,
+    translationInvertY: false,
+    translationMax: 50,
+    rotationActive: false,
+    rotationInvertX: false,
+    rotationInvertY: false,
+    rotationMax: 25,
+    skewActive: false,
+    skewInvertX: false,
+    skewInvertY: false,
+    skewMax: 25,
+    scaleActive: false,
+    scaleInvertX: false,
+    scaleInvertY: false,
+    scaleMax: 0.5
+};
+
 const stats = new Stats();
 stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom);
@@ -19,8 +49,8 @@ class Demo {
             mouseTarget: null
         });
 
-        this.two5.on();
         this.setupStats();
+        this.two5.on();
 
         this.two5Config = {
             scene: 'images',
@@ -28,10 +58,10 @@ class Demo {
             perspectiveZ: 600,
             elevation: 10,
             animation: {
-                active: this.two5.config.animationActive,
-                friction: this.two5.config.animationFriction
+                active: false,
+                friction: 0.4
             },
-            ...this.createEffectConfig(this.two5.config),
+            ...this.createEffectConfig(),
             layers: this.createLayersConfig()
         };
 
@@ -79,7 +109,6 @@ class Demo {
                 }
 
                 this.two5.on();
-                this.setupStats();
             });
 
         this.gui.add(this.two5Config, 'hitRegion', {screen: null, container: 'container'})
@@ -89,7 +118,6 @@ class Demo {
                 this.two5.config.mouseTarget = mouseTarget;
                 this.two5.config.layersContainer = this.two5.container = this.currentContainer;
                 this.two5.on();
-                this.setupStats();
             });
 
         this.sceneConfig = this.gui.addFolder('Scene config');
@@ -142,57 +170,58 @@ class Demo {
     }
 
     setupStats () {
-        this.two5.effects.unshift(function () {
+        const _loop = this.two5.loop;
+
+        this.two5.loop = function () {
             stats.begin();
-        });
-        this.two5.effects.push(function () {
+            _loop.call(this);
             stats.end();
-        });
+        };
     }
 
-    createEffectConfig (config) {
+    createEffectConfig () {
         return {
             transition: {
-                active: config.transitionActive,
-                duration: config.transitionDuration,
-                easing: config.transitionEasing
+                active: DEFAULTS.transitionActive,
+                duration: DEFAULTS.transitionDuration,
+                easing: DEFAULTS.transitionEasing
             },
             perspective: {
-                active: config.perspectiveActive,
-                invertX: config.perspectiveInvertX,
-                invertY: config.perspectiveInvertY,
-                max: config.perspectiveMax
+                active: DEFAULTS.perspectiveActive,
+                invertX: DEFAULTS.perspectiveInvertX,
+                invertY: DEFAULTS.perspectiveInvertY,
+                max: DEFAULTS.perspectiveMax
             },
             translation: {
-                active: config.translationActive,
-                invertX: config.translationInvertX,
-                invertY: config.translationInvertY,
-                max: config.translationMax
+                active: DEFAULTS.translationActive,
+                invertX: DEFAULTS.translationInvertX,
+                invertY: DEFAULTS.translationInvertY,
+                max: DEFAULTS.translationMax
             },
             rotation: {
-                active: config.rotationActive,
-                invertX: config.rotationInvertX,
-                invertY: config.rotationInvertY,
-                max: config.rotationMax
+                active: DEFAULTS.rotationActive,
+                invertX: DEFAULTS.rotationInvertX,
+                invertY: DEFAULTS.rotationInvertY,
+                max: DEFAULTS.rotationMax
             },
             skewing: {
-                active: config.skewActive,
-                invertX: config.skewInvertX,
-                invertY: config.skewInvertY,
-                max: config.skewMax
+                active: DEFAULTS.skewActive,
+                invertX: DEFAULTS.skewInvertX,
+                invertY: DEFAULTS.skewInvertY,
+                max: DEFAULTS.skewMax
             },
             scaling: {
-                active: config.scaleActive,
-                invertX: config.scaleInvertX,
-                invertY: config.scaleInvertY,
-                max: config.scaleMax
+                active: DEFAULTS.scaleActive,
+                invertX: DEFAULTS.scaleInvertX,
+                invertY: DEFAULTS.scaleInvertY,
+                max: DEFAULTS.scaleMax
             }
         };
     }
 
     createLayersConfig () {
         return this.two5.layers.reduce((acc, layer, index) => {
-            acc[index] = this.createEffectConfig(layer);
+            acc[index] = this.createEffectConfig();
             return acc;
         }, {});
     }
@@ -211,7 +240,6 @@ class Demo {
 
             this.two5.teardownEffects();
             this.two5.setupEffects();
-            this.setupStats();
         };
     }
 
@@ -224,7 +252,6 @@ class Demo {
 
             this.two5.teardownEffects();
             this.two5.setupEffects();
-            this.setupStats();
         };
     }
 

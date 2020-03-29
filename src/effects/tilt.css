@@ -1,0 +1,102 @@
+:root {
+    --x: 0;
+    --y: 0;
+    --x-scale: 0.5; /* Math.abs(0.5 - x) */
+    --y-scale: 0.5; /* Math.abs(0.5 - y) */
+}
+
+:root,
+[data-tilt-container] {
+    --px-on: 0;
+    --py-on: 0;
+    --px-dir: 1;
+    --py-dir: 1;
+    /*--px: 0px;*/
+    /*--py: 0px;*/
+    --p-max: 0;
+    --pz: 600px;
+    --depth: 0;
+    --tx-on: 0;
+    --ty-on: 0;
+    --tx-dir: 1;
+    --ty-dir: 1;
+    /*--tx: 50px;*/
+    /*--ty: 50px;*/
+    --t-max: 50px;
+    --tz: 0px;
+    --sx-on: 0;
+    --sy-on: 0;
+    --sx-dir: 1;
+    --sy-dir: 1;
+    /*--sx: 0.5;*/
+    /*--sy: 0.5;*/
+    --s-max: 0.5;
+    --rx-on: 0;
+    --ry-on: 0;
+    --rx-dir: 1;
+    --ry-dir: 1;
+    /*--rx: 25deg;*/
+    /*--ry: 25deg;*/
+    --r-max: 25deg;
+    --skx-on: 0;
+    --sky-on: 0;
+    --skx-dir: 1;
+    --sky-dir: 1;
+    /*--skx: 25deg;*/
+    /*--sky: 25deg;*/
+    --sk-max: 25deg;
+}
+
+[data-tilt-container] {
+    --px-norm: calc((var(--px-dir) + 1) / 2);
+    --py-norm: calc((var(--py-dir) + 1) / 2);
+    --px-inv: calc((var(--px-dir) - 1) / -2);
+    --py-inv: calc((var(--py-dir) - 1) / -2);
+    perspective: var(--pz);
+    perspective-origin:
+        calc((1 - var(--px-on)) * 50% + var(--px-on) * ((var(--px-norm) * var(--x) + var(--px-inv) * (1 - var(--x))) * (1 + 2 * var(--p-max)) - var(--p-max)) * 100%)
+        calc((1 - var(--py-on)) * 50% + var(--py-on) * ((var(--py-norm) * var(--y) + var(--py-inv) * (1 - var(--y))) * (1 + 2 * var(--p-max)) - var(--p-max)) * 100%);
+}
+
+[data-tilt-layer] {
+    transform:
+        translate3d(
+            calc(var(--tx-on) * var(--tx-dir) * var(--t-max) * (2 * var(--x) - 1) * var(--depth)),
+            calc(var(--ty-on) * var(--ty-dir) * var(--t-max) * (2 * var(--y) - 1) * var(--depth)),
+            var(--tz)
+        )
+        scale(
+            calc(1 + var(--sx-on) * var(--sx-dir) * var(--s-max) * (var(--x-scale) * 2) * var(--depth)),
+            calc(1 + var(--sy-on) * var(--sy-dir) * var(--s-max) * (var(--y-scale) * 2) * var(--depth))
+        )
+        skew(
+            calc(var(--skx-on) * var(--skx-dir) * var(--sk-max) * (1 - var(--x) * 2) * var(--depth)),
+            calc(var(--sky-on) * var(--sky-dir) * var(--sk-max) * (1 - var(--y) * 2) * var(--depth))
+        )
+        rotateX(calc(var(--rx-on) * var(--rx-dir) * var(--r-max) * (1 - var(--y) * 2) * var(--depth)))
+        rotateY(calc(var(--ry-on) * var(--ry-dir) * var(--r-max) * (var(--x) * 2 - 1) * var(--depth)));
+}
+
+[data-tilt-layer][data-tilt-layer-perspective] {
+    transform:
+        perspective(var(--pz))
+        translate3d(
+            calc(var(--tx-on) * var(--tx-dir) * var(--t-max) * (2 * var(--x) - 1) * var(--depth)),
+            calc(var(--ty-on) * var(--ty-dir) * var(--t-max) * (2 * var(--y) - 1) * var(--depth)),
+            var(--tz)
+        )
+        scale(
+            calc(1 + var(--sx-on) * var(--sx-dir) * var(--s-max) * (var(--x-scale) * 2) * var(--depth)),
+            calc(1 + var(--sy-on) * var(--sy-dir) * var(--s-max) * (var(--y-scale) * 2) * var(--depth))
+        )
+        skew(
+            calc(var(--skx-on) * var(--skx-dir) * var(--sk-max) * (1 - var(--x) * 2) * var(--depth)),
+            calc(var(--sky-on) * var(--sky-dir) * var(--sk-max) * (1 - var(--y) * 2) * var(--depth))
+        )
+        rotateX(calc(var(--rx-on) * var(--rx-dir) * var(--r-max) * (1 - var(--y) * 2) * var(--depth)))
+        rotateY(calc(var(--ry-on) * var(--ry-dir) * var(--r-max) * (var(--x) * 2 - 1) * var(--depth)));
+}
+
+[data-tilt-layer][data-tilt-no-pointer] {
+    pointer-events: none;
+}

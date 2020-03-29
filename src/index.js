@@ -1,4 +1,4 @@
-import { getEffect as getTiltEffect } from './effects/tilt.js';
+import { getEffect as getTiltEffect } from './effects/tilt-css.js';
 import { getHandler as getHover } from './events/hover.js';
 import { getHandler as getGyroscope } from './events/gyroscope';
 import { clone, lerp } from './utilities.js';
@@ -9,44 +9,12 @@ const DEFAULTS = {
     layers: null,
     gyroscopeSamples: 3,
     maxBeta: 15,
-    maxGamma: 15,
-    perspectiveZ: 600,
-    elevation: 10,
-    animationActive: false,
-    animationFriction: 0.4,
-    transitionActive: false,
-    transitionDuration: 200,
-    transitionEasing: 'ease-out',
-    perspectiveActive: false,
-    perspectiveInvertX: false,
-    perspectiveInvertY: false,
-    perspectiveMax: 0,
-    translationActive: true,
-    translationInvertX: false,
-    translationInvertY: false,
-    translationMax: 50,
-    rotationActive: false,
-    rotationInvertX: false,
-    rotationInvertY: false,
-    rotationMax: 25,
-    skewActive: false,
-    skewInvertX: false,
-    skewInvertY: false,
-    skewMax: 25,
-    scaleActive: false,
-    scaleInvertX: false,
-    scaleInvertY: false,
-    scaleMax: 0.5
-};
-
-const LAYER_PROPS_WITH_DEFAULT = {
-    perspectiveZ: null,
-    elevation: null
+    maxGamma: 15
 };
 
 export default class Two5 {
     constructor (config = {}) {
-        this.config = clone(DEFAULTS, config);
+        this.config = config;
         this.progress = {
             x: 0,
             y: 0
@@ -70,10 +38,10 @@ export default class Two5 {
             let config;
 
             if (layer instanceof Element) {
-                config = clone(this.config, { el: layer, ...LAYER_PROPS_WITH_DEFAULT }, layer.dataset);
+                config = clone({ el: layer }, layer.dataset);
             }
             else if (typeof layer == 'object' && layer) {
-                config = clone(this.config, LAYER_PROPS_WITH_DEFAULT, layer);
+                config = clone(layer);
             }
 
             return config;

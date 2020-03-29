@@ -4,6 +4,41 @@ function formatTransition ({property, duration, easing}) {
     return `${property} ${duration}ms ${easing}`;
 }
 
+const LAYER_PROPS_WITH_DEFAULT = {
+    perspectiveZ: null,
+    elevation: null
+};
+
+const DEFAULTS = {
+    perspectiveZ: 600,
+    elevation: 10,
+    animationActive: false,
+    animationFriction: 0.4,
+    transitionActive: false,
+    transitionDuration: 200,
+    transitionEasing: 'ease-out',
+    perspectiveActive: false,
+    perspectiveInvertX: false,
+    perspectiveInvertY: false,
+    perspectiveMax: 0,
+    translationActive: false,
+    translationInvertX: false,
+    translationInvertY: false,
+    translationMax: 50,
+    rotationActive: false,
+    rotationInvertX: false,
+    rotationInvertY: false,
+    rotationMax: 25,
+    skewActive: false,
+    skewInvertX: false,
+    skewInvertY: false,
+    skewMax: 25,
+    scaleActive: false,
+    scaleInvertX: false,
+    scaleInvertY: false,
+    scaleMax: 0.5
+};
+
 export function getEffect (config) {
     const container = config.container;
     const layers = config.layers;
@@ -36,7 +71,7 @@ export function getEffect (config) {
         const layerStyle = {};
 
         if (!layer.allowPointer) {
-            layerStyle['pointer-events'] = 'none';
+            layer.el.dataset.tiltNoPointer = '';
         }
 
         if (layer.transitionActive) {
