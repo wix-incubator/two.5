@@ -1,4 +1,3 @@
-// import { fixed } from '../utilities';
 function formatTransition({
   property,
   duration,
@@ -169,7 +168,7 @@ function getEffect(config) {
       const setter = SETTERS[key];
 
       if (setter) {
-        setter(layer.el, config[key], layer);
+        setter(layer.el, layer[key], layer);
       }
     });
 
@@ -180,18 +179,19 @@ function getEffect(config) {
     if (config.elevation && !Object.prototype.hasOwnProperty.call(layer, 'elevation')) {
       setProperty(layer.el, '--tz', `${config.elevation * (index + 1)}px`);
     } else if (Object.prototype.hasOwnProperty.call(layer, 'elevation')) {
-      setProperty(layer.el, '--tz', `${v}px`);
+      setProperty(layer.el, '--tz', `${layer.elevation}px`);
     }
   });
   return function tilt({
     x,
     y
   }) {
-    const root = window.document.documentElement.style;
-    root.setProperty('--x', x);
-    root.setProperty('--y', y);
-    root.setProperty('--x-scale', Math.abs(0.5 - x));
-    root.setProperty('--y-scale', Math.abs(0.5 - y));
+    // const style = window.document.documentElement.style;
+    const style = scope.style;
+    style.setProperty('--x', x);
+    style.setProperty('--y', y);
+    style.setProperty('--x-scale', Math.abs(0.5 - x));
+    style.setProperty('--y-scale', Math.abs(0.5 - y));
   };
 }
 
