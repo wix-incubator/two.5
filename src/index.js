@@ -4,12 +4,8 @@ import { getHandler as getGyroscope } from './events/gyroscope';
 import { clone, lerp } from './utilities.js';
 
 const DEFAULTS = {
-    mouseTarget: null,
     layersContainer: null,
     layers: null,
-    gyroscopeSamples: 3,
-    maxBeta: 15,
-    maxGamma: 15,
     perspectiveZ: 600,
     elevation: 10,
     animationActive: false,
@@ -116,10 +112,10 @@ export default class Two5 {
 
     setupEvents () {
         const gyroscoeHandler = getGyroscope({
+            progress: this.progress,
             samples: this.config.gyroscopeSamples,
             maxBeta: this.config.maxBeta,
-            maxGamma: this.config.maxGamma,
-            progress: this.progress
+            maxGamma: this.config.maxGamma
         });
 
         if (gyroscoeHandler) {

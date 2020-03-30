@@ -1,6 +1,17 @@
 import { clamp } from '../utilities';
 
-export function getHandler ({samples, maxBeta, maxGamma, progress}) {
+const DEFAULTS = {
+    samples: 3,
+    maxBeta: 15,
+    maxGamma: 15
+};
+
+export function getHandler ({
+    progress,
+    samples=DEFAULTS.samples,
+    maxBeta=DEFAULTS.maxBeta,
+    maxGamma=DEFAULTS.maxGamma
+}) {
     const hasSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 
     if (!hasSupport) {

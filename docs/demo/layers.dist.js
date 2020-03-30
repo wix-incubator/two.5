@@ -204,11 +204,17 @@
     };
   }
 
+  const DEFAULTS = {
+    samples: 3,
+    maxBeta: 15,
+    maxGamma: 15
+  };
+
   function getHandler$1({
-    samples,
-    maxBeta,
-    maxGamma,
-    progress
+    progress,
+    samples = DEFAULTS.samples,
+    maxBeta = DEFAULTS.maxBeta,
+    maxGamma = DEFAULTS.maxGamma
   }) {
     const hasSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 
@@ -263,13 +269,9 @@
     };
   }
 
-  const DEFAULTS = {
-    mouseTarget: null,
+  const DEFAULTS$1 = {
     layersContainer: null,
     layers: null,
-    gyroscopeSamples: 3,
-    maxBeta: 15,
-    maxGamma: 15,
     perspectiveZ: 600,
     elevation: 10,
     animationActive: false,
@@ -305,7 +307,7 @@
 
   class Two5 {
     constructor(config = {}) {
-      this.config = clone(DEFAULTS, config);
+      this.config = clone(DEFAULTS$1, config);
       this.progress = {
         x: 0,
         y: 0
@@ -367,10 +369,10 @@
 
     setupEvents() {
       const gyroscoeHandler = getHandler$1({
+        progress: this.progress,
         samples: this.config.gyroscopeSamples,
         maxBeta: this.config.maxBeta,
-        maxGamma: this.config.maxGamma,
-        progress: this.progress
+        maxGamma: this.config.maxGamma
       });
 
       if (gyroscoeHandler) {
