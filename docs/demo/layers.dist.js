@@ -32,23 +32,28 @@
     perspectiveActive: false,
     perspectiveInvertX: false,
     perspectiveInvertY: false,
-    perspectiveMax: 0,
+    perspectiveMaxX: 0,
+    perspectiveMaxY: 0,
     translationActive: true,
     translationInvertX: false,
     translationInvertY: false,
-    translationMax: 50,
+    translationMaxX: 50,
+    translationMaxY: 50,
     rotationActive: false,
     rotationInvertX: false,
     rotationInvertY: false,
-    rotationMax: 25,
+    rotationMaxX: 25,
+    rotationMaxY: 25,
     skewActive: false,
     skewInvertX: false,
     skewInvertY: false,
-    skewMax: 25,
+    skewMaxX: 25,
+    skewMaxY: 25,
     scaleActive: false,
     scaleInvertX: false,
     scaleInvertY: false,
-    scaleMax: 0.5
+    scaleMaxX: 0.5,
+    scaleMaxY: 0.5
   };
 
   function formatTransition({
@@ -119,8 +124,8 @@
         let translatePart = '';
 
         if (layer.translationActive) {
-          const translateXVal = layer.translationActive === 'y' ? 0 : fixed((layer.translationInvertX ? -1 : 1) * layer.translationMax * (2 * x - 1) * depth);
-          const translateYVal = layer.translationActive === 'x' ? 0 : fixed((layer.translationInvertY ? -1 : 1) * layer.translationMax * (2 * y - 1) * depth);
+          const translateXVal = layer.translationActive === 'y' ? 0 : fixed((layer.translationInvertX ? -1 : 1) * layer.translationMaxX * (2 * x - 1) * depth);
+          const translateYVal = layer.translationActive === 'x' ? 0 : fixed((layer.translationInvertY ? -1 : 1) * layer.translationMaxY * (2 * y - 1) * depth);
           translatePart = `translate3d(${translateXVal}px, ${translateYVal}px, ${translateZVal}px)`;
         } else {
           translatePart = `translateZ(${translateZVal}px)`;
@@ -129,8 +134,8 @@
         let rotatePart = '';
 
         if (layer.rotationActive) {
-          const rotateXVal = layer.rotationActive === 'y' ? 0 : fixed((layer.rotationInvertX ? -1 : 1) * layer.rotationMax * (1 - y * 2) * depth);
-          const rotateYVal = layer.rotationActive === 'x' ? 0 : fixed((layer.rotationInvertY ? -1 : 1) * layer.rotationMax * (x * 2 - 1) * depth);
+          const rotateXVal = layer.rotationActive === 'x' ? 0 : fixed((layer.rotationInvertY ? -1 : 1) * layer.rotationMaxY * (1 - y * 2) * depth);
+          const rotateYVal = layer.rotationActive === 'y' ? 0 : fixed((layer.rotationInvertX ? -1 : 1) * layer.rotationMaxX * (x * 2 - 1) * depth);
           rotatePart = `rotateX(${rotateXVal}deg) rotateY(${rotateYVal}deg)`;
         } else {
           rotatePart = 'rotateX(0deg) rotateY(0deg)';
@@ -139,8 +144,8 @@
         let skewPart = '';
 
         if (layer.skewActive) {
-          const skewXVal = layer.skewActive === 'y' ? 0 : fixed((layer.skewInvertX ? -1 : 1) * layer.skewMax * (1 - x * 2) * depth);
-          const skewYVal = layer.skewActive === 'x' ? 0 : fixed((layer.skewInvertY ? -1 : 1) * layer.skewMax * (1 - y * 2) * depth);
+          const skewXVal = layer.skewActive === 'y' ? 0 : fixed((layer.skewInvertX ? -1 : 1) * layer.skewMaxX * (1 - x * 2) * depth);
+          const skewYVal = layer.skewActive === 'x' ? 0 : fixed((layer.skewInvertY ? -1 : 1) * layer.skewMaxY * (1 - y * 2) * depth);
           skewPart = `skew(${skewXVal}deg, ${skewYVal}deg)`;
         } else {
           skewPart = 'skew(0deg, 0deg)';
@@ -149,8 +154,8 @@
         let scalePart = '';
 
         if (layer.scaleActive) {
-          const scaleXVal = layer.scaleActive === 'y' ? 1 : 1 + fixed((layer.scaleInvertX ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - x) * 2) * depth);
-          const scaleYVal = layer.scaleActive === 'x' ? 1 : 1 + fixed((layer.scaleInvertY ? -1 : 1) * layer.scaleMax * (Math.abs(0.5 - y) * 2) * depth);
+          const scaleXVal = layer.scaleActive === 'y' ? 1 : 1 + fixed((layer.scaleInvertX ? -1 : 1) * layer.scaleMaxX * (Math.abs(0.5 - x) * 2) * depth);
+          const scaleYVal = layer.scaleActive === 'x' ? 1 : 1 + fixed((layer.scaleInvertY ? -1 : 1) * layer.scaleMaxY * (Math.abs(0.5 - y) * 2) * depth);
           scalePart = `scale(${scaleXVal}, ${scaleYVal})`;
         } else {
           scalePart = 'scale(1, 1)';
@@ -168,16 +173,20 @@
       });
 
       if (config.perspectiveActive) {
-        let a = 1,
-            b = 0;
+        let aX = 1,
+            bX = 0,
+            aY = 1,
+            bY = 0;
 
         if (config.perspectiveMax) {
-          a = 1 + 2 * config.perspectiveMax;
-          b = config.perspectiveMax;
+          aX = 1 + 2 * config.perspectiveMaxX;
+          bX = config.perspectiveMaxX;
+          aY = 1 + 2 * config.perspectiveMaxY;
+          bY = config.perspectiveMaxY;
         }
 
-        const perspX = config.perspectiveActive === 'y' ? 0.5 : (config.perspectiveInvertX ? 1 - x : x) * a - b;
-        const perspY = config.perspectiveActive === 'x' ? 0.5 : (config.perspectiveInvertY ? 1 - y : y) * a - b;
+        const perspX = config.perspectiveActive === 'y' ? 0.5 : (config.perspectiveInvertX ? 1 - x : x) * aX - bX;
+        const perspY = config.perspectiveActive === 'x' ? 0.5 : (config.perspectiveInvertY ? 1 - y : y) * aY - bY;
         container.style.perspectiveOrigin = `${fixed(perspX, 3) * 100}% ${fixed(perspY, 3) * 100}%`;
       } else if (container) {
         container.style.perspectiveOrigin = '50% 50%';
@@ -3404,7 +3413,8 @@
       this.currentContainer = imagesContainer;
       this.two5 = new Two5({
         layersContainer: this.currentContainer,
-        mouseTarget: null
+        mouseTarget: null,
+        translationActive: true
       });
       this.two5.on();
       this.setupStats();
@@ -3526,31 +3536,36 @@
           active: config.perspectiveActive || false,
           invertX: config.perspectiveInvertX || false,
           invertY: config.perspectiveInvertY || false,
-          max: config.perspectiveMax || 0
+          maxX: config.perspectiveMaxX || 0,
+          maxY: config.perspectiveMaxY || 0
         },
         translation: {
           active: config.translationActive || false,
           invertX: config.translationInvertX || false,
           invertY: config.translationInvertY || false,
-          max: config.translationMax || 50
+          maxX: config.translationMaxX || 50,
+          maxY: config.translationMaxY || 50
         },
         rotation: {
           active: config.rotationActive || false,
           invertX: config.rotationInvertX || false,
           invertY: config.rotationInvertY || false,
-          max: config.rotationMax || 25
+          maxX: config.rotationMaxX || 25,
+          maxY: config.rotationMaxY || 25
         },
         skewing: {
           active: config.skewActive || false,
           invertX: config.skewInvertX || false,
           invertY: config.skewInvertY || false,
-          max: config.skewMax || 25
+          maxX: config.skewMaxX || 25,
+          maxY: config.skewMaxY || 25
         },
         scaling: {
           active: config.scaleActive || false,
           invertX: config.scaleInvertX || false,
           invertY: config.scaleInvertY || false,
-          max: config.scaleMax || 0.5
+          maxX: config.scaleMaxX || 0.5,
+          maxY: config.scaleMaxY || 0.5
         }
       };
     }
@@ -3600,7 +3615,8 @@
       }).onChange(getHandler('perspectiveActive', targetIndex));
       perspective.add(config.perspective, 'invertX').onChange(getHandler('perspectiveInvertX', targetIndex));
       perspective.add(config.perspective, 'invertY').onChange(getHandler('perspectiveInvertY', targetIndex));
-      perspective.add(config.perspective, 'max', 0, 0.5, 0.05).onChange(getHandler('perspectiveMax', targetIndex));
+      perspective.add(config.perspective, 'maxX', 0, 0.5, 0.05).onChange(getHandler('perspectiveMaxX', targetIndex));
+      perspective.add(config.perspective, 'maxY', 0, 0.5, 0.05).onChange(getHandler('perspectiveMaxY', targetIndex));
       const translation = folder.addFolder('Translation');
       translation.add(config.translation, 'active', {
         non: false,
@@ -3610,7 +3626,8 @@
       }).onChange(getHandler('translationActive', targetIndex));
       translation.add(config.translation, 'invertX').onChange(getHandler('translationInvertX', targetIndex));
       translation.add(config.translation, 'invertY').onChange(getHandler('translationInvertY', targetIndex));
-      translation.add(config.translation, 'max', 10, 150, 5).onChange(getHandler('translationMax', targetIndex));
+      translation.add(config.translation, 'maxX', 10, 150, 5).onChange(getHandler('translationMaxX', targetIndex));
+      translation.add(config.translation, 'maxY', 10, 150, 5).onChange(getHandler('translationMaxY', targetIndex));
       translation.open();
       const rotation = folder.addFolder('Rotation');
       rotation.add(config.rotation, 'active', {
@@ -3621,7 +3638,8 @@
       }).onChange(getHandler('rotationActive', targetIndex));
       rotation.add(config.rotation, 'invertX').onChange(getHandler('rotationInvertX', targetIndex));
       rotation.add(config.rotation, 'invertY').onChange(getHandler('rotationInvertY', targetIndex));
-      rotation.add(config.rotation, 'max', 10, 60, 1).onChange(getHandler('rotationMax', targetIndex));
+      rotation.add(config.rotation, 'maxX', 10, 60, 1).onChange(getHandler('rotationMaxX', targetIndex));
+      rotation.add(config.rotation, 'maxY', 10, 60, 1).onChange(getHandler('rotationMaxY', targetIndex));
       const skewing = folder.addFolder('Skewing');
       skewing.add(config.skewing, 'active', {
         non: false,
@@ -3631,7 +3649,8 @@
       }).onChange(getHandler('skewActive', targetIndex));
       skewing.add(config.skewing, 'invertX').onChange(getHandler('skewInvertX', targetIndex));
       skewing.add(config.skewing, 'invertY').onChange(getHandler('skewInvertY', targetIndex));
-      skewing.add(config.skewing, 'max', 10, 60, 1).onChange(getHandler('skewMax', targetIndex));
+      skewing.add(config.skewing, 'maxX', 10, 60, 1).onChange(getHandler('skewMaxX', targetIndex));
+      skewing.add(config.skewing, 'maxY', 10, 60, 1).onChange(getHandler('skewMaxY', targetIndex));
       const scaling = folder.addFolder('Scaling');
       scaling.add(config.scaling, 'active', {
         non: false,
@@ -3641,7 +3660,8 @@
       }).onChange(getHandler('scaleActive', targetIndex));
       scaling.add(config.scaling, 'invertX').onChange(getHandler('scaleInvertX', targetIndex));
       scaling.add(config.scaling, 'invertY').onChange(getHandler('scaleInvertY', targetIndex));
-      scaling.add(config.scaling, 'max', 0.1, 2, 0.1).onChange(getHandler('scaleMax', targetIndex));
+      scaling.add(config.scaling, 'maxX', 0.1, 2, 0.1).onChange(getHandler('scaleMaxX', targetIndex));
+      scaling.add(config.scaling, 'maxY', 0.1, 2, 0.1).onChange(getHandler('scaleMaxY', targetIndex));
     }
 
   }

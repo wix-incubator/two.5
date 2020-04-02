@@ -16,7 +16,8 @@ class Demo {
 
         this.two5 = new Two5({
             layersContainer: this.currentContainer,
-            mouseTarget: null
+            mouseTarget: null,
+            translationActive: true
         });
 
         this.two5.on();
@@ -161,31 +162,36 @@ class Demo {
                 active: config.perspectiveActive || false,
                 invertX: config.perspectiveInvertX || false,
                 invertY: config.perspectiveInvertY || false,
-                max: config.perspectiveMax || 0
+                maxX: config.perspectiveMaxX || 0,
+                maxY: config.perspectiveMaxY || 0
             },
             translation: {
                 active: config.translationActive || false,
                 invertX: config.translationInvertX || false,
                 invertY: config.translationInvertY || false,
-                max: config.translationMax || 50
+                maxX: config.translationMaxX || 50,
+                maxY: config.translationMaxY || 50
             },
             rotation: {
                 active: config.rotationActive || false,
                 invertX: config.rotationInvertX || false,
                 invertY: config.rotationInvertY || false,
-                max: config.rotationMax || 25
+                maxX: config.rotationMaxX || 25,
+                maxY: config.rotationMaxY || 25
             },
             skewing: {
                 active: config.skewActive || false,
                 invertX: config.skewInvertX || false,
                 invertY: config.skewInvertY || false,
-                max: config.skewMax || 25
+                maxX: config.skewMaxX || 25,
+                maxY: config.skewMaxY || 25
             },
             scaling: {
                 active: config.scaleActive || false,
                 invertX: config.scaleInvertX || false,
                 invertY: config.scaleInvertY || false,
-                max: config.scaleMax || 0.5
+                maxX: config.scaleMaxX || 0.5,
+                maxY: config.scaleMaxY || 0.5
             }
         };
     }
@@ -240,8 +246,10 @@ class Demo {
             .onChange(getHandler('perspectiveInvertX', targetIndex));
         perspective.add(config.perspective, 'invertY')
             .onChange(getHandler('perspectiveInvertY', targetIndex));
-        perspective.add(config.perspective, 'max', 0, 0.5, 0.05)
-            .onChange(getHandler('perspectiveMax', targetIndex));
+        perspective.add(config.perspective, 'maxX', 0, 0.5, 0.05)
+            .onChange(getHandler('perspectiveMaxX', targetIndex));
+        perspective.add(config.perspective, 'maxY', 0, 0.5, 0.05)
+            .onChange(getHandler('perspectiveMaxY', targetIndex));
 
         const translation = folder.addFolder('Translation');
         translation.add(config.translation, 'active', {non: false, both: true, x: 'x', y: 'y'})
@@ -250,8 +258,10 @@ class Demo {
             .onChange(getHandler('translationInvertX', targetIndex));
         translation.add(config.translation, 'invertY')
             .onChange(getHandler('translationInvertY', targetIndex));
-        translation.add(config.translation, 'max', 10, 150, 5)
-            .onChange(getHandler('translationMax', targetIndex));
+        translation.add(config.translation, 'maxX', 10, 150, 5)
+            .onChange(getHandler('translationMaxX', targetIndex));
+        translation.add(config.translation, 'maxY', 10, 150, 5)
+            .onChange(getHandler('translationMaxY', targetIndex));
         translation.open();
 
         const rotation = folder.addFolder('Rotation');
@@ -261,8 +271,10 @@ class Demo {
             .onChange(getHandler('rotationInvertX', targetIndex));
         rotation.add(config.rotation, 'invertY')
             .onChange(getHandler('rotationInvertY', targetIndex));
-        rotation.add(config.rotation, 'max', 10, 60, 1)
-            .onChange(getHandler('rotationMax', targetIndex));
+        rotation.add(config.rotation, 'maxX', 10, 60, 1)
+            .onChange(getHandler('rotationMaxX', targetIndex));
+        rotation.add(config.rotation, 'maxY', 10, 60, 1)
+            .onChange(getHandler('rotationMaxY', targetIndex));
 
         const skewing = folder.addFolder('Skewing');
         skewing.add(config.skewing, 'active', {non: false, both: true, x: 'x', y: 'y'})
@@ -271,8 +283,10 @@ class Demo {
             .onChange(getHandler('skewInvertX', targetIndex));
         skewing.add(config.skewing, 'invertY')
             .onChange(getHandler('skewInvertY', targetIndex));
-        skewing.add(config.skewing, 'max', 10, 60, 1)
-            .onChange(getHandler('skewMax', targetIndex));
+        skewing.add(config.skewing, 'maxX', 10, 60, 1)
+            .onChange(getHandler('skewMaxX', targetIndex));
+        skewing.add(config.skewing, 'maxY', 10, 60, 1)
+            .onChange(getHandler('skewMaxY', targetIndex));
 
         const scaling = folder.addFolder('Scaling');
         scaling.add(config.scaling, 'active', {non: false, both: true, x: 'x', y: 'y'})
@@ -281,8 +295,10 @@ class Demo {
             .onChange(getHandler('scaleInvertX', targetIndex));
         scaling.add(config.scaling, 'invertY')
             .onChange(getHandler('scaleInvertY', targetIndex));
-        scaling.add(config.scaling, 'max', 0.1, 2, 0.1)
-            .onChange(getHandler('scaleMax', targetIndex));
+        scaling.add(config.scaling, 'maxX', 0.1, 2, 0.1)
+            .onChange(getHandler('scaleMaxX', targetIndex));
+        scaling.add(config.scaling, 'maxY', 0.1, 2, 0.1)
+            .onChange(getHandler('scaleMaxY', targetIndex));
     }
 }
 
