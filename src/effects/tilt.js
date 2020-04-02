@@ -1,13 +1,43 @@
-import { fixed } from '../utilities';
+import { defaultTo, fixed } from '../utilities';
+
+const DEFAULTS = {
+    perspectiveZ: 600,
+    elevation: 10,
+    transitionDuration: 200,
+    transitionActive: false,
+    transitionEasing: 'ease-out',
+    perspectiveActive: false,
+    perspectiveInvertX: false,
+    perspectiveInvertY: false,
+    perspectiveMax: 0,
+    translationActive: true,
+    translationInvertX: false,
+    translationInvertY: false,
+    translationMax: 50,
+    rotationActive: false,
+    rotationInvertX: false,
+    rotationInvertY: false,
+    rotationMax: 25,
+    skewActive: false,
+    skewInvertX: false,
+    skewInvertY: false,
+    skewMax: 25,
+    scaleActive: false,
+    scaleInvertX: false,
+    scaleInvertY: false,
+    scaleMax: 0.5
+};
 
 function formatTransition ({property, duration, easing}) {
     return `${property} ${duration}ms ${easing}`;
 }
 
-export function getEffect (config) {
+export function getEffect (_config) {
+    const config = defaultTo(_config, DEFAULTS);
     const container = config.container;
-    const layers = config.layers;
     const perspectiveZ = config.perspectiveZ;
+
+    config.layers = config.layers.map(layer => defaultTo(layer, config));
 
     /*
      * Init effect
@@ -32,7 +62,7 @@ export function getEffect (config) {
     /*
      * Setup layers styling
      */
-    layers.forEach(layer => {
+    config.layers.forEach(layer => {
         const layerStyle = {};
 
         if (!layer.allowPointer) {
@@ -54,12 +84,12 @@ export function getEffect (config) {
     });
 
     return function tilt ({x, y}) {
-        const len = layers.length;
+        const len = config.layers.length;
 
-        layers.forEach((layer, index) => {
-            const depth = layer.depth || (index + 1) / len;
+        config.layers.forEach((layer, index) => {
+            const depth = layer.hasOwnProperty('depth') ? layer.depth : (index + 1) / len;
 
-            const translateZVal =  layer.elevation !== null ? layer.elevation : config.elevation * (index + 1);
+            const translateZVal =  layer.hasOwnProperty('elevation') ? layer.elevation : config.elevation * (index + 1);
 
             let translatePart = '';
             if (layer.translationActive) {

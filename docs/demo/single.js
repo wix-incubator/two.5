@@ -30,9 +30,9 @@ class Demo {
                 friction: this.two5.config.animationFriction
             },
             transition: {
-                active: this.two5.config.transitionActive,
-                duration: this.two5.config.transitionDuration,
-                easing: this.two5.config.transitionEasing
+                active: this.two5.config.transitionActive || false,
+                duration: this.two5.config.transitionDuration || 300,
+                easing: this.two5.config.transitionEasing || 'linear'
             },
             elements: this.createElementsConfig()
         };
@@ -106,34 +106,34 @@ class Demo {
         return {
             depth: config.depth,
             perspective: {
-                active: config.perspectiveActive,
-                invertX: config.perspectiveInvertX,
-                invertY: config.perspectiveInvertY,
-                max: config.perspectiveMax
+                active: config.perspectiveActive || false,
+                invertX: config.perspectiveInvertX || false,
+                invertY: config.perspectiveInvertY || false,
+                max: config.perspectiveMax || 0
             },
             translation: {
-                active: config.translationActive,
-                invertX: config.translationInvertX,
-                invertY: config.translationInvertY,
-                max: config.translationMax
+                active: config.translationActive || false,
+                invertX: config.translationInvertX || false,
+                invertY: config.translationInvertY || false,
+                max: config.translationMax || 50
             },
             rotation: {
-                active: config.rotationActive,
-                invertX: config.rotationInvertX,
-                invertY: config.rotationInvertY,
-                max: config.rotationMax
+                active: config.rotationActive || false,
+                invertX: config.rotationInvertX || false,
+                invertY: config.rotationInvertY || false,
+                max: config.rotationMax || 25
             },
             skewing: {
-                active: config.skewActive,
-                invertX: config.skewInvertX,
-                invertY: config.skewInvertY,
-                max: config.skewMax
+                active: config.skewActive || false,
+                invertX: config.skewInvertX || false,
+                invertY: config.skewInvertY || false,
+                max: config.skewMax || 25
             },
             scaling: {
-                active: config.scaleActive,
-                invertX: config.scaleInvertX,
-                invertY: config.scaleInvertY,
-                max: config.scaleMax
+                active: config.scaleActive || false,
+                invertX: config.scaleInvertX || false,
+                invertY: config.scaleInvertY || false,
+                max: config.scaleMax || 0.5
             }
         };
     }

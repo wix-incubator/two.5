@@ -11,13 +11,45 @@
     return +num.toFixed(digits);
   }
 
+  function defaultTo(obj, defaults) {
+    return Object.assign(Object.create(defaults), obj);
+  }
+
   function clone(...objects) {
-    return Object.assign(Object.create(null), ...objects);
+    return Object.assign({}, ...objects);
   }
 
   function lerp(a, b, t) {
     return a * (1 - t) + b * t;
   }
+
+  const DEFAULTS = {
+    perspectiveZ: 600,
+    elevation: 10,
+    transitionDuration: 200,
+    transitionActive: false,
+    transitionEasing: 'ease-out',
+    perspectiveActive: false,
+    perspectiveInvertX: false,
+    perspectiveInvertY: false,
+    perspectiveMax: 0,
+    translationActive: true,
+    translationInvertX: false,
+    translationInvertY: false,
+    translationMax: 50,
+    rotationActive: false,
+    rotationInvertX: false,
+    rotationInvertY: false,
+    rotationMax: 25,
+    skewActive: false,
+    skewInvertX: false,
+    skewInvertY: false,
+    skewMax: 25,
+    scaleActive: false,
+    scaleInvertX: false,
+    scaleInvertY: false,
+    scaleMax: 0.5
+  };
 
   function formatTransition({
     property,
@@ -27,10 +59,11 @@
     return `${property} ${duration}ms ${easing}`;
   }
 
-  function getEffect(config) {
+  function getEffect(_config) {
+    const config = defaultTo(_config, DEFAULTS);
     const container = config.container;
-    const layers = config.layers;
     const perspectiveZ = config.perspectiveZ;
+    config.layers = config.layers.map(layer => defaultTo(layer, config));
     /*
      * Init effect
      * also set transition if required.
@@ -56,7 +89,7 @@
      */
 
 
-    layers.forEach(layer => {
+    config.layers.forEach(layer => {
       const layerStyle = {};
 
       if (!layer.allowPointer) {
@@ -79,10 +112,10 @@
       x,
       y
     }) {
-      const len = layers.length;
-      layers.forEach((layer, index) => {
-        const depth = layer.depth || (index + 1) / len;
-        const translateZVal = layer.elevation !== null ? layer.elevation : config.elevation * (index + 1);
+      const len = config.layers.length;
+      config.layers.forEach((layer, index) => {
+        const depth = layer.hasOwnProperty('depth') ? layer.depth : (index + 1) / len;
+        const translateZVal = layer.hasOwnProperty('elevation') ? layer.elevation : config.elevation * (index + 1);
         let translatePart = '';
 
         if (layer.translationActive) {
@@ -204,7 +237,7 @@
     };
   }
 
-  const DEFAULTS = {
+  const DEFAULTS$1 = {
     samples: 3,
     maxBeta: 15,
     maxGamma: 15
@@ -212,9 +245,9 @@
 
   function getHandler$1({
     progress,
-    samples = DEFAULTS.samples,
-    maxBeta = DEFAULTS.maxBeta,
-    maxGamma = DEFAULTS.maxGamma
+    samples = DEFAULTS$1.samples,
+    maxBeta = DEFAULTS$1.maxBeta,
+    maxGamma = DEFAULTS$1.maxGamma
   }) {
     const hasSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 
@@ -269,45 +302,14 @@
     };
   }
 
-  const DEFAULTS$1 = {
-    layersContainer: null,
-    layers: null,
-    perspectiveZ: 600,
-    elevation: 10,
+  const DEFAULTS$2 = {
     animationActive: false,
-    animationFriction: 0.4,
-    transitionActive: false,
-    transitionDuration: 200,
-    transitionEasing: 'ease-out',
-    perspectiveActive: false,
-    perspectiveInvertX: false,
-    perspectiveInvertY: false,
-    perspectiveMax: 0,
-    translationActive: true,
-    translationInvertX: false,
-    translationInvertY: false,
-    translationMax: 50,
-    rotationActive: false,
-    rotationInvertX: false,
-    rotationInvertY: false,
-    rotationMax: 25,
-    skewActive: false,
-    skewInvertX: false,
-    skewInvertY: false,
-    skewMax: 25,
-    scaleActive: false,
-    scaleInvertX: false,
-    scaleInvertY: false,
-    scaleMax: 0.5
-  };
-  const LAYER_PROPS_WITH_DEFAULT = {
-    perspectiveZ: null,
-    elevation: null
+    animationFriction: 0.4
   };
 
   class Two5 {
     constructor(config = {}) {
-      this.config = clone(DEFAULTS$1, config);
+      this.config = defaultTo(config, DEFAULTS$2);
       this.progress = {
         x: 0,
         y: 0
@@ -328,12 +330,11 @@
         let config;
 
         if (layer instanceof Element) {
-          config = clone(this.config, {
-            el: layer,
-            ...LAYER_PROPS_WITH_DEFAULT
+          config = Object.assign({
+            el: layer
           }, layer.dataset);
         } else if (typeof layer == 'object' && layer) {
-          config = clone(this.config, LAYER_PROPS_WITH_DEFAULT, layer);
+          config = layer;
         }
 
         return config;
@@ -3517,39 +3518,39 @@
     createEffectConfig(config) {
       return {
         transition: {
-          active: config.transitionActive,
-          duration: config.transitionDuration,
-          easing: config.transitionEasing
+          active: config.transitionActive || false,
+          duration: config.transitionDuration || 300,
+          easing: config.transitionEasing || 'linear'
         },
         perspective: {
-          active: config.perspectiveActive,
-          invertX: config.perspectiveInvertX,
-          invertY: config.perspectiveInvertY,
-          max: config.perspectiveMax
+          active: config.perspectiveActive || false,
+          invertX: config.perspectiveInvertX || false,
+          invertY: config.perspectiveInvertY || false,
+          max: config.perspectiveMax || 0
         },
         translation: {
-          active: config.translationActive,
-          invertX: config.translationInvertX,
-          invertY: config.translationInvertY,
-          max: config.translationMax
+          active: config.translationActive || false,
+          invertX: config.translationInvertX || false,
+          invertY: config.translationInvertY || false,
+          max: config.translationMax || 50
         },
         rotation: {
-          active: config.rotationActive,
-          invertX: config.rotationInvertX,
-          invertY: config.rotationInvertY,
-          max: config.rotationMax
+          active: config.rotationActive || false,
+          invertX: config.rotationInvertX || false,
+          invertY: config.rotationInvertY || false,
+          max: config.rotationMax || 25
         },
         skewing: {
-          active: config.skewActive,
-          invertX: config.skewInvertX,
-          invertY: config.skewInvertY,
-          max: config.skewMax
+          active: config.skewActive || false,
+          invertX: config.skewInvertX || false,
+          invertY: config.skewInvertY || false,
+          max: config.skewMax || 25
         },
         scaling: {
-          active: config.scaleActive,
-          invertX: config.scaleInvertX,
-          invertY: config.scaleInvertY,
-          max: config.scaleMax
+          active: config.scaleActive || false,
+          invertX: config.scaleInvertX || false,
+          invertY: config.scaleInvertY || false,
+          max: config.scaleMax || 0.5
         }
       };
     }
