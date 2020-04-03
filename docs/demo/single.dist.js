@@ -162,8 +162,10 @@
         let scalePart = '';
 
         if (layer.scaleActive) {
-          const scaleXVal = layer.scaleActive === 'y' ? 1 : 1 + fixed((layer.scaleInvertX ? -1 : 1) * layer.scaleMaxX * (Math.abs(0.5 - x) * 2) * depth);
-          const scaleYVal = layer.scaleActive === 'x' ? 1 : 1 + fixed((layer.scaleInvertY ? -1 : 1) * layer.scaleMaxY * (Math.abs(0.5 - y) * 2) * depth);
+          const scaleXInput = layer.scaleActive === 'yy' ? y : x;
+          const scaleYInput = layer.scaleActive === 'xx' ? x : y;
+          const scaleXVal = layer.scaleActive === 'y' ? 1 : 1 + fixed((layer.scaleInvertX ? -1 : 1) * layer.scaleMaxX * (Math.abs(0.5 - scaleXInput) * 2) * depth);
+          const scaleYVal = layer.scaleActive === 'x' ? 1 : 1 + fixed((layer.scaleInvertY ? -1 : 1) * layer.scaleMaxY * (Math.abs(0.5 - scaleYInput) * 2) * depth);
           scalePart = ` scale(${scaleXVal}, ${scaleYVal})`;
         }
 
@@ -3551,11 +3553,6 @@
       return v => {
         if (v === 'true') v = true;
         if (v === 'false') v = false;
-        this.two5.layers.forEach(layer => {
-          if (layer[prop] === this.two5.config[prop]) {
-            layer[prop] = v;
-          }
-        });
         this.two5.config[prop] = v;
         this.two5.teardownEffects();
         this.two5.setupEffects();
@@ -3633,6 +3630,8 @@
       scaling.add(config.scaling, 'active', {
         non: false,
         both: true,
+        'x sync': 'xx',
+        'y sync': 'yy',
         x: 'x',
         y: 'y'
       }).onChange(getHandler('scaleActive', targetIndex));

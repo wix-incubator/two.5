@@ -218,11 +218,6 @@ class Demo {
             if (v === 'true') v = true;
             if (v === 'false') v = false;
 
-            // this.two5.layers.forEach(layer => {
-            //     if (layer[prop] === this.two5.config[prop]) {
-            //         layer[prop] = v;
-            //     }
-            // });
             this.two5.config[prop] = v;
 
             this.two5.teardownEffects();
@@ -309,7 +304,7 @@ class Demo {
             .onChange(getHandler('skewMaxY', targetIndex));
 
         const scaling = folder.addFolder('Scaling');
-        scaling.add(config.scaling, 'active', {non: false, both: true, x: 'x', y: 'y'})
+        scaling.add(config.scaling, 'active', {non: false, both: true, 'x sync': 'xx', 'y sync': 'yy', x: 'x', y: 'y'})
             .onChange(getHandler('scaleActive', targetIndex));
         scaling.add(config.scaling, 'invertX')
             .onChange(getHandler('scaleInvertX', targetIndex));
