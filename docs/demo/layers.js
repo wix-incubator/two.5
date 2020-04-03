@@ -113,7 +113,7 @@ class Demo {
 
         this.transition = this.gui.addFolder('Transition');
         this.transition.add(this.two5Config.transition, 'active')
-            .onChange((function (handler) {
+            .onChange((handler => {
                 return v => {
                     if (v === false) {
                         this.two5.container.style.transition = '';
@@ -152,18 +152,11 @@ class Demo {
     }
 
     createEffectConfig (config) {
-        return {
+        const result = {
             transition: {
                 active: config.transitionActive || false,
                 duration: config.transitionDuration || 300,
                 easing: config.transitionEasing || 'linear'
-            },
-            perspective: {
-                active: config.perspectiveActive || false,
-                invertX: config.perspectiveInvertX || false,
-                invertY: config.perspectiveInvertY || false,
-                maxX: config.perspectiveMaxX || 0,
-                maxY: config.perspectiveMaxY || 0
             },
             translation: {
                 active: config.translationActive || false,
@@ -172,12 +165,17 @@ class Demo {
                 maxX: config.translationMaxX || 50,
                 maxY: config.translationMaxY || 50
             },
-            rotation: {
-                active: config.rotationActive || false,
-                invertX: config.rotationInvertX || false,
-                invertY: config.rotationInvertY || false,
-                maxX: config.rotationMaxX || 25,
-                maxY: config.rotationMaxY || 25
+            rotate: {
+                active: config.rotateActive || false,
+                invert: config.rotateInvert || false,
+                max: config.rotateMax || 25,
+            },
+            tilt: {
+                active: config.tiltActive || false,
+                invertX: config.tiltInvertX || false,
+                invertY: config.tiltInvertY || false,
+                maxX: config.tiltMaxX || 25,
+                maxY: config.tiltMaxY || 25
             },
             skewing: {
                 active: config.skewActive || false,
@@ -194,6 +192,18 @@ class Demo {
                 maxY: config.scaleMaxY || 0.5
             }
         };
+
+        if (config === this.two5.config) {
+            result.perspective = {
+                active: config.perspectiveActive || false,
+                invertX: config.perspectiveInvertX || false,
+                invertY: config.perspectiveInvertY || false,
+                maxX: config.perspectiveMaxX || 0,
+                maxY: config.perspectiveMaxY || 0
+            };
+        }
+
+        return result;
     }
 
     createLayersConfig () {
@@ -208,11 +218,11 @@ class Demo {
             if (v === 'true') v = true;
             if (v === 'false') v = false;
 
-            this.two5.layers.forEach(layer => {
-                if (layer[prop] === this.two5.config[prop]) {
-                    layer[prop] = v;
-                }
-            });
+            // this.two5.layers.forEach(layer => {
+            //     if (layer[prop] === this.two5.config[prop]) {
+            //         layer[prop] = v;
+            //     }
+            // });
             this.two5.config[prop] = v;
 
             this.two5.teardownEffects();
@@ -239,17 +249,19 @@ class Demo {
             ? prop => this.getSceneHandler(prop)
             : (prop, index) => this.getLayerHandler(prop, index);
 
-        const perspective = folder.addFolder('Perspective');
-        perspective.add(config.perspective, 'active', {non: false, both: true, x: 'x', y: 'y'})
-            .onChange(getHandler('perspectiveActive', targetIndex));
-        perspective.add(config.perspective, 'invertX')
-            .onChange(getHandler('perspectiveInvertX', targetIndex));
-        perspective.add(config.perspective, 'invertY')
-            .onChange(getHandler('perspectiveInvertY', targetIndex));
-        perspective.add(config.perspective, 'maxX', 0, 0.5, 0.05)
-            .onChange(getHandler('perspectiveMaxX', targetIndex));
-        perspective.add(config.perspective, 'maxY', 0, 0.5, 0.05)
-            .onChange(getHandler('perspectiveMaxY', targetIndex));
+        if (config === this.two5Config) {
+            const perspective = folder.addFolder('Perspective');
+            perspective.add(config.perspective, 'active', {non: false, both: true, x: 'x', y: 'y'})
+                .onChange(getHandler('perspectiveActive', targetIndex));
+            perspective.add(config.perspective, 'invertX')
+                .onChange(getHandler('perspectiveInvertX', targetIndex));
+            perspective.add(config.perspective, 'invertY')
+                .onChange(getHandler('perspectiveInvertY', targetIndex));
+            perspective.add(config.perspective, 'maxX', 0, 0.5, 0.05)
+                .onChange(getHandler('perspectiveMaxX', targetIndex));
+            perspective.add(config.perspective, 'maxY', 0, 0.5, 0.05)
+                .onChange(getHandler('perspectiveMaxY', targetIndex));
+        }
 
         const translation = folder.addFolder('Translation');
         translation.add(config.translation, 'active', {non: false, both: true, x: 'x', y: 'y'})
@@ -264,17 +276,25 @@ class Demo {
             .onChange(getHandler('translationMaxY', targetIndex));
         translation.open();
 
-        const rotation = folder.addFolder('Rotation');
-        rotation.add(config.rotation, 'active', {non: false, both: true, x: 'x', y: 'y'})
-            .onChange(getHandler('rotationActive', targetIndex));
-        rotation.add(config.rotation, 'invertX')
-            .onChange(getHandler('rotationInvertX', targetIndex));
-        rotation.add(config.rotation, 'invertY')
-            .onChange(getHandler('rotationInvertY', targetIndex));
-        rotation.add(config.rotation, 'maxX', 10, 60, 1)
-            .onChange(getHandler('rotationMaxX', targetIndex));
-        rotation.add(config.rotation, 'maxY', 10, 60, 1)
-            .onChange(getHandler('rotationMaxY', targetIndex));
+        const rotate = folder.addFolder('Rotate');
+        rotate.add(config.rotate, 'active', {non: false, x: 'x', y: 'y'})
+            .onChange(getHandler('rotateActive', targetIndex));
+        rotate.add(config.rotate, 'invert')
+            .onChange(getHandler('rotateInvert', targetIndex));
+        rotate.add(config.rotate, 'max', 10, 270, 1)
+            .onChange(getHandler('rotateMax', targetIndex));
+
+        const tilt = folder.addFolder('Tilt');
+        tilt.add(config.tilt, 'active', {non: false, both: true, x: 'x', y: 'y'})
+            .onChange(getHandler('tiltActive', targetIndex));
+        tilt.add(config.tilt, 'invertX')
+            .onChange(getHandler('tiltInvertX', targetIndex));
+        tilt.add(config.tilt, 'invertY')
+            .onChange(getHandler('tiltInvertY', targetIndex));
+        tilt.add(config.tilt, 'maxX', 10, 60, 1)
+            .onChange(getHandler('tiltMaxX', targetIndex));
+        tilt.add(config.tilt, 'maxY', 10, 60, 1)
+            .onChange(getHandler('tiltMaxY', targetIndex));
 
         const skewing = folder.addFolder('Skewing');
         skewing.add(config.skewing, 'active', {non: false, both: true, x: 'x', y: 'y'})

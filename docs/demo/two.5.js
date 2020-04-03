@@ -34,11 +34,14 @@ const DEFAULTS = {
   translationInvertY: false,
   translationMaxX: 50,
   translationMaxY: 50,
-  rotationActive: false,
-  rotationInvertX: false,
-  rotationInvertY: false,
-  rotationMaxX: 25,
-  rotationMaxY: 25,
+  rotateActive: false,
+  rotateInvert: false,
+  rotateMax: 45,
+  tiltActive: false,
+  tiltInvertX: false,
+  tiltInvertY: false,
+  tiltMaxX: 25,
+  tiltMaxY: 25,
   skewActive: false,
   skewInvertX: false,
   skewInvertY: false,
@@ -127,13 +130,20 @@ function getEffect(_config) {
       }
 
       let rotatePart = '';
+      let rotateXVal = 0,
+          rotateYVal = 0,
+          rotateZVal = 0;
 
-      if (layer.rotationActive) {
-        const rotateXVal = layer.rotationActive === 'x' ? 0 : fixed((layer.rotationInvertY ? -1 : 1) * layer.rotationMaxY * (1 - y * 2) * depth);
-        const rotateYVal = layer.rotationActive === 'y' ? 0 : fixed((layer.rotationInvertX ? -1 : 1) * layer.rotationMaxX * (x * 2 - 1) * depth);
-        rotatePart = `rotateX(${rotateXVal}deg) rotateY(${rotateYVal}deg)`;
-      } else {
-        rotatePart = 'rotateX(0deg) rotateY(0deg)';
+      if (layer.tiltActive) {
+        rotateXVal = layer.tiltActive === 'x' ? 0 : fixed((layer.tiltInvertY ? -1 : 1) * layer.tiltMaxY * (1 - y * 2) * depth);
+        rotateYVal = layer.tiltActive === 'y' ? 0 : fixed((layer.tiltInvertX ? -1 : 1) * layer.tiltMaxX * (x * 2 - 1) * depth);
+        rotatePart += ` rotateX(${rotateXVal}deg) rotateY(${rotateYVal}deg)`;
+      }
+
+      if (layer.rotateActive) {
+        const rotateInput = layer.rotateActive === 'x' ? x : y;
+        rotateZVal = fixed((layer.rotateInvert ? -1 : 1) * layer.rotateMax * (rotateInput * 2 - 1) * depth);
+        rotatePart += ` rotateZ(${rotateZVal}deg)`;
       }
 
       let skewPart = '';
@@ -141,9 +151,7 @@ function getEffect(_config) {
       if (layer.skewActive) {
         const skewXVal = layer.skewActive === 'y' ? 0 : fixed((layer.skewInvertX ? -1 : 1) * layer.skewMaxX * (1 - x * 2) * depth);
         const skewYVal = layer.skewActive === 'x' ? 0 : fixed((layer.skewInvertY ? -1 : 1) * layer.skewMaxY * (1 - y * 2) * depth);
-        skewPart = `skew(${skewXVal}deg, ${skewYVal}deg)`;
-      } else {
-        skewPart = 'skew(0deg, 0deg)';
+        skewPart = ` skew(${skewXVal}deg, ${skewYVal}deg)`;
       }
 
       let scalePart = '';
@@ -151,20 +159,18 @@ function getEffect(_config) {
       if (layer.scaleActive) {
         const scaleXVal = layer.scaleActive === 'y' ? 1 : 1 + fixed((layer.scaleInvertX ? -1 : 1) * layer.scaleMaxX * (Math.abs(0.5 - x) * 2) * depth);
         const scaleYVal = layer.scaleActive === 'x' ? 1 : 1 + fixed((layer.scaleInvertY ? -1 : 1) * layer.scaleMaxY * (Math.abs(0.5 - y) * 2) * depth);
-        scalePart = `scale(${scaleXVal}, ${scaleYVal})`;
-      } else {
-        scalePart = 'scale(1, 1)';
+        scalePart = ` scale(${scaleXVal}, ${scaleYVal})`;
       }
 
       let layerPerspectiveZ = '';
 
-      if (layer.perspectiveZ) {
+      if (layer.hasOwnProperty('perspectiveZ')) {
         layerPerspectiveZ = `perspective(${layer.perspectiveZ}px) `;
       } else if (!container) {
         layerPerspectiveZ = `perspective(${config.perspectiveZ}px) `;
       }
 
-      layer.el.style.transform = `${layerPerspectiveZ}${translatePart} ${scalePart} ${skewPart} ${rotatePart}`;
+      layer.el.style.transform = `${layerPerspectiveZ}${translatePart}${scalePart}${skewPart}${rotatePart}`;
     });
 
     if (config.perspectiveActive) {
@@ -173,9 +179,12 @@ function getEffect(_config) {
           aY = 1,
           bY = 0;
 
-      if (config.perspectiveMax) {
+      if (config.perspectiveMaxX) {
         aX = 1 + 2 * config.perspectiveMaxX;
         bX = config.perspectiveMaxX;
+      }
+
+      if (config.perspectiveMaxY) {
         aY = 1 + 2 * config.perspectiveMaxY;
         bY = config.perspectiveMaxY;
       }
