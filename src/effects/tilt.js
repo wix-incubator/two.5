@@ -16,6 +16,7 @@ const DEFAULTS = {
     translationInvertY: false,
     translationMaxX: 50,
     translationMaxY: 50,
+    invertRotation: false, // used for orientation compensation when using deviceorientation event, reference see below
     rotateActive: false,
     rotateInvert: false,
     rotateMax: 45,
@@ -135,7 +136,13 @@ export function getEffect (_config) {
                     ? 0
                     : (layer.tiltInvertX ? -1 : 1) * layer.tiltMaxX * (x * 2 - 1) * depth;
 
-                rotatePart += ` rotateX(${rotateXVal.toFixed(2)}deg) rotateY(${rotateYVal.toFixed(2)}deg)`;
+                if (config.invertRotation) {
+                    // see https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Using_device_orientation_with_3D_transforms#Orientation_compensation
+                    rotatePart = ` rotateY(${rotateYVal.toFixed(2)}deg) rotateX(${rotateXVal.toFixed(2)}deg)${rotatePart}`;
+                }
+                else {
+                    rotatePart += ` rotateX(${rotateXVal.toFixed(2)}deg) rotateY(${rotateYVal.toFixed(2)}deg)`;
+                }
             }
 
             let skewPart = '';

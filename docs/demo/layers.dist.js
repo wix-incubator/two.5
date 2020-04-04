@@ -35,6 +35,8 @@
     translationInvertY: false,
     translationMaxX: 50,
     translationMaxY: 50,
+    invertRotation: false,
+    // used for orientation compensation when using deviceorientation event, reference see below
     rotateActive: false,
     rotateInvert: false,
     rotateMax: 45,
@@ -144,7 +146,13 @@
         if (layer.tiltActive) {
           rotateXVal = layer.tiltActive === 'x' ? 0 : (layer.tiltInvertY ? -1 : 1) * layer.tiltMaxY * (1 - y * 2) * depth;
           rotateYVal = layer.tiltActive === 'y' ? 0 : (layer.tiltInvertX ? -1 : 1) * layer.tiltMaxX * (x * 2 - 1) * depth;
-          rotatePart += ` rotateX(${rotateXVal.toFixed(2)}deg) rotateY(${rotateYVal.toFixed(2)}deg)`;
+
+          if (config.invertRotation) {
+            // see https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Using_device_orientation_with_3D_transforms#Orientation_compensation
+            rotatePart = ` rotateY(${rotateYVal.toFixed(2)}deg) rotateX(${rotateXVal.toFixed(2)}deg)${rotatePart}`;
+          } else {
+            rotatePart += ` rotateX(${rotateXVal.toFixed(2)}deg) rotateY(${rotateYVal.toFixed(2)}deg)`;
+          }
         }
 
         let skewPart = '';
@@ -393,6 +401,7 @@
       });
 
       if (gyroscoeHandler) {
+        this.usingGyroscope = true;
         this.tiltHandler = gyroscoeHandler;
       } else {
         /*
@@ -412,7 +421,9 @@
     }
 
     setupEffects() {
-      const tilt = getEffect(clone(this.config, {
+      const tilt = getEffect(clone({
+        invertRotation: !!this.usingGyroscope
+      }, this.config, {
         container: this.container,
         layers: this.layers
       }));

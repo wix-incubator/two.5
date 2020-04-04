@@ -87,6 +87,7 @@ export default class Two5 {
         });
 
         if (gyroscoeHandler) {
+            this.usingGyroscope = true;
             this.tiltHandler = gyroscoeHandler;
         }
         else {
@@ -109,6 +110,7 @@ export default class Two5 {
     setupEffects () {
         const tilt = getTiltEffect(
             clone(
+                { invertRotation: !!this.usingGyroscope },
                 this.config,
                 { container: this.container, layers: this.layers }
             )
