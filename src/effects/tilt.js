@@ -41,12 +41,12 @@ function formatTransition ({property, duration, easing}) {
     return `${property} ${duration}ms ${easing}`;
 }
 
-export function getEffect (_config) {
-    const config = defaultTo(_config, DEFAULTS);
-    const container = config.container;
-    const perspectiveZ = config.perspectiveZ;
+export function getEffect (config) {
+    const _config = defaultTo(config, DEFAULTS);
+    const container = _config.container;
+    const perspectiveZ = _config.perspectiveZ;
 
-    config.layers = config.layers.map(layer => defaultTo(layer, config));
+    _config.layers = _config.layers.map(layer => defaultTo(layer, _config));
 
     /*
      * Init effect
@@ -57,11 +57,11 @@ export function getEffect (_config) {
             perspective: `${perspectiveZ}px`
         };
 
-        if (config.transitionActive && config.perspectiveActive) {
+        if (_config.transitionActive && _config.perspectiveActive) {
             containerStyle.transition = formatTransition({
                 property: 'perspective-origin',
-                duration: config.transitionDuration,
-                easing: config.transitionEasing
+                duration: _config.transitionDuration,
+                easing: _config.transitionEasing
             });
         }
 
@@ -71,7 +71,7 @@ export function getEffect (_config) {
     /*
      * Setup layers styling
      */
-    config.layers.forEach(layer => {
+    _config.layers.forEach(layer => {
         const layerStyle = {};
 
         if (!layer.allowPointer) {
@@ -93,12 +93,12 @@ export function getEffect (_config) {
     });
 
     return function tilt ({x, y}) {
-        const len = config.layers.length;
+        const len = _config.layers.length;
 
-        config.layers.forEach((layer, index) => {
+        _config.layers.forEach((layer, index) => {
             const depth = layer.hasOwnProperty('depth') ? layer.depth : (index + 1) / len;
 
-            const translateZVal =  layer.hasOwnProperty('elevation') ? layer.elevation : config.elevation * (index + 1);
+            const translateZVal =  layer.hasOwnProperty('elevation') ? layer.elevation : _config.elevation * (index + 1);
 
             let translatePart = '';
             if (layer.translationActive) {
@@ -136,7 +136,7 @@ export function getEffect (_config) {
                     ? 0
                     : (layer.tiltInvertX ? -1 : 1) * layer.tiltMaxX * (x * 2 - 1) * depth;
 
-                if (config.invertRotation) {
+                if (_config.invertRotation) {
                     // see https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Using_device_orientation_with_3D_transforms#Orientation_compensation
                     rotatePart = ` rotateY(${rotateYVal.toFixed(2)}deg) rotateX(${rotateXVal.toFixed(2)}deg)${rotatePart}`;
                 }
@@ -177,33 +177,33 @@ export function getEffect (_config) {
                 layerPerspectiveZ = `perspective(${layer.perspectiveZ}px) `;
             }
             else if (!container) {
-                layerPerspectiveZ = `perspective(${config.perspectiveZ}px) `;
+                layerPerspectiveZ = `perspective(${_config.perspectiveZ}px) `;
             }
 
             layer.el.style.transform = `${layerPerspectiveZ}${translatePart}${scalePart}${skewPart}${rotatePart}`;
         });
 
-        if (config.perspectiveActive) {
+        if (_config.perspectiveActive) {
             let aX = 1, bX = 0, aY = 1, bY = 0;
 
-            if (config.perspectiveMaxX) {
-                aX = 1 + 2 * config.perspectiveMaxX;
-                bX = config.perspectiveMaxX;
+            if (_config.perspectiveMaxX) {
+                aX = 1 + 2 * _config.perspectiveMaxX;
+                bX = _config.perspectiveMaxX;
             }
 
-            if (config.perspectiveMaxY) {
-                aY = 1 + 2 * config.perspectiveMaxY;
-                bY = config.perspectiveMaxY;
+            if (_config.perspectiveMaxY) {
+                aY = 1 + 2 * _config.perspectiveMaxY;
+                bY = _config.perspectiveMaxY;
             }
 
-            const perspX = config.perspectiveActive === 'y'
+            const perspX = _config.perspectiveActive === 'y'
                 ? 0.5
-                : (config.perspectiveInvertX ? (1 - x) : x) * aX - bX;
-            const perspY = config.perspectiveActive === 'x'
+                : (_config.perspectiveInvertX ? (1 - x) : x) * aX - bX;
+            const perspY = _config.perspectiveActive === 'x'
                 ? 0.5
-                : (config.perspectiveInvertY ? (1 - y) : y) * aY - bY;
+                : (_config.perspectiveInvertY ? (1 - y) : y) * aY - bY;
 
-            container.style.perspectiveOrigin = `${(perspX * 100).toFixed(2)}% ${fixed(perspY * 100).toFixed(2)}%`;
+            container.style.perspectiveOrigin = `${(perspX * 100).toFixed(2)}% ${(perspY * 100).toFixed(2)}%`;
         }
         else if (container) {
             container.style.perspectiveOrigin = '50% 50%';
