@@ -2,10 +2,6 @@ function clamp (min, max, val) {
     return Math.min(Math.max(min, val), max);
 }
 
-function fixed (num, digits=2) {
-    return +num.toFixed(digits);
-}
-
 function defaultTo (obj, defaults) {
     return Object.assign(Object.create(defaults), obj);
 }
@@ -20,7 +16,6 @@ function lerp (a, b, t) {
 
 export {
     clamp,
-    fixed,
     clone,
     defaultTo,
     lerp

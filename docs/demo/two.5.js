@@ -2,10 +2,6 @@ function clamp(min, max, val) {
   return Math.min(Math.max(min, val), max);
 }
 
-function fixed(num, digits = 2) {
-  return +num.toFixed(digits);
-}
-
 function defaultTo(obj, defaults) {
   return Object.assign(Object.create(defaults), obj);
 }
@@ -122,9 +118,9 @@ function getEffect(_config) {
       let translatePart = '';
 
       if (layer.translationActive) {
-        const translateXVal = layer.translationActive === 'y' ? 0 : fixed((layer.translationInvertX ? -1 : 1) * layer.translationMaxX * (2 * x - 1) * depth);
-        const translateYVal = layer.translationActive === 'x' ? 0 : fixed((layer.translationInvertY ? -1 : 1) * layer.translationMaxY * (2 * y - 1) * depth);
-        translatePart = `translate3d(${translateXVal}px, ${translateYVal}px, ${translateZVal}px)`;
+        const translateXVal = layer.translationActive === 'y' ? 0 : (layer.translationInvertX ? -1 : 1) * layer.translationMaxX * (2 * x - 1) * depth;
+        const translateYVal = layer.translationActive === 'x' ? 0 : (layer.translationInvertY ? -1 : 1) * layer.translationMaxY * (2 * y - 1) * depth;
+        translatePart = `translate3d(${translateXVal.toFixed(2)}px, ${translateYVal.toFixed(2)}px, ${translateZVal}px)`;
       } else {
         translatePart = `translateZ(${translateZVal}px)`;
       }
@@ -134,24 +130,24 @@ function getEffect(_config) {
           rotateYVal = 0,
           rotateZVal = 0;
 
-      if (layer.tiltActive) {
-        rotateXVal = layer.tiltActive === 'x' ? 0 : fixed((layer.tiltInvertY ? -1 : 1) * layer.tiltMaxY * (1 - y * 2) * depth);
-        rotateYVal = layer.tiltActive === 'y' ? 0 : fixed((layer.tiltInvertX ? -1 : 1) * layer.tiltMaxX * (x * 2 - 1) * depth);
-        rotatePart += ` rotateX(${rotateXVal}deg) rotateY(${rotateYVal}deg)`;
-      }
-
       if (layer.rotateActive) {
         const rotateInput = layer.rotateActive === 'x' ? x : y;
-        rotateZVal = fixed((layer.rotateInvert ? -1 : 1) * layer.rotateMax * (rotateInput * 2 - 1) * depth);
-        rotatePart += ` rotateZ(${rotateZVal}deg)`;
+        rotateZVal = (layer.rotateInvert ? -1 : 1) * layer.rotateMax * (rotateInput * 2 - 1) * depth;
+        rotatePart += ` rotateZ(${rotateZVal.toFixed(2)}deg)`;
+      }
+
+      if (layer.tiltActive) {
+        rotateXVal = layer.tiltActive === 'x' ? 0 : (layer.tiltInvertY ? -1 : 1) * layer.tiltMaxY * (1 - y * 2) * depth;
+        rotateYVal = layer.tiltActive === 'y' ? 0 : (layer.tiltInvertX ? -1 : 1) * layer.tiltMaxX * (x * 2 - 1) * depth;
+        rotatePart += ` rotateX(${rotateXVal.toFixed(2)}deg) rotateY(${rotateYVal.toFixed(2)}deg)`;
       }
 
       let skewPart = '';
 
       if (layer.skewActive) {
-        const skewXVal = layer.skewActive === 'y' ? 0 : fixed((layer.skewInvertX ? -1 : 1) * layer.skewMaxX * (1 - x * 2) * depth);
-        const skewYVal = layer.skewActive === 'x' ? 0 : fixed((layer.skewInvertY ? -1 : 1) * layer.skewMaxY * (1 - y * 2) * depth);
-        skewPart = ` skew(${skewXVal}deg, ${skewYVal}deg)`;
+        const skewXVal = layer.skewActive === 'y' ? 0 : (layer.skewInvertX ? -1 : 1) * layer.skewMaxX * (1 - x * 2) * depth;
+        const skewYVal = layer.skewActive === 'x' ? 0 : (layer.skewInvertY ? -1 : 1) * layer.skewMaxY * (1 - y * 2) * depth;
+        skewPart = ` skew(${skewXVal.toFixed(2)}deg, ${skewYVal.toFixed(2)}deg)`;
       }
 
       let scalePart = '';
@@ -159,9 +155,9 @@ function getEffect(_config) {
       if (layer.scaleActive) {
         const scaleXInput = layer.scaleActive === 'yy' ? y : x;
         const scaleYInput = layer.scaleActive === 'xx' ? x : y;
-        const scaleXVal = layer.scaleActive === 'y' ? 1 : 1 + fixed((layer.scaleInvertX ? -1 : 1) * layer.scaleMaxX * (Math.abs(0.5 - scaleXInput) * 2) * depth);
-        const scaleYVal = layer.scaleActive === 'x' ? 1 : 1 + fixed((layer.scaleInvertY ? -1 : 1) * layer.scaleMaxY * (Math.abs(0.5 - scaleYInput) * 2) * depth);
-        scalePart = ` scale(${scaleXVal}, ${scaleYVal})`;
+        const scaleXVal = layer.scaleActive === 'y' ? 1 : 1 + (layer.scaleInvertX ? -1 : 1) * layer.scaleMaxX * (Math.abs(0.5 - scaleXInput) * 2) * depth;
+        const scaleYVal = layer.scaleActive === 'x' ? 1 : 1 + (layer.scaleInvertY ? -1 : 1) * layer.scaleMaxY * (Math.abs(0.5 - scaleYInput) * 2) * depth;
+        scalePart = ` scale(${scaleXVal.toFixed(2)}, ${scaleYVal.toFixed(2)})`;
       }
 
       let layerPerspectiveZ = '';
@@ -193,7 +189,7 @@ function getEffect(_config) {
 
       const perspX = config.perspectiveActive === 'y' ? 0.5 : (config.perspectiveInvertX ? 1 - x : x) * aX - bX;
       const perspY = config.perspectiveActive === 'x' ? 0.5 : (config.perspectiveInvertY ? 1 - y : y) * aY - bY;
-      container.style.perspectiveOrigin = `${fixed(perspX, 3) * 100}% ${fixed(perspY, 3) * 100}%`;
+      container.style.perspectiveOrigin = `${(perspX * 100).toFixed(2)}% ${fixed(perspY * 100).toFixed(2)}%`;
     } else if (container) {
       container.style.perspectiveOrigin = '50% 50%';
     }
