@@ -1,4 +1,4 @@
-import Two5 from './two.5.js';
+import { Tilt } from './two.5.js';
 import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
 import Stats from '../../node_modules/stats.js/src/Stats.js';
 
@@ -14,7 +14,7 @@ class Demo {
     constructor () {
         this.currentContainer = imagesContainer;
 
-        this.two5 = new Two5({
+        this.two5 = new Tilt({
             layersContainer: this.currentContainer,
             mouseTarget: null,
             translationActive: true

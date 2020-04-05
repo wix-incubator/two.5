@@ -208,5 +208,5 @@ export function getEffect (config) {
         else if (container) {
             container.style.perspectiveOrigin = '50% 50%';
         }
-    }
+    };
 }

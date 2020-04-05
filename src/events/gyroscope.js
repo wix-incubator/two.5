@@ -8,9 +8,9 @@ const DEFAULTS = {
 
 export function getHandler ({
     progress,
-    samples=DEFAULTS.samples,
-    maxBeta=DEFAULTS.maxBeta,
-    maxGamma=DEFAULTS.maxGamma
+    samples = DEFAULTS.samples,
+    maxBeta = DEFAULTS.maxBeta,
+    maxGamma = DEFAULTS.maxGamma
 }) {
     const hasSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 

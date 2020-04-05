@@ -20,6 +20,73 @@
   }
 
   const DEFAULTS = {
+    animationActive: false,
+    animationFriction: 0.4
+  };
+
+  class Two5 {
+    constructor(config = {}) {
+      this.config = defaultTo(config, DEFAULTS);
+      this.progress = {
+        x: 0,
+        y: 0
+      };
+      this.currentProgress = {
+        x: 0,
+        y: 0
+      };
+      this.measures = [];
+      this.effects = [];
+    }
+
+    on() {
+      this.setupEvents();
+      this.setupEffects(); // start animating
+
+      window.requestAnimationFrame(() => this.loop());
+    }
+
+    off() {
+      window.cancelAnimationFrame(this.animationFrame);
+      this.teardownEvents();
+    }
+
+    loop() {
+      this.animationFrame = window.requestAnimationFrame(() => this.loop());
+      this.measures.forEach(measure => measure(this.progress));
+
+      if (this.config.animationActive) {
+        this.lerp();
+      }
+
+      this.effects.forEach(effect => effect(this.config.animationActive ? this.currentProgress : this.progress));
+    }
+
+    lerp() {
+      this.currentProgress.x = lerp(this.currentProgress.x, this.progress.x, 1 - this.config.animationFriction);
+      this.currentProgress.y = lerp(this.currentProgress.y, this.progress.y, 1 - this.config.animationFriction);
+    }
+
+    setupEvents() {}
+
+    teardownEvents() {}
+
+    getEffects() {
+      return [];
+    }
+
+    setupEffects() {
+      this.effects.push(...this.getEffects());
+    }
+
+    teardownEffects() {
+      this.measures.length = 0;
+      this.effects.length = 0;
+    }
+
+  }
+
+  const DEFAULTS$1 = {
     perspectiveZ: 600,
     elevation: 10,
     transitionDuration: 200,
@@ -66,7 +133,7 @@
   }
 
   function getEffect(config) {
-    const _config = defaultTo(config, DEFAULTS);
+    const _config = defaultTo(config, DEFAULTS$1);
 
     const container = _config.container;
     const perspectiveZ = _config.perspectiveZ;
@@ -264,7 +331,7 @@
     };
   }
 
-  const DEFAULTS$1 = {
+  const DEFAULTS$2 = {
     samples: 3,
     maxBeta: 15,
     maxGamma: 15
@@ -272,9 +339,9 @@
 
   function getHandler$1({
     progress,
-    samples = DEFAULTS$1.samples,
-    maxBeta = DEFAULTS$1.maxBeta,
-    maxGamma = DEFAULTS$1.maxGamma
+    samples = DEFAULTS$2.samples,
+    maxBeta = DEFAULTS$2.maxBeta,
+    maxGamma = DEFAULTS$2.maxGamma
   }) {
     const hasSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 
@@ -329,25 +396,11 @@
     };
   }
 
-  const DEFAULTS$2 = {
-    animationActive: false,
-    animationFriction: 0.4
-  };
-
-  class Two5 {
+  class Tilt extends Two5 {
     constructor(config = {}) {
-      this.config = defaultTo(config, DEFAULTS$2);
-      this.progress = {
-        x: 0,
-        y: 0
-      };
-      this.currentProgress = {
-        x: 0,
-        y: 0
-      };
+      super(config);
       this.container = this.config.layersContainer || null;
       this.createLayers();
-      this.effects = [];
     }
 
     createLayers() {
@@ -368,31 +421,13 @@
       }).filter(x => x);
     }
 
-    on() {
-      this.setupEvents();
-      this.setupEffects(); // start animating
-
-      window.requestAnimationFrame(() => this.loop());
-    }
-
-    off() {
-      window.cancelAnimationFrame(this.animationFrame);
-      this.teardownEvents();
-    }
-
-    loop() {
-      this.animationFrame = window.requestAnimationFrame(() => this.loop());
-
-      if (this.config.animationActive) {
-        this.lerp();
-      }
-
-      this.effects.forEach(effect => effect(this.config.animationActive ? this.currentProgress : this.progress));
-    }
-
-    lerp() {
-      this.currentProgress.x = lerp(this.currentProgress.x, this.progress.x, 1 - this.config.animationFriction);
-      this.currentProgress.y = lerp(this.currentProgress.y, this.progress.y, 1 - this.config.animationFriction);
+    getEffects() {
+      return [getEffect(clone({
+        invertRotation: !!this.usingGyroscope
+      }, this.config, {
+        container: this.container,
+        layers: this.layers
+      }))];
     }
 
     setupEvents() {
@@ -421,20 +456,6 @@
 
     teardownEvents() {
       this.tiltHandler.off();
-    }
-
-    setupEffects() {
-      const tilt = getEffect(clone({
-        invertRotation: !!this.usingGyroscope
-      }, this.config, {
-        container: this.container,
-        layers: this.layers
-      }));
-      this.effects.push(tilt);
-    }
-
-    teardownEffects() {
-      this.effects.length = 0;
     }
 
   }
@@ -3432,7 +3453,7 @@
   class Demo {
     constructor() {
       this.currentContainer = imagesContainer;
-      this.two5 = new Two5({
+      this.two5 = new Tilt({
         layersContainer: this.currentContainer,
         mouseTarget: null,
         translationActive: true
