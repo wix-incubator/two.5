@@ -79,7 +79,7 @@ function getEffect(config) {
           }
         }
 
-        scene.effects.forEach(effect => effect(scene, progress));
+        scene.effect(scene, progress);
       }
     });
   };
