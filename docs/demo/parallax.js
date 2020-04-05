@@ -22,10 +22,15 @@ function hueRotate (scene, progress) {
     scene.element.style.filter = `hue-rotate(${(1 - progress) * 180}deg)`;
 }
 
+function sepia (scene, progress) {
+    scene.element.style.filter = `sepia(${(1 - progress) * 100}%)`;
+}
+
 const FILTERS = {
     focus,
     saturate,
-    hueRotate
+    hueRotate,
+    sepia
 };
 
 function createScenes () {
@@ -74,13 +79,13 @@ const config = {
             filter: null
         },
         {
-            filter: 'focus'
+            filter: null
         },
         {
-            filter: 'saturate'
+            filter: null
         },
         {
-            filter: 'hueRotate'
+            filter: null
         },
         {
             filter: null
@@ -92,23 +97,23 @@ const sceneConfig = gui.addFolder('Scene config');
 sceneConfig.add(config.scene, 'friction', 0, 0.95, 0.05).onFinishChange(restart);
 
 const image1 = gui.addFolder('Image 1');
-image1.add(config.images[0], 'filter', {non: null, focus: 'focus', saturate: 'saturate', 'hue rotate': 'hueRotate'})
+image1.add(config.images[0], 'filter', {non: null, focus: 'focus', saturate: 'saturate', 'hue rotate': 'hueRotate', sepia: 'sepia'})
     .onChange(restart);
 
 const image2 = gui.addFolder('Image 2');
-image2.add(config.images[1], 'filter', {non: null, focus: 'focus', saturate: 'saturate', 'hue rotate': 'hueRotate'})
+image2.add(config.images[1], 'filter', {non: null, focus: 'focus', saturate: 'saturate', 'hue rotate': 'hueRotate', sepia: 'sepia'})
     .onChange(restart);
 
 const image3 = gui.addFolder('Image 3');
-image3.add(config.images[2], 'filter', {non: null, focus: 'focus', saturate: 'saturate', 'hue rotate': 'hueRotate'})
+image3.add(config.images[2], 'filter', {non: null, focus: 'focus', saturate: 'saturate', 'hue rotate': 'hueRotate', sepia: 'sepia'})
     .onChange(restart);
 
 const image4 = gui.addFolder('Image 4');
-image4.add(config.images[3], 'filter', {non: null, focus: 'focus', saturate: 'saturate', 'hue rotate': 'hueRotate'})
+image4.add(config.images[3], 'filter', {non: null, focus: 'focus', saturate: 'saturate', 'hue rotate': 'hueRotate', sepia: 'sepia'})
     .onChange(restart);
 
 const image5 = gui.addFolder('Image 5');
-image5.add(config.images[4], 'filter', {non: null, focus: 'focus', saturate: 'saturate', 'hue rotate': 'hueRotate'})
+image5.add(config.images[4], 'filter', {non: null, focus: 'focus', saturate: 'saturate', 'hue rotate': 'hueRotate', sepia: 'sepia'})
     .onChange(restart);
 
 let instance;
