@@ -6,7 +6,9 @@
   "scripts": {
     "test": "test",
     "build": "rollup -c",
-    "demo": "npm run build && cp index.js ./docs/demo/two.5.js && cd docs/demo && rollup -c single.config.js && rollup -c layers.config.js && cd -"
+    "copy": "cp index.js ./docs/demo/two.5.js",
+    "demo:build": "cd docs/demo && rollup -c single.config.js && rollup -c layers.config.js && rollup -c parallax.config.js && cd -",
+    "demo": "npm run build && npm run copy && npm run demo:build"
   },
   "repository": {
     "type": "git",

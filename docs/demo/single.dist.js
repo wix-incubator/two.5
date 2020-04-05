@@ -19,14 +19,14 @@
     return a * (1 - t) + b * t;
   }
 
-  const DEFAULTS = {
+  const DEFAULTS$1 = {
     animationActive: false,
     animationFriction: 0.4
   };
 
   class Two5 {
     constructor(config = {}) {
-      this.config = defaultTo(config, DEFAULTS);
+      this.config = defaultTo(config, DEFAULTS$1);
       this.progress = {
         x: 0,
         y: 0
@@ -86,7 +86,7 @@
 
   }
 
-  const DEFAULTS$1 = {
+  const DEFAULTS$2 = {
     perspectiveZ: 600,
     elevation: 10,
     transitionDuration: 200,
@@ -132,8 +132,8 @@
     return `${property} ${duration}ms ${easing}`;
   }
 
-  function getEffect(config) {
-    const _config = defaultTo(config, DEFAULTS$1);
+  function getEffect$1(config) {
+    const _config = defaultTo(config, DEFAULTS$2);
 
     const container = _config.container;
     const perspectiveZ = _config.perspectiveZ;
@@ -279,7 +279,7 @@
     };
   }
 
-  function getHandler({
+  function getHandler$1({
     target,
     progress
   }) {
@@ -331,17 +331,17 @@
     };
   }
 
-  const DEFAULTS$2 = {
+  const DEFAULTS$3 = {
     samples: 3,
     maxBeta: 15,
     maxGamma: 15
   };
 
-  function getHandler$1({
+  function getHandler$2({
     progress,
-    samples = DEFAULTS$2.samples,
-    maxBeta = DEFAULTS$2.maxBeta,
-    maxGamma = DEFAULTS$2.maxGamma
+    samples = DEFAULTS$3.samples,
+    maxBeta = DEFAULTS$3.maxBeta,
+    maxGamma = DEFAULTS$3.maxGamma
   }) {
     const hasSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 
@@ -422,7 +422,7 @@
     }
 
     getEffects() {
-      return [getEffect(clone({
+      return [getEffect$1(clone({
         invertRotation: !!this.usingGyroscope
       }, this.config, {
         container: this.container,
@@ -431,7 +431,7 @@
     }
 
     setupEvents() {
-      const gyroscoeHandler = getHandler$1({
+      const gyroscoeHandler = getHandler$2({
         progress: this.progress,
         samples: this.config.gyroscopeSamples,
         maxBeta: this.config.maxBeta,
@@ -445,7 +445,7 @@
         /*
          * No deviceorientation support
          */
-        this.tiltHandler = getHandler({
+        this.tiltHandler = getHandler$1({
           target: this.config.mouseTarget,
           progress: this.progress
         });

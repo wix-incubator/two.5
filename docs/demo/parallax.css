@@ -1,0 +1,78 @@
+:root {
+    --strip-height: 1000px;
+}
+
+main {
+    /*will-change: transform;*/
+}
+
+.root {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.strip {
+    position: relative;
+    display: grid;
+    grid-template: 100% / 100%;
+    grid-template-areas: "strip";
+    text-align: center;
+    border-bottom: 1px solid #000;
+    height: var(--strip-height);
+}
+
+.strip .bg {
+    grid-area: strip;
+    place-self: stretch;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.strip .bg img {
+    width: 100%;
+    height: 100vh;
+    min-height: var(--strip-height);
+    object-fit: cover;
+    will-change: transform;
+    transform: translate3d(0px, 0px, 0px);
+}
+
+.strip .content {
+    grid-area: strip;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.strip .content p {
+    padding: 2em;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.footer {
+    height: auto;
+}
+
+.horizontal {display: flex; flex-flow: row wrap; justify-content: center}
+.vertical {display: flex; flex-direction: column;}
+
+.cube {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+#cube1{
+    background: red;
+}
+#cube2{
+    background: green;
+}
+#cube3{
+    background: blue;
+}
+#cube4{
+    background: magenta;
+}

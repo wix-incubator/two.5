@@ -26,8 +26,8 @@ export function getEffect (config) {
         totalWidth = window.innerWidth;
     }
 
-    _config.scenes = _config.scenes.map(layer => {
-        const conf = defaultTo(layer, _config);
+    _config.scenes = _config.scenes.map(scene => {
+        const conf = defaultTo(scene, _config);
 
         if (conf.end == null) {
             conf.end = conf.start + conf.duration;
@@ -40,36 +40,33 @@ export function getEffect (config) {
     });
 
     return function controller ({x, y}) {
-        const posX = x * totalHeight;
-        const posY = y * totalWidth;
-
         if (container) {
-            container.style.transform = `translate3d(${-x * totalWidth}px, ${-y * totalHeight}px, 0px)`;
+            container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
         }
 
         _config.scenes.forEach(scene => {
-            if (scene.enabled) {
-                const {start, end, duration}  = scene;
+            if (!scene.disabled) {
+                const {start, end, duration} = scene;
                 let progress = 0;
 
                 if (horizontal) {
-                    if (posX >= start && posX <= end) {
-                        progress = duration ? (posX - start) / duration : 1;
+                    if (x >= start && x <= end) {
+                        progress = duration ? (x - start) / duration : 1;
                     }
-                    else if (posX > end) {
+                    else if (x > end) {
                         progress = 1;
                     }
                 }
                 else {
-                    if (posY >= start && posY <= end) {
-                        progress = duration ? (posY - start) / duration : 1;
+                    if (y >= start && y <= end) {
+                        progress = duration ? (y - start) / duration : 1;
                     }
-                    else if (posY > end) {
+                    else if (y > end) {
                         progress = 1;
                     }
                 }
 
-                scene.effects.forEach(effect => effect(progress));
+                scene.effects.forEach(effect => effect(scene, progress));
             }
         });
     };

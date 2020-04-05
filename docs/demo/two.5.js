@@ -15,12 +15,106 @@ function lerp(a, b, t) {
 }
 
 const DEFAULTS = {
+  horizontal: false
+};
+function getEffect(config) {
+  const _config = defaultTo(config, DEFAULTS);
+
+  const container = _config.container;
+  const horizontal = _config.horizontal;
+  let totalHeight, totalWidth;
+
+  if (container) {
+    /*
+     * Setup Smooth Scroll technique
+     */
+    totalHeight = container.offsetHeight;
+    totalWidth = container.offsetWidth;
+    window.document.body.style.height = `${totalHeight}px`;
+    window.document.body.style.width = `${totalWidth}px`;
+  } else {
+    totalHeight = window.innerHeight;
+    totalWidth = window.innerWidth;
+  }
+
+  _config.scenes = _config.scenes.map(scene => {
+    const conf = defaultTo(scene, _config);
+
+    if (conf.end == null) {
+      conf.end = conf.start + conf.duration;
+    } else if (conf.duration == null) {
+      conf.duration = conf.end - conf.start;
+    }
+
+    return conf;
+  });
+  return function controller({
+    x,
+    y
+  }) {
+    if (container) {
+      container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
+    }
+
+    _config.scenes.forEach(scene => {
+      if (!scene.disabled) {
+        const {
+          start,
+          end,
+          duration
+        } = scene;
+        let progress = 0;
+
+        if (horizontal) {
+          if (x >= start && x <= end) {
+            progress = duration ? (x - start) / duration : 1;
+          } else if (x > end) {
+            progress = 1;
+          }
+        } else {
+          if (y >= start && y <= end) {
+            progress = duration ? (y - start) / duration : 1;
+          } else if (y > end) {
+            progress = 1;
+          }
+        }
+
+        scene.effects.forEach(effect => effect(scene, progress));
+      }
+    });
+  };
+}
+
+function getHandler() {
+  function handler(progress) {
+    progress.x = window.scrollX || window.pageXOffset;
+    progress.y = window.scrollY || window.pageYOffset;
+  }
+
+  let frameId;
+
+  function on() {
+    frameId = window.requestAnimationFrame(handler);
+  }
+
+  function off() {
+    window.cancelAnimationFrame(frameId);
+  }
+
+  return {
+    handler,
+    on,
+    off
+  };
+}
+
+const DEFAULTS$1 = {
   animationActive: false,
   animationFriction: 0.4
 };
 class Two5 {
   constructor(config = {}) {
-    this.config = defaultTo(config, DEFAULTS);
+    this.config = defaultTo(config, DEFAULTS$1);
     this.progress = {
       x: 0,
       y: 0
@@ -80,7 +174,26 @@ class Two5 {
 
 }
 
-const DEFAULTS$1 = {
+class Scroll extends Two5 {
+  constructor(config = {}) {
+    super(config);
+  }
+
+  getEffects() {
+    return [getEffect(this.config)];
+  }
+
+  setupEvents() {
+    this.measures.push(getHandler().handler);
+  }
+
+  teardownEvents() {
+    this.measures.length = 0;
+  }
+
+}
+
+const DEFAULTS$2 = {
   perspectiveZ: 600,
   elevation: 10,
   transitionDuration: 200,
@@ -126,8 +239,8 @@ function formatTransition({
   return `${property} ${duration}ms ${easing}`;
 }
 
-function getEffect(config) {
-  const _config = defaultTo(config, DEFAULTS$1);
+function getEffect$1(config) {
+  const _config = defaultTo(config, DEFAULTS$2);
 
   const container = _config.container;
   const perspectiveZ = _config.perspectiveZ;
@@ -273,7 +386,7 @@ function getEffect(config) {
   };
 }
 
-function getHandler({
+function getHandler$1({
   target,
   progress
 }) {
@@ -325,16 +438,16 @@ function getHandler({
   };
 }
 
-const DEFAULTS$2 = {
+const DEFAULTS$3 = {
   samples: 3,
   maxBeta: 15,
   maxGamma: 15
 };
-function getHandler$1({
+function getHandler$2({
   progress,
-  samples = DEFAULTS$2.samples,
-  maxBeta = DEFAULTS$2.maxBeta,
-  maxGamma = DEFAULTS$2.maxGamma
+  samples = DEFAULTS$3.samples,
+  maxBeta = DEFAULTS$3.maxBeta,
+  maxGamma = DEFAULTS$3.maxGamma
 }) {
   const hasSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 
@@ -415,7 +528,7 @@ class Tilt extends Two5 {
   }
 
   getEffects() {
-    return [getEffect(clone({
+    return [getEffect$1(clone({
       invertRotation: !!this.usingGyroscope
     }, this.config, {
       container: this.container,
@@ -424,7 +537,7 @@ class Tilt extends Two5 {
   }
 
   setupEvents() {
-    const gyroscoeHandler = getHandler$1({
+    const gyroscoeHandler = getHandler$2({
       progress: this.progress,
       samples: this.config.gyroscopeSamples,
       maxBeta: this.config.maxBeta,
@@ -438,7 +551,7 @@ class Tilt extends Two5 {
       /*
        * No deviceorientation support
        */
-      this.tiltHandler = getHandler({
+      this.tiltHandler = getHandler$1({
         target: this.config.mouseTarget,
         progress: this.progress
       });
@@ -453,4 +566,4 @@ class Tilt extends Two5 {
 
 }
 
-export { Tilt };
+export { Scroll, Tilt };
