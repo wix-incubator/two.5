@@ -3199,11 +3199,16 @@
     scene.element.style.filter = `sepia(${(1 - progress) * 100}%)`;
   }
 
+  function difference(scene, progress) {
+    scene.element.style.backgroundColor = `hsl(0, 0%, ${(1 - progress) * 100}%)`;
+  }
+
   const FILTERS = {
     focus,
     saturate,
     hueRotate,
-    sepia
+    sepia,
+    difference
   };
 
   function createScenes() {
@@ -3226,11 +3231,20 @@
     }).concat(filterScenes.map(([filter, scene]) => {
       const parent = scene.closest('[data-effects]');
       const parentTop = parent.offsetTop;
+      let element = scene;
+
+      if (filter === 'difference') {
+        parent.dataset.blend = filter;
+        element = scene.parentElement;
+      } else {
+        delete parent.dataset.blend;
+      }
+
       return {
         effect: FILTERS[filter],
         start: parentTop - viewportHeight * 0.65,
         duration: viewportHeight,
-        element: scene,
+        element,
         viewportHeight
       };
     }));
@@ -3253,48 +3267,26 @@
       filter: null
     }]
   };
+  const FILTER_CONF = {
+    non: null,
+    focus: 'focus',
+    saturate: 'saturate',
+    'hue rotate': 'hueRotate',
+    sepia: 'sepia',
+    'blend-difference': 'difference'
+  };
   const sceneConfig = gui.addFolder('Scene config');
   sceneConfig.add(config.scene, 'friction', 0, 0.95, 0.05).onFinishChange(restart);
   const image1 = gui.addFolder('Image 1');
-  image1.add(config.images[0], 'filter', {
-    non: null,
-    focus: 'focus',
-    saturate: 'saturate',
-    'hue rotate': 'hueRotate',
-    sepia: 'sepia'
-  }).onChange(restart);
+  image1.add(config.images[0], 'filter', FILTER_CONF).onChange(restart);
   const image2 = gui.addFolder('Image 2');
-  image2.add(config.images[1], 'filter', {
-    non: null,
-    focus: 'focus',
-    saturate: 'saturate',
-    'hue rotate': 'hueRotate',
-    sepia: 'sepia'
-  }).onChange(restart);
+  image2.add(config.images[1], 'filter', FILTER_CONF).onChange(restart);
   const image3 = gui.addFolder('Image 3');
-  image3.add(config.images[2], 'filter', {
-    non: null,
-    focus: 'focus',
-    saturate: 'saturate',
-    'hue rotate': 'hueRotate',
-    sepia: 'sepia'
-  }).onChange(restart);
+  image3.add(config.images[2], 'filter', FILTER_CONF).onChange(restart);
   const image4 = gui.addFolder('Image 4');
-  image4.add(config.images[3], 'filter', {
-    non: null,
-    focus: 'focus',
-    saturate: 'saturate',
-    'hue rotate': 'hueRotate',
-    sepia: 'sepia'
-  }).onChange(restart);
+  image4.add(config.images[3], 'filter', FILTER_CONF).onChange(restart);
   const image5 = gui.addFolder('Image 5');
-  image5.add(config.images[4], 'filter', {
-    non: null,
-    focus: 'focus',
-    saturate: 'saturate',
-    'hue rotate': 'hueRotate',
-    sepia: 'sepia'
-  }).onChange(restart);
+  image5.add(config.images[4], 'filter', FILTER_CONF).onChange(restart);
   let instance;
 
   function restart() {
