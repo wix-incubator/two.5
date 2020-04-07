@@ -26,6 +26,10 @@ function sepia (scene, progress) {
     scene.element.style.filter = `sepia(${(1 - progress) * 100}%)`;
 }
 
+function invert (scene, progress) {
+    scene.element.style.filter = `invert(${(1 - progress) * 100}%)`;
+}
+
 function difference (scene, progress) {
     scene.element.style.backgroundColor = `hsl(0, 0%, ${(1 - progress) * 100}%)`
 }
@@ -35,6 +39,7 @@ const FILTERS = {
     saturate,
     hueRotate,
     sepia,
+    invert,
     difference
 };
 
@@ -44,12 +49,16 @@ function createScenes () {
     const scenes = [...window.document.querySelectorAll('[data-effects~="parallax"] img')];
     const filterScenes = config.images
         .map((img, index) => [img.filter, scenes[index]])
-        .filter(x => x[0]);
+        .filter(x => {
+            return x[0] && x[0] !== 'null'
+        });
 
     return scenes.map((scene, index) => {
         const parent = parents[index];
         const parentTop = parent.offsetTop;
         const parentHeight = parent.offsetHeight;
+
+        scene.style.filter = '';
 
         return {
             effect: background,
@@ -90,18 +99,23 @@ const config = {
     },
     images: [
         {
+            speed: 0,
             filter: null
         },
         {
+            speed: 0.25,
             filter: null
         },
         {
+            speed: 0.5,
             filter: null
         },
         {
+            speed: 0.75,
             filter: null
         },
         {
+            speed: 1.0,
             filter: null
         }
     ]
@@ -113,6 +127,7 @@ const FILTER_CONF = {
     saturate: 'saturate',
     'hue rotate': 'hueRotate',
     sepia: 'sepia',
+    invert: 'invert',
     'blend-difference': 'difference'
 };
 
@@ -120,22 +135,32 @@ const sceneConfig = gui.addFolder('Scene config');
 sceneConfig.add(config.scene, 'friction', 0, 0.95, 0.05).onFinishChange(restart);
 
 const image1 = gui.addFolder('Image 1');
+image1.add(config.images[0], 'speed', 0, 1, 0.05)
+    .onChange(restart);
 image1.add(config.images[0], 'filter', FILTER_CONF)
     .onChange(restart);
 
 const image2 = gui.addFolder('Image 2');
+image2.add(config.images[1], 'speed', 0, 1, 0.05)
+    .onChange(restart);
 image2.add(config.images[1], 'filter', FILTER_CONF)
     .onChange(restart);
 
 const image3 = gui.addFolder('Image 3');
+image3.add(config.images[2], 'speed', 0, 1, 0.05)
+    .onChange(restart);
 image3.add(config.images[2], 'filter', FILTER_CONF)
     .onChange(restart);
 
 const image4 = gui.addFolder('Image 4');
+image4.add(config.images[3], 'speed', 0, 1, 0.05)
+    .onChange(restart);
 image4.add(config.images[3], 'filter', FILTER_CONF)
     .onChange(restart);
 
 const image5 = gui.addFolder('Image 5');
+image5.add(config.images[4], 'speed', 0, 1, 0.05)
+    .onChange(restart);
 image5.add(config.images[4], 'filter', FILTER_CONF)
     .onChange(restart);
 
@@ -147,12 +172,15 @@ function restart () {
 }
 
 function init () {
+    const scenes = createScenes();
     const parallax = new Scroll({
         container: document.querySelector('main'),
-        scenes: createScenes(),
+        scenes,
         animationActive: true,
         animationFriction: config.scene.friction
     });
+
+    parallax.on();
 
     parallax.effects.unshift(function () {
         stats.begin();
@@ -160,8 +188,6 @@ function init () {
     parallax.effects.push(function () {
         stats.end();
     });
-
-    parallax.on();
 
     return parallax;
 }
