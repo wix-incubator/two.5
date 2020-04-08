@@ -2,6 +2,10 @@
     --strip-height: 1000px;
 }
 
+body {
+    margin: 0;
+}
+
 main {
     /*will-change: transform;*/
 }
