@@ -60,6 +60,10 @@ main {
     mix-blend-mode: difference;
 }
 
+[data-blend="dodge"] img {
+    mix-blend-mode: color-dodge;
+}
+
 .footer {
     height: auto;
 }

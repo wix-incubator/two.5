@@ -2,10 +2,6 @@ import { Scroll } from './two.5.js';
 import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
 import Stats from '../../node_modules/stats.js/src/Stats.js';
 
-const stats = new Stats();
-stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild(stats.dom);
-
 function background (scene, progress) {
     scene.element.style.transform = `translate3d(0px, ${(progress * scene.duration - scene.viewportHeight) * scene.speed}px, 0px)`;
 }
@@ -31,7 +27,11 @@ function invert (scene, progress) {
 }
 
 function difference (scene, progress) {
-    scene.element.style.backgroundColor = `hsl(0, 0%, ${(1 - progress) * 100}%)`
+    scene.element.style.backgroundColor = `hsl(0, 0%, ${(1 - progress) * 100}%)`;
+}
+
+function dodge (scene, progress) {
+    scene.element.style.backgroundColor = `hsl(15, ${(1 - progress) * 100}%, 20%)`;
 }
 
 const FILTERS = {
@@ -40,23 +40,25 @@ const FILTERS = {
     hueRotate,
     sepia,
     invert,
-    difference
+    difference,
+    dodge
 };
 
+const wrapper = document.querySelector('#wrapper');
 const viewportHeight = window.innerHeight;
 const parents = [...window.document.querySelectorAll('[data-effects~="parallax"]')];
+const images = [...window.document.querySelectorAll('[data-effects~="parallax"] img')];
 
 function createScenes (pins) {
-    const scenes = [...window.document.querySelectorAll('[data-effects~="parallax"] img')];
     const filterScenes = config.images
-        .map((img, index) => [img.filter, scenes[index]])
+        .map((img, index) => [img.filter, images[index]])
         .filter(x => {
             return x[0] && x[0] !== 'null'
         });
     const pin1Duration = pins[0] ? pins[0].duration : 0;
     const pin2Duration = pins[1] ? pins[1].duration : 0;
 
-    return scenes.map((scene, index) => {
+    return images.map((img, index) => {
         const parent = parents[index];
         const parentTop = parent.offsetTop;
         const parentHeight = parent.offsetHeight;
@@ -64,14 +66,12 @@ function createScenes (pins) {
         const start = parentTop - viewportHeight;
         const duration = (parentHeight > viewportHeight ? parentHeight : viewportHeight) + viewportHeight;
 
-        scene.style.filter = '';
-
         return {
             effect: background,
             speed: +config.images[index].speed,
             start,
             duration,
-            element: scene,
+            element: img,
             pauseDuringPin: true,
             viewportHeight
         };
@@ -83,12 +83,9 @@ function createScenes (pins) {
         let start = parentTop - viewportHeight * 0.65;
         let duration = viewportHeight;
 
-        if (filter === 'difference') {
+        if (filter === 'difference' || filter === 'dodge') {
             parent.dataset.blend = filter;
             element = scene.parentElement;
-        }
-        else {
-            delete parent.dataset.blend;
         }
 
         if (index === 1) {
@@ -118,6 +115,7 @@ const gui = new dat.GUI();
 
 const config = {
     scene: {
+        container: true,
         friction: 0.8,
         pins: {
             'image 2': true,
@@ -155,7 +153,8 @@ const FILTER_CONF = {
     'hue rotate': 'hueRotate',
     sepia: 'sepia',
     invert: 'invert',
-    'blend-difference': 'difference'
+    'blend-difference': 'difference',
+    'blend-dodge': 'dodge'
 };
 
 const PINS_CONF = {
@@ -164,6 +163,7 @@ const PINS_CONF = {
 };
 
 const sceneConfig = gui.addFolder('Scene config');
+sceneConfig.add(config.scene, 'container').onChange(restart);
 sceneConfig.add(config.scene, 'friction', 0, 0.95, 0.05).onFinishChange(restart);
 const pins = sceneConfig.addFolder('Pins');
 pins.add(config.scene.pins, 'image 2').onChange(restart);
@@ -173,46 +173,77 @@ sceneConfig.open();
 
 const image1 = gui.addFolder('image 1');
 image1.add(config.images[0], 'speed', 0, 1, 0.05)
-    .onChange(restart);
+    .onFinishChange(restart);
 image1.add(config.images[0], 'filter', FILTER_CONF)
-    .onChange(restart);
+    .onChange(filterChange(0));
 
 const image2 = gui.addFolder('Image 2');
 image2.add(config.images[1], 'speed', 0, 1, 0.05)
-    .onChange(restart);
+    .onFinishChange(restart);
 image2.add(config.images[1], 'filter', FILTER_CONF)
-    .onChange(restart);
+    .onChange(filterChange(1));
 
 const image3 = gui.addFolder('image 3');
 image3.add(config.images[2], 'speed', 0, 1, 0.05)
-    .onChange(restart);
+    .onFinishChange(restart);
 image3.add(config.images[2], 'filter', FILTER_CONF)
-    .onChange(restart);
+    .onChange(filterChange(2));
 
 const image4 = gui.addFolder('Image 4');
 image4.add(config.images[3], 'speed', 0, 1, 0.05)
-    .onChange(restart);
+    .onFinishChange(restart);
 image4.add(config.images[3], 'filter', FILTER_CONF)
-    .onChange(restart);
+    .onChange(filterChange(3));
 
 const image5 = gui.addFolder('Image 5');
 image5.add(config.images[4], 'speed', 0, 1, 0.05)
-    .onChange(restart);
+    .onFinishChange(restart);
 image5.add(config.images[4], 'filter', FILTER_CONF)
-    .onChange(restart);
+    .onChange(filterChange(4));
 
 let instance;
+
+function filterChange (i) {
+    return function (v) {
+        switch (v) {
+            case 'null':
+                parents[i].dataset.blend = '';
+                images[i].dataset.filter = '';
+                break;
+            case 'difference':
+            case 'dodge':
+                images[i].dataset.filter = '';
+                break
+            default:
+                parents[i].dataset.blend = '';
+        }
+
+        restart();
+    };
+}
 
 function restart () {
     instance.off();
     instance = init();
 }
 
+let stats;
+
 function init () {
+    if (stats) {
+        stats.dom.remove();
+    }
+
+    stats = new Stats();
+    stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(stats.dom);
+
+    wrapper.classList.toggle('root', config.scene.container);
+
     const pins = Object.entries(config.scene.pins).map(([key, toggle]) => toggle && PINS_CONF[key]());
     const scenes = createScenes(pins);
     const parallax = new Scroll({
-        container: document.querySelector('main'),
+        container: config.scene.container ? document.querySelector('main') : null,
         pins: pins.filter(Boolean),
         scenes,
         animationActive: true,
