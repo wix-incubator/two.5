@@ -238,12 +238,13 @@ function init () {
     stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom);
 
-    wrapper.classList.toggle('root', config.scene.container);
-
     const pins = Object.entries(config.scene.pins).map(([key, toggle]) => toggle && PINS_CONF[key]());
     const scenes = createScenes(pins);
+    const container = document.querySelector('main');
+    const wrapper = document.querySelector('#wrapper');
     const parallax = new Scroll({
-        container: config.scene.container ? document.querySelector('main') : null,
+        container: config.scene.container ? container : null,
+        wrapper,
         pins: pins.filter(Boolean),
         scenes,
         animationActive: true,
@@ -262,4 +263,27 @@ function init () {
     return parallax;
 }
 
-instance = init();
+setTimeout(() => {
+    let checkId;
+    let lastScrollPos = window.scrollY;
+
+    function check () {
+        const pos = window.scrollY;
+        if (pos !== lastScrollPos) {
+            lastScrollPos = pos;
+            checkId = null;
+            scroll();
+        }
+        else {
+            instance = init();
+        }
+    }
+
+    function scroll () {
+        if (!checkId) {
+            checkId = window.requestAnimationFrame(check);
+        }
+    }
+
+    scroll();
+}, 2000);

@@ -15,7 +15,12 @@ function lerp(a, b, t) {
 }
 
 const DEFAULTS = {
-  horizontal: false
+  horizontal: false,
+
+  scrollHandler(container, x, y) {
+    container.style.transform = `translate3d(${-x.toFixed(2)}px, ${-y.toFixed(2)}px, 0px)`;
+  }
+
 };
 
 function calcPosition(p, pins) {
@@ -64,6 +69,15 @@ function getEffect(config) {
   }); // calculate extra scroll if we have pins
 
   const extraScroll = pins.reduce((acc, pin) => acc + (pin[1] - pin[0]), 0);
+  let lastX, lastY; // prepare scenes data
+
+  _config.scenes.forEach(scene => {
+    if (scene.end == null) {
+      scene.end = scene.start + scene.duration;
+    } else if (scene.duration == null) {
+      scene.duration = scene.end - scene.start;
+    }
+  });
 
   if (container) {
     /*
@@ -77,19 +91,36 @@ function getEffect(config) {
     } else {
       window.document.body.style.height = `${totalHeight}px`;
     }
-  } // prepare scenes data
+
+    if (_config.wrapper) {
+      // if we got a wrapper element set its style
+      Object.assign(_config.wrapper.style, {
+        position: 'fixed',
+        width: '100vw',
+        height: '100vh',
+        overflow: 'hidden'
+      }); // get current scroll position
+
+      let x = window.scrollX || window.pageXOffset;
+      let y = window.scrollY || window.pageYOffset; // increment current scroll position by accumulated pin duration
+
+      if (horizontal) {
+        x = pins.reduce((acc, [start, end]) => start < acc ? acc + (end - start) : acc, x);
+      } else {
+        y = pins.reduce((acc, [start, end]) => start < acc ? acc + (end - start) : acc, y);
+      } // update scroll to new calculated position
 
 
-  _config.scenes.forEach(scene => {
-    if (scene.end == null) {
-      scene.end = scene.start + scene.duration;
-    } else if (scene.duration == null) {
-      scene.duration = scene.end - scene.start;
+      window.scrollTo(x, y); // render current position
+
+      controller({
+        x,
+        y
+      });
     }
-  });
+  }
 
-  let lastX, lastY;
-  return function controller({
+  function controller({
     x,
     y
   }) {
@@ -108,7 +139,7 @@ function getEffect(config) {
     }
 
     if (container) {
-      container.style.transform = `translate3d(${-_x.toFixed(2)}px, ${-_y.toFixed(2)}px, 0px)`;
+      _config.scrollHandler(container, _x, _y);
     }
 
     _config.scenes.forEach(scene => {
@@ -126,7 +157,9 @@ function getEffect(config) {
 
     lastX = x;
     lastY = y;
-  };
+  }
+
+  return controller;
 }
 
 function getHandler() {

@@ -12,7 +12,12 @@
   }
 
   const DEFAULTS = {
-    horizontal: false
+    horizontal: false,
+
+    scrollHandler(container, x, y) {
+      container.style.transform = `translate3d(${-x.toFixed(2)}px, ${-y.toFixed(2)}px, 0px)`;
+    }
+
   };
 
   function calcPosition(p, pins) {
@@ -61,6 +66,15 @@
     }); // calculate extra scroll if we have pins
 
     const extraScroll = pins.reduce((acc, pin) => acc + (pin[1] - pin[0]), 0);
+    let lastX, lastY; // prepare scenes data
+
+    _config.scenes.forEach(scene => {
+      if (scene.end == null) {
+        scene.end = scene.start + scene.duration;
+      } else if (scene.duration == null) {
+        scene.duration = scene.end - scene.start;
+      }
+    });
 
     if (container) {
       /*
@@ -74,19 +88,36 @@
       } else {
         window.document.body.style.height = `${totalHeight}px`;
       }
-    } // prepare scenes data
+
+      if (_config.wrapper) {
+        // if we got a wrapper element set its style
+        Object.assign(_config.wrapper.style, {
+          position: 'fixed',
+          width: '100vw',
+          height: '100vh',
+          overflow: 'hidden'
+        }); // get current scroll position
+
+        let x = window.scrollX || window.pageXOffset;
+        let y = window.scrollY || window.pageYOffset; // increment current scroll position by accumulated pin duration
+
+        if (horizontal) {
+          x = pins.reduce((acc, [start, end]) => start < acc ? acc + (end - start) : acc, x);
+        } else {
+          y = pins.reduce((acc, [start, end]) => start < acc ? acc + (end - start) : acc, y);
+        } // update scroll to new calculated position
 
 
-    _config.scenes.forEach(scene => {
-      if (scene.end == null) {
-        scene.end = scene.start + scene.duration;
-      } else if (scene.duration == null) {
-        scene.duration = scene.end - scene.start;
+        window.scrollTo(x, y); // render current position
+
+        controller({
+          x,
+          y
+        });
       }
-    });
+    }
 
-    let lastX, lastY;
-    return function controller({
+    function controller({
       x,
       y
     }) {
@@ -105,7 +136,7 @@
       }
 
       if (container) {
-        container.style.transform = `translate3d(${-_x.toFixed(2)}px, ${-_y.toFixed(2)}px, 0px)`;
+        _config.scrollHandler(container, _x, _y);
       }
 
       _config.scenes.forEach(scene => {
@@ -123,7 +154,9 @@
 
       lastX = x;
       lastY = y;
-    };
+    }
+
+    return controller;
   }
 
   function getHandler() {
@@ -3327,7 +3360,7 @@
   const config = {
     scene: {
       container: true,
-      friction: 0.8,
+      friction: 0.0,
       pins: {
         'image 2': true,
         'image 4': true
@@ -3432,11 +3465,13 @@
     stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 
     document.body.appendChild(stats.dom);
-    wrapper.classList.toggle('root', config.scene.container);
     const pins = Object.entries(config.scene.pins).map(([key, toggle]) => toggle && PINS_CONF[key]());
     const scenes = createScenes(pins);
+    const container = document.querySelector('main');
+    const wrapper = document.querySelector('#wrapper');
     const parallax = new Scroll({
-      container: config.scene.container ? document.querySelector('main') : null,
+      container: config.scene.container ? container : null,
+      wrapper,
       pins: pins.filter(Boolean),
       scenes,
       animationActive: true,
@@ -3452,6 +3487,29 @@
     return parallax;
   }
 
-  instance = init();
+  setTimeout(() => {
+    let checkId;
+    let lastScrollPos = window.scrollY;
+
+    function check() {
+      const pos = window.scrollY;
+
+      if (pos !== lastScrollPos) {
+        lastScrollPos = pos;
+        checkId = null;
+        scroll();
+      } else {
+        instance = init();
+      }
+    }
+
+    function scroll() {
+      if (!checkId) {
+        checkId = window.requestAnimationFrame(check);
+      }
+    }
+
+    scroll();
+  }, 2000);
 
 })));
