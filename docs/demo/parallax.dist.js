@@ -3360,7 +3360,7 @@
   const config = {
     scene: {
       container: true,
-      friction: 0.0,
+      friction: 0.8,
       pins: {
         'image 2': true,
         'image 4': true
@@ -3486,9 +3486,13 @@
     });
     return parallax;
   }
+  /*
+   * Simulate a slow script start after page loaded, that allowed user to start scrolling before we initialize effects.
+   * Implemented below is a simple loop that waits for the first idle frame where window.scrollY didn't change.
+   */
+
 
   setTimeout(() => {
-    let checkId;
     let lastScrollPos = window.scrollY;
 
     function check() {
@@ -3496,7 +3500,6 @@
 
       if (pos !== lastScrollPos) {
         lastScrollPos = pos;
-        checkId = null;
         scroll();
       } else {
         instance = init();
@@ -3504,9 +3507,7 @@
     }
 
     function scroll() {
-      if (!checkId) {
-        checkId = window.requestAnimationFrame(check);
-      }
+      window.requestAnimationFrame(check);
     }
 
     scroll();
