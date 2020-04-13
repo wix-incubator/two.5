@@ -263,15 +263,17 @@ function init () {
     return parallax;
 }
 
+/*
+ * Simulate a slow script start after page loaded, that allowed user to start scrolling before we initialize effects.
+ * Implemented below is a simple loop that waits for the first idle frame where window.scrollY didn't change.
+ */
 setTimeout(() => {
-    let checkId;
     let lastScrollPos = window.scrollY;
 
     function check () {
         const pos = window.scrollY;
         if (pos !== lastScrollPos) {
             lastScrollPos = pos;
-            checkId = null;
             scroll();
         }
         else {
@@ -280,9 +282,7 @@ setTimeout(() => {
     }
 
     function scroll () {
-        if (!checkId) {
-            checkId = window.requestAnimationFrame(check);
-        }
+        window.requestAnimationFrame(check);
     }
 
     scroll();
