@@ -105,10 +105,14 @@
           x = pins.reduce((acc, [start, end]) => start < acc ? acc + (end - start) : acc, x);
         } else {
           y = pins.reduce((acc, [start, end]) => start < acc ? acc + (end - start) : acc, y);
-        } // update scroll to new calculated position
+        } // update scroll and progress to new calculated position
 
 
-        window.scrollTo(x, y); // render current position
+        _config.resetProgress({
+          x,
+          y
+        }); // render current position
+
 
         controller({
           x,
@@ -252,6 +256,22 @@
   class Scroll extends Two5 {
     constructor(config = {}) {
       super(config);
+      this.config.resetProgress = this.config.resetProgress || this.resetProgress.bind(this);
+    }
+
+    resetProgress({
+      x,
+      y
+    }) {
+      this.progress.x = x;
+      this.progress.y = y;
+
+      if (this.config.animationActive) {
+        this.currentProgress.x = x;
+        this.currentProgress.y = y;
+      }
+
+      window.scrollTo(x, y);
     }
 
     getEffects() {
@@ -3468,7 +3488,6 @@
     const pins = Object.entries(config.scene.pins).map(([key, toggle]) => toggle && PINS_CONF[key]());
     const scenes = createScenes(pins);
     const container = document.querySelector('main');
-    const wrapper = document.querySelector('#wrapper');
     const parallax = new Scroll({
       container: config.scene.container ? container : null,
       wrapper,

@@ -241,7 +241,6 @@ function init () {
     const pins = Object.entries(config.scene.pins).map(([key, toggle]) => toggle && PINS_CONF[key]());
     const scenes = createScenes(pins);
     const container = document.querySelector('main');
-    const wrapper = document.querySelector('#wrapper');
     const parallax = new Scroll({
         container: config.scene.container ? container : null,
         wrapper,

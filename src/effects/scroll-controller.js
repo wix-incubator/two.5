@@ -99,8 +99,8 @@ export function getEffect (config) {
                 y = pins.reduce((acc, [start, end]) => start < acc ? acc + (end - start) : acc, y);
             }
 
-            // update scroll to new calculated position
-            window.scrollTo(x, y);
+            // update scroll and progress to new calculated position
+            _config.resetProgress({x, y});
 
             // render current position
             controller({x, y});
