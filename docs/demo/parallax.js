@@ -34,6 +34,10 @@ function dodge (scene, progress) {
     scene.element.style.backgroundColor = `hsl(15, ${(1 - progress) * 100}%, 20%)`;
 }
 
+function scrubCSSAnimation (scene, progress) {
+    scene.element.style.animationDelay = `-${progress}s`;
+}
+
 const FILTERS = {
     focus,
     saturate,
@@ -48,6 +52,7 @@ const wrapper = document.querySelector('#wrapper');
 const viewportHeight = window.innerHeight;
 const parents = [...window.document.querySelectorAll('[data-effects~="parallax"]')];
 const images = [...window.document.querySelectorAll('[data-effects~="parallax"] img')];
+const shapes = [...window.document.querySelectorAll('[data-effects~="cssanimation"]')];
 
 function createScenes (pins) {
     const filterScenes = config.images
@@ -57,6 +62,8 @@ function createScenes (pins) {
         });
     const pin1Duration = pins[0] ? pins[0].duration : 0;
     const pin2Duration = pins[1] ? pins[1].duration : 0;
+    const pin1Start = pins[0].start;
+    const pin2Start = pins[1].start;
 
     return images.map((img, index) => {
         const parent = parents[index];
@@ -107,6 +114,32 @@ function createScenes (pins) {
             duration,
             element,
             viewportHeight
+        };
+    })).concat(shapes.map((shape, i) => {
+        const firstGroup = i < 3;
+        const pin1On = config.scene.pins['image 2'];
+        const pin2On = config.scene.pins['image 4'];
+        const duration = (
+            firstGroup
+                ? pin1On ? pin1Duration - 200 : viewportHeight / 3
+                : pin2On ? pin2Duration - 200 : viewportHeight / 3
+        ) / 3;
+        const stagger = (i < 3 ? i : i - 3) * duration;
+        const start = (
+            firstGroup
+                ? pin1On ? pin1Start : parents[1].offsetTop - viewportHeight / 2
+                : pin2On
+                    ? pin2Start
+                    : pin1On
+                        ? parents[3].offsetTop - viewportHeight / 2 + pin1Duration
+                        : parents[3].offsetTop - viewportHeight / 2
+        ) + 100 + stagger;
+
+        return {
+            effect: scrubCSSAnimation,
+            start,
+            duration,
+            element: shape
         };
     }));
 }
@@ -209,6 +242,7 @@ function filterChange (i) {
             case 'null':
                 parents[i].dataset.blend = '';
                 images[i].dataset.filter = '';
+                images[i].style.filter = '';
                 break;
             case 'difference':
             case 'dodge':
