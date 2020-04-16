@@ -1,6 +1,6 @@
 {
   "name": "two.5",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "description": "Respond to user interactions with visual effects",
   "main": "index.js",
   "scripts": {
