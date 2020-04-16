@@ -3504,14 +3504,14 @@
   const images = [...window.document.querySelectorAll('[data-effects~="parallax"] img')];
   const shapes = [...window.document.querySelectorAll('[data-effects~="cssanimation"]')];
 
-  function createScenes(pins) {
+  function createScenes(snaps) {
     const filterScenes = config.images.map((img, index) => [img.filter, images[index]]).filter(x => {
       return x[0] && x[0] !== 'null';
     });
-    const pin1Duration = pins[0] ? pins[0].duration : 0;
-    const pin2Duration = pins[1] ? pins[1].duration : 0;
-    const pin1Start = pins[0].start;
-    const pin2Start = pins[1].start;
+    const snap1Duration = snaps[0] ? snaps[0].duration : 0;
+    const snap2Duration = snaps[1] ? snaps[1].duration : 0;
+    const snap1Start = snaps[0].start;
+    const snap2Start = snaps[1].start;
     return images.map((img, index) => {
       const parent = parents[index];
       const parentTop = parent.offsetTop;
@@ -3524,7 +3524,7 @@
         start,
         duration,
         element: img,
-        pauseDuringPin: true,
+        pauseDuringSnap: true,
         viewportHeight
       };
     }).concat(filterScenes.map(([filter, scene]) => {
@@ -3541,19 +3541,19 @@
       }
 
       if (index === 1) {
-        duration += pin1Duration;
+        duration += snap1Duration;
       }
 
       if (index > 1) {
-        start += pin1Duration;
+        start += snap1Duration;
       }
 
       if (index === 3) {
-        duration += pin2Duration;
+        duration += snap2Duration;
       }
 
       if (index > 3) {
-        start += pin2Duration;
+        start += snap2Duration;
       }
 
       return {
@@ -3565,11 +3565,11 @@
       };
     })).concat(shapes.map((shape, i) => {
       const firstGroup = i < 3;
-      const pin1On = config.scene.pins['image 2'];
-      const pin2On = config.scene.pins['image 4'];
-      const duration = (firstGroup ? pin1On ? pin1Duration - 200 : viewportHeight / 3 : pin2On ? pin2Duration - 200 : viewportHeight / 3) / 3;
+      const snap1On = config.scene.snaps['image 2'];
+      const snap2On = config.scene.snaps['image 4'];
+      const duration = (firstGroup ? snap1On ? snap1Duration - 200 : viewportHeight / 3 : snap2On ? snap2Duration - 200 : viewportHeight / 3) / 3;
       const stagger = (i < 3 ? i : i - 3) * duration;
-      const start = (firstGroup ? pin1On ? pin1Start : parents[1].offsetTop - viewportHeight / 2 : pin2On ? pin2Start : pin1On ? parents[3].offsetTop - viewportHeight / 2 + pin1Duration : parents[3].offsetTop - viewportHeight / 2) + 100 + stagger;
+      const start = (firstGroup ? snap1On ? snap1Start : parents[1].offsetTop - viewportHeight / 2 : snap2On ? snap2Start : snap1On ? parents[3].offsetTop - viewportHeight / 2 + snap1Duration : parents[3].offsetTop - viewportHeight / 2) + 100 + stagger;
       return {
         effect: scrubCSSAnimation,
         start,
@@ -3584,7 +3584,7 @@
     scene: {
       container: true,
       friction: 0.8,
-      pins: {
+      snaps: {
         'image 2': true,
         'image 4': true
       }
@@ -3616,23 +3616,23 @@
     'blend-difference': 'difference',
     'blend-dodge': 'dodge'
   };
-  const PINS_CONF = {
+  const SPANS_CONF = {
     'image 2': () => ({
       start: parents[1].offsetTop,
       duration: 1500
     }),
     'image 4': () => ({
-      start: parents[3].offsetTop + (config.scene.pins['image 2'] ? 1500 : 0),
+      start: parents[3].offsetTop + (config.scene.snaps['image 2'] ? 1500 : 0),
       duration: 1700
     })
   };
   const sceneConfig = gui.addFolder('Scene config');
   sceneConfig.add(config.scene, 'container').onChange(restart);
   sceneConfig.add(config.scene, 'friction', 0, 0.95, 0.05).onFinishChange(restart);
-  const pins = sceneConfig.addFolder('Pins');
-  pins.add(config.scene.pins, 'image 2').onChange(restart);
-  pins.add(config.scene.pins, 'image 4').onChange(restart);
-  pins.open();
+  const snaps = sceneConfig.addFolder('Snaps');
+  snaps.add(config.scene.snaps, 'image 2').onChange(restart);
+  snaps.add(config.scene.snaps, 'image 4').onChange(restart);
+  snaps.open();
   sceneConfig.open();
   const image1 = gui.addFolder('image 1');
   image1.add(config.images[0], 'speed', 0, 1, 0.05).onFinishChange(restart);
@@ -3689,13 +3689,13 @@
     stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 
     document.body.appendChild(stats.dom);
-    const pins = Object.entries(config.scene.pins).map(([key, toggle]) => toggle && PINS_CONF[key]());
-    const scenes = createScenes(pins);
+    const snaps = Object.entries(config.scene.snaps).map(([key, toggle]) => toggle && SPANS_CONF[key]());
+    const scenes = createScenes(snaps);
     const container = document.querySelector('main');
     const parallax = new Scroll({
       container: config.scene.container ? container : null,
       wrapper,
-      pins: pins.filter(Boolean),
+      snaps: snaps.filter(Boolean),
       scenes,
       animationActive: true,
       animationFriction: config.scene.friction
