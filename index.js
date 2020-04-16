@@ -220,7 +220,9 @@ function getEffect(config) {
     x,
     y
   }) {
-    // if nothing changed bail out
+    x = +x.toFixed(1);
+    y = +y.toFixed(1); // if nothing changed bail out
+
     if (x === lastX && y === lastY) return;
     let _x = x,
         _y = y;
@@ -272,8 +274,8 @@ function getEffect(config) {
 
 function getHandler() {
   function handler(progress) {
-    progress.x = +(window.scrollX || window.pageXOffset).toFixed(1);
-    progress.y = +(window.scrollY || window.pageYOffset).toFixed(1);
+    progress.x = window.scrollX || window.pageXOffset;
+    progress.y = window.scrollY || window.pageYOffset;
   }
 
   let frameId;

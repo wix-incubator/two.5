@@ -211,7 +211,9 @@
       x,
       y
     }) {
-      // if nothing changed bail out
+      x = +x.toFixed(1);
+      y = +y.toFixed(1); // if nothing changed bail out
+
       if (x === lastX && y === lastY) return;
       let _x = x,
           _y = y;
@@ -263,8 +265,8 @@
 
   function getHandler() {
     function handler(progress) {
-      progress.x = +(window.scrollX || window.pageXOffset).toFixed(1);
-      progress.y = +(window.scrollY || window.pageYOffset).toFixed(1);
+      progress.x = window.scrollX || window.pageXOffset;
+      progress.y = window.scrollY || window.pageYOffset;
     }
 
     let frameId;
@@ -3453,8 +3455,8 @@
     };
   };
 
-  function background(scene, progress) {
-    scene.element.style.transform = `translate3d(0px, ${(progress * scene.duration - scene.viewportHeight) * scene.speed}px, 0px)`;
+  function translateY(scene, progress) {
+    scene.element.style.transform = `translate3d(0px, ${(progress * scene.duration - scene.offset) * scene.speed}px, 0px)`;
   }
 
   function focus(scene, progress) {
@@ -3500,8 +3502,9 @@
   };
   const wrapper = document.querySelector('#wrapper');
   const viewportHeight = window.innerHeight;
-  const parents = [...window.document.querySelectorAll('[data-effects~="parallax"]')];
-  const images = [...window.document.querySelectorAll('[data-effects~="parallax"] img')];
+  const parents = [...window.document.querySelectorAll('[data-effects~="bgparallax"]')];
+  const images = [...window.document.querySelectorAll('[data-effects~="bgparallax"] .bg > img')];
+  const photos = [...window.document.querySelectorAll('[data-effects~="parallax"]')];
   const shapes = [...window.document.querySelectorAll('[data-effects~="cssanimation"]')];
 
   function createScenes(snaps) {
@@ -3519,15 +3522,26 @@
       const start = parentTop - viewportHeight;
       const duration = (parentHeight > viewportHeight ? parentHeight : viewportHeight) + viewportHeight;
       return {
-        effect: background,
+        effect: translateY,
         speed: +config.images[index].speed,
         start,
         duration,
         element: img,
         pauseDuringSnap: true,
-        viewportHeight
+        offset: viewportHeight
       };
-    }).concat(filterScenes.map(([filter, scene]) => {
+    }).concat(photos.map((img, index) => {
+      const parent = img.closest('.strip');
+      const start = parent.offsetTop + img.offsetTop + snap1Duration - viewportHeight;
+      return {
+        effect: translateY,
+        speed: +config.photos[index].speed,
+        start,
+        duration: viewportHeight + img.offsetHeight,
+        element: img,
+        offset: 0
+      };
+    })).concat(filterScenes.map(([filter, scene]) => {
       const parent = scene.closest('[data-effects]');
       const parentTop = parent.offsetTop;
       const index = parents.indexOf(parent);
@@ -3604,6 +3618,13 @@
     }, {
       speed: 1.0,
       filter: null
+    }],
+    photos: [{
+      speed: 0.25,
+      filter: null
+    }, {
+      speed: 0.33,
+      filter: null
     }]
   };
   const FILTER_CONF = {
@@ -3634,7 +3655,7 @@
   snaps.add(config.scene.snaps, 'image 4').onChange(restart);
   snaps.open();
   sceneConfig.open();
-  const image1 = gui.addFolder('image 1');
+  const image1 = gui.addFolder('Image 1');
   image1.add(config.images[0], 'speed', 0, 1, 0.05).onFinishChange(restart);
   image1.add(config.images[0], 'filter', FILTER_CONF).onChange(filterChange(0));
   const image2 = gui.addFolder('Image 2');

@@ -156,6 +156,9 @@ export function getEffect (config) {
      * @param {number} progress.y
      */
     function controller ({x, y}) {
+        x = +x.toFixed(1);
+        y = +y.toFixed(1);
+
         // if nothing changed bail out
         if (x === lastX && y === lastY) return;
 

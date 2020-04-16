@@ -56,6 +56,14 @@ main {
     background: rgba(255, 255, 255, 0.5);
 }
 
+.content .photo {
+    opacity: 0.66;
+}
+
+.content .photo:nth-of-type(2) {
+    margin-left: -10em;
+}
+
 [data-blend="difference"] img {
     mix-blend-mode: difference;
 }
