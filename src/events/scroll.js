@@ -1,7 +1,7 @@
 export function getHandler () {
     function handler (progress) {
-        progress.x = window.scrollX || window.pageXOffset;
-        progress.y = window.scrollY || window.pageYOffset;
+        progress.x = +(window.scrollX || window.pageXOffset).toFixed(1);
+        progress.y = +(window.scrollY || window.pageYOffset).toFixed(1);
     }
 
     let frameId;

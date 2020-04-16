@@ -3,17 +3,54 @@
   factory();
 }((function () { 'use strict';
 
-  function clamp(min, max, val) {
-    return Math.min(Math.max(min, val), max);
+  /**
+   * Clamps a value between limits.
+   *
+   * @param {number} min lower limit
+   * @param {number} max upper limit
+   * @param {number} value value to clamp
+   * @return {number} clamped value
+   *
+   * @example
+   * const x = clamp(0, 1, 1.5); // returns 1
+   */
+  function clamp(min, max, value) {
+    return Math.min(Math.max(min, value), max);
   }
+  /**
+   * Returns a new Object with the properties of the first argument
+   * assigned to it, and the second argument as its prototype, so
+   * its properties are served as defaults.
+   *
+   * @param {Object} obj properties to assign
+   * @param {Object|null} defaults
+   * @return {Object}
+   */
+
 
   function defaultTo(obj, defaults) {
     return Object.assign(Object.create(defaults), obj);
   }
+  /**
+   * Copies all given objects into a new Object.
+   *
+   * @param {...Object} objects
+   * @return {Object}
+   */
+
 
   function clone(...objects) {
     return Object.assign({}, ...objects);
   }
+  /**
+   * Interpolate from a to b by the factor t.
+   *
+   * @param {number} a start point
+   * @param {number} b end point
+   * @param {number} t interpolation factor
+   * @return {number}
+   */
+
 
   function lerp(a, b, t) {
     return a * (1 - t) + b * t;
@@ -23,6 +60,13 @@
     animationActive: false,
     animationFriction: 0.4
   };
+  /**
+   * Initialize a WebGL target with effects.
+   *
+   * @class Two5
+   * @abstract
+   * @param {two5Config} config
+   */
 
   class Two5 {
     constructor(config = {}) {
@@ -38,6 +82,10 @@
       this.measures = [];
       this.effects = [];
     }
+    /**
+     * Setup events and effects, and starts animation loop.
+     */
+
 
     on() {
       this.setupEvents();
@@ -45,22 +93,38 @@
 
       window.requestAnimationFrame(() => this.loop());
     }
+    /**
+     * Removes events and stops animation loop.
+     */
+
 
     off() {
+      // stop animation
       window.cancelAnimationFrame(this.animationFrame);
       this.teardownEvents();
     }
+    /**
+     * Starts the animation loop and handle animation frame work.
+     */
+
 
     loop() {
-      this.animationFrame = window.requestAnimationFrame(() => this.loop());
-      this.measures.forEach(measure => measure(this.progress));
+      // register next frame
+      this.animationFrame = window.requestAnimationFrame(() => this.loop()); // perform any registered measures
+
+      this.measures.forEach(measure => measure(this.progress)); // if animation is active interpolate to next point
 
       if (this.config.animationActive) {
         this.lerp();
-      }
+      } // perform all registered effects
+
 
       this.effects.forEach(effect => effect(this.config.animationActive ? this.currentProgress : this.progress));
     }
+    /**
+     * Calculate current progress.
+     */
+
 
     lerp() {
       this.currentProgress.x = lerp(this.currentProgress.x, this.progress.x, 1 - this.config.animationFriction);
@@ -70,14 +134,28 @@
     setupEvents() {}
 
     teardownEvents() {}
+    /**
+     * Returns a list of effect functions for registering.
+     *
+     * @return {function[]} list of effects to perform
+     */
+
 
     getEffects() {
       return [];
     }
+    /**
+     * Registers effects.
+     */
+
 
     setupEffects() {
       this.effects.push(...this.getEffects());
     }
+    /**
+     * Clears registered effects and measures.
+     */
+
 
     teardownEffects() {
       this.measures.length = 0;
@@ -85,6 +163,30 @@
     }
 
   }
+  /**
+   * @typedef {Object} SnapPoint
+   * @property {number} start scroll position in pixels where virtual scroll starts snapping.
+   * @property {number} [duration] duration in pixels for virtual scroll snapping. Defaults to end - start.
+   * @property {number} [end] scroll position in pixels where virtual scroll starts snapping. Defaults to start + duration.
+   *
+   * @typedef {Object} ScrollScene
+   * @property {number} start scroll position in pixels where effect starts.
+   * @property {number} [duration] duration of effect in pixels. Defaults to end - start.
+   * @property {number} [end] scroll position in pixels where effect ends. Defaults to start + duration.
+   * @property {function} effect the effect to perform.
+   * @property {boolean} [pauseDuringSnap] whether to pause the effect during snap points, effectively ignoring scroll during duration of scroll snapping.
+   * @property {boolean} [disabled] whether to perform updates on the scene. Defaults to false.
+   *
+   * @typedef {object} scrollConfig
+   * @property {boolean} animationActive whether to animate effect progress.
+   * @property {number} animationFriction between 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
+   * @property {Element} [wrapper] element to use as the fixed, viewport sized layer, that clips and holds the scroll content container. If not provided, no setup is done.
+   * @property {Element|null} [container] element to use as the container for the scrolled content. If not provided assuming native scroll is desired.
+   * @property {ScrollScene[]} scenes list of effect scenes to perform during scroll.
+   * @property {SnapPoint[]} snaps list of scroll snap points.
+   * @property {function} [scrollHandler] if using a container, this allows overriding the function used for scrolling the content. Defaults to setting `style.transform`.
+   */
+
 
   const DEFAULTS$2 = {
     perspectiveZ: 600,
@@ -395,6 +497,18 @@
       handler
     };
   }
+  /**
+   * @class Tilt
+   * @extends Two5
+   * @param {tiltConfig} config
+   *
+   * @example
+   * import { Tilt } from 'two.5';
+   *
+   * const tilt = new Tilt();
+   * tilt.on();
+   */
+
 
   class Tilt extends Two5 {
     constructor(config = {}) {
@@ -402,12 +516,18 @@
       this.container = this.config.layersContainer || null;
       this.createLayers();
     }
+    /**
+     * Creates config of layers to be animated during the effect.
+     */
+
 
     createLayers() {
-      const layersContainer = this.container || window.document.body;
+      // container defaults to document.body
+      const layersContainer = this.container || window.document.body; // use config.layers or query elements from DOM
+
       this.layers = this.config.layers || [...layersContainer.querySelectorAll('[data-tilt-layer]')];
       this.layers = this.layers.map(layer => {
-        let config;
+        let config; // if layer is an Element convert it to a TiltLayer object and augment it with data attributes
 
         if (layer instanceof Element) {
           config = Object.assign({
@@ -417,20 +537,35 @@
           config = layer;
         }
 
-        return config;
+        return config; // discard garbage
       }).filter(x => x);
     }
+    /**
+     * Initializes and returns tilt effect.
+     *
+     * @return {[tilt]}
+     */
+
 
     getEffects() {
-      return [getEffect$1(clone({
+      return [getEffect$1( // we invert rotation transform order in case of device orientation,
+      // see: https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Using_device_orientation_with_3D_transforms#Orientation_compensation
+      clone({
         invertRotation: !!this.usingGyroscope
       }, this.config, {
         container: this.container,
         layers: this.layers
       }))];
     }
+    /**
+     * Setup event handler for tilt effect.
+     * First attempts to setup handler for DeviceOrientation event.
+     * If feature detection fails, handler is set on MouseOver event.
+     */
+
 
     setupEvents() {
+      // attempt usage of DeviceOrientation event
       const gyroscoeHandler = getHandler$2({
         progress: this.progress,
         samples: this.config.gyroscopeSamples,
@@ -444,6 +579,7 @@
       } else {
         /*
          * No deviceorientation support
+         * Use mouseover event.
          */
         this.tiltHandler = getHandler$1({
           target: this.config.mouseTarget,
@@ -453,6 +589,10 @@
 
       this.tiltHandler.on();
     }
+    /**
+     * Removes registered event handler.
+     */
+
 
     teardownEvents() {
       this.tiltHandler.off();
