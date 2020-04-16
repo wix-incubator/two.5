@@ -1,6 +1,77 @@
 import { defaultTo, lerp } from './utilities.js';
 
+const ticker = {
+    pool: [],
+    /**
+     * Starts the animation loop.
+     */
+    start () {
+        if ( ! ticker.animationFrame ) {
+            const loop = (time) => {
+                ticker.animationFrame = window.requestAnimationFrame(loop);
+                ticker.tick(time);
+            };
+
+            ticker.animationFrame = window.requestAnimationFrame(loop);
+        }
+    },
+
+    /**
+     * Stops the animation loop.
+     */
+    stop () {
+        window.cancelAnimationFrame(ticker.animationFrame);
+        ticker.animationFrame = null;
+    },
+
+    /**
+     * Invoke `.tick()` on all instances in the pool.
+     *
+     * @param {number} time animation frame time argument.
+     */
+    tick (time) {
+        ticker.pool.forEach(instance => instance.tick(time));
+    },
+
+    /**
+     * Add an instance to the pool.
+     *
+     * @param {Two5} instance
+     */
+    add (instance) {
+        const index = ticker.pool.indexOf(instance);
+
+        if ( ! ~ index ) {
+            ticker.pool.push(instance);
+            instance.ticking = true;
+        }
+
+        if ( ticker.pool.length ) {
+            ticker.start();
+        }
+    },
+
+    /**
+     * Remove an instance from the pool.
+     *
+     * @param {Two5} instance
+     */
+    remove (instance) {
+        const index = ticker.pool.indexOf(instance);
+
+        if ( ~ index ) {
+            ticker.pool.splice(index, 1);
+            instance.ticking = false;
+        }
+
+        if ( ! ticker.pool.length ) {
+            ticker.stop();
+        }
+    }
+};
+
 const DEFAULTS = {
+    ticker,
     animationActive: false,
     animationFriction: 0.4
 };
@@ -26,6 +97,8 @@ export default class Two5 {
 
         this.measures = [];
         this.effects = [];
+        this.ticking = false;
+        this.ticker = this.config.ticker;
     }
 
     /**
@@ -36,7 +109,7 @@ export default class Two5 {
         this.setupEffects();
 
         // start animating
-        window.requestAnimationFrame(() => this.loop());
+        this.ticker.add(this);
     }
 
     /**
@@ -44,17 +117,14 @@ export default class Two5 {
      */
     off () {
         // stop animation
-        window.cancelAnimationFrame(this.animationFrame);
+        this.ticker.remove(this);
         this.teardownEvents();
     }
 
     /**
-     * Starts the animation loop and handle animation frame work.
+     * Handle animation frame work.
      */
-    loop () {
-        // register next frame
-        this.animationFrame = window.requestAnimationFrame(() => this.loop());
-
+    tick () {
         // perform any registered measures
         this.measures.forEach(measure => measure(this.progress));
 
