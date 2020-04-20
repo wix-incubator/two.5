@@ -118,7 +118,7 @@ function calcProgress(p, start, end, duration) {
  * Initialize and return a scroll controller.
  *
  * @param {scrollConfig} config
- * @return {controller}
+ * @return {function}
  */
 
 
@@ -202,7 +202,9 @@ function getEffect(config) {
 
       controller({
         x,
-        y
+        y,
+        vx: 0,
+        vy: 0
       });
     }
   }
@@ -213,15 +215,20 @@ function getEffect(config) {
    * @param {Object} progress
    * @param {number} progress.x
    * @param {number} progress.y
+   * @param {number} progress.vx
+   * @param {number} progress.vy
    */
 
 
   function controller({
     x,
-    y
+    y,
+    vx,
+    vy
   }) {
     x = +x.toFixed(1);
-    y = +y.toFixed(1); // if nothing changed bail out
+    y = +y.toFixed(1);
+    const velocity = horizontal ? +vx.toFixed(3) : +vy.toFixed(3); // if nothing changed bail out
 
     if (x === lastX && y === lastY) return;
     let _x = x,
@@ -260,7 +267,7 @@ function getEffect(config) {
 
         const progress = calcProgress(t, start, end, duration); // run effect
 
-        scene.effect(scene, progress);
+        scene.effect(scene, progress, velocity);
       }
     }); // cache last position
 
@@ -369,7 +376,9 @@ const ticker = {
 const DEFAULTS$1 = {
   ticker,
   animationActive: false,
-  animationFriction: 0.4
+  animationFriction: 0.4,
+  velocityActive: false,
+  velocityMax: 1
 };
 /**
  * Initialize a WebGL target with effects.
@@ -384,16 +393,22 @@ class Two5 {
     this.config = defaultTo(config, DEFAULTS$1);
     this.progress = {
       x: 0,
-      y: 0
+      y: 0,
+      vx: 0,
+      vy: 0
     };
     this.currentProgress = {
       x: 0,
-      y: 0
+      y: 0,
+      vx: 0,
+      vy: 0
     };
     this.measures = [];
     this.effects = [];
     this.ticking = false;
     this.ticker = this.config.ticker;
+    this.time = 0;
+    this.dt = 1;
   }
   /**
    * Setup events and effects, and starts animation loop.
@@ -402,7 +417,12 @@ class Two5 {
 
   on() {
     this.setupEvents();
-    this.setupEffects(); // start animating
+    this.setupEffects();
+
+    if (this.config.velocityActive) {
+      this.time = window.performance && window.performance.now ? window.performance.now() : Date.now();
+    } // start animating
+
 
     this.ticker.add(this);
   }
@@ -418,15 +438,35 @@ class Two5 {
   }
   /**
    * Handle animation frame work.
+   *
+   *
    */
 
 
-  tick() {
-    // perform any registered measures
+  tick(time) {
+    // choose the object we iterate on
+    const progress = this.config.animationActive ? this.currentProgress : this.progress; // cache values for calculating deltas for velocity
+
+    const {
+      x,
+      y
+    } = progress; // perform any registered measures
+
     this.measures.forEach(measure => measure(this.progress)); // if animation is active interpolate to next point
 
     if (this.config.animationActive) {
       this.lerp();
+    }
+
+    if (this.config.velocityActive) {
+      this.dt = time - this.time;
+      this.time = time;
+      const dx = progress.x - x;
+      const dy = progress.y - y;
+      const factorX = dx < 0 ? -1 : 1;
+      const factorY = dy < 0 ? -1 : 1;
+      progress.vx = Math.min(this.config.velocityMax, Math.abs(dx / this.dt)) / this.config.velocityMax * factorX;
+      progress.vy = Math.min(this.config.velocityMax, Math.abs(dy / this.dt)) / this.config.velocityMax * factorY;
     } // perform all registered effects
 
 
@@ -477,7 +517,9 @@ class Two5 {
 /**
  * @typedef {Object} two5Config
  * @property {boolean} animationActive whether to animate effect progress.
- * @property {number} animationFriction between 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
+ * @property {number} animationFriction from 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
+ * @property {boolean} velocityActive whether to calculate velocity with progress.
+ * @property {number} velocityMax max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
  */
 
 /**
@@ -516,10 +558,14 @@ class Scroll extends Two5 {
   }) {
     this.progress.x = x;
     this.progress.y = y;
+    this.progress.vx = 0;
+    this.progress.vy = 0;
 
     if (this.config.animationActive) {
       this.currentProgress.x = x;
       this.currentProgress.y = y;
+      this.currentProgress.vx = 0;
+      this.currentProgress.vy = 0;
     }
 
     window.scrollTo(x, y);
@@ -527,7 +573,7 @@ class Scroll extends Two5 {
   /**
    * Initializes and returns scroll controller.
    *
-   * @return {[controller]}
+   * @return {function[]}
    */
 
 
@@ -569,6 +615,8 @@ class Scroll extends Two5 {
  * @typedef {object} scrollConfig
  * @property {boolean} animationActive whether to animate effect progress.
  * @property {number} animationFriction between 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
+ * @property {boolean} velocityActive whether to calculate velocity with progress.
+ * @property {number} velocityMax max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
  * @property {Element} [wrapper] element to use as the fixed, viewport sized layer, that clips and holds the scroll content container. If not provided, no setup is done.
  * @property {Element|null} [container] element to use as the container for the scrolled content. If not provided assuming native scroll is desired.
  * @property {ScrollScene[]} scenes list of effect scenes to perform during scroll.

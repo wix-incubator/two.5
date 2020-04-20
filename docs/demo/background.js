@@ -9,14 +9,14 @@ import Stats from '../../node_modules/stats.js/src/Stats.js';
 /*
  * Simple transforms
  */
-function transform (scene, progress) {
-    let translate = '', skew = '';
+function transform (scene, progress, velocity) {
+    let translate = 'translate3d(0px, 0px, 0px)', skew = '';
 
     if (scene.translateY) {
         translate = `translate3d(0px, ${(progress * scene.duration - scene.offset) * scene.speed}px, 0px)`;
     }
     if (scene.skewY) {
-        skew = ` skewY(${(1 - progress) * scene.angle}deg)`;
+        skew = ` skewY(${velocity * scene.angle}deg)`;
     }
     scene.element.style.transform = `${translate}${skew}`;
 }
@@ -85,10 +85,10 @@ const config = {
     images: [
         {
             speed: 0,
-            angle: 30,
+            angle: 20,
             transform: {
-                translateY: true,
-                skewY: false
+                translateY: false,
+                skewY: true
             },
             filter: {
                 active: false,
@@ -100,10 +100,10 @@ const config = {
         },
         {
             speed: 0.25,
-            angle: 30,
+            angle: 20,
             transform: {
-                translateY: true,
-                skewY: false
+                translateY: false,
+                skewY: true
             },
             filter: {
                 active: false,
@@ -115,10 +115,10 @@ const config = {
         },
         {
             speed: 0.5,
-            angle: 30,
+            angle: 20,
             transform: {
-                translateY: true,
-                skewY: false
+                translateY: false,
+                skewY: true
             },
             filter: {
                 active: false,
@@ -130,10 +130,10 @@ const config = {
         },
         {
             speed: 0.75,
-            angle: 30,
+            angle: 20,
             transform: {
-                translateY: true,
-                skewY: false
+                translateY: false,
+                skewY: true
             },
             filter: {
                 active: false,
@@ -145,10 +145,10 @@ const config = {
         },
         {
             speed: 1.0,
-            angle: 30,
+            angle: 20,
             transform: {
-                translateY: true,
-                skewY: false
+                translateY: false,
+                skewY: true
             },
             filter: {
                 active: false,
@@ -183,7 +183,7 @@ const image1Transforms = image1.addFolder('Transforms');
 image1Transforms.open();
 image1Transforms.add(config.images[0], 'speed', 0, 1, 0.05)
     .onFinishChange(restart);
-image1Transforms.add(config.images[0], 'angle', 5, 60, 1)
+image1Transforms.add(config.images[0], 'angle', 5, 30, 1)
     .onFinishChange(restart);
 image1Transforms.add(config.images[0].transform, 'translateY')
     .onChange(restart);
@@ -212,7 +212,7 @@ const image2Transforms = image2.addFolder('Transforms');
 image2Transforms.open();
 image2Transforms.add(config.images[1], 'speed', 0, 1, 0.05)
     .onFinishChange(restart);
-image2Transforms.add(config.images[1], 'angle', 5, 60, 1)
+image2Transforms.add(config.images[1], 'angle', 5, 30, 1)
     .onFinishChange(restart);
 image2Transforms.add(config.images[1].transform, 'translateY')
     .onChange(restart);
@@ -240,7 +240,7 @@ const image3Transforms = image3.addFolder('Transforms');
 image3Transforms.open();
 image3Transforms.add(config.images[2], 'speed', 0, 1, 0.05)
     .onFinishChange(restart);
-image3Transforms.add(config.images[2], 'angle', 5, 60, 1)
+image3Transforms.add(config.images[2], 'angle', 5, 30, 1)
     .onFinishChange(restart);
 image3Transforms.add(config.images[2].transform, 'translateY')
     .onChange(restart);
@@ -268,7 +268,7 @@ const image4Transforms = image4.addFolder('Transforms');
 image4Transforms.open();
 image4Transforms.add(config.images[3], 'speed', 0, 1, 0.05)
     .onFinishChange(restart);
-image4Transforms.add(config.images[3], 'angle', 5, 60, 1)
+image4Transforms.add(config.images[3], 'angle', 5, 30, 1)
     .onFinishChange(restart);
 image4Transforms.add(config.images[3].transform, 'translateY')
     .onChange(restart);
@@ -296,7 +296,7 @@ const image5Transforms = image5.addFolder('Transforms');
 image5Transforms.open();
 image5Transforms.add(config.images[4], 'speed', 0, 1, 0.05)
     .onFinishChange(restart);
-image5Transforms.add(config.images[4], 'angle', 5, 60, 1)
+image5Transforms.add(config.images[4], 'angle', 5, 30, 1)
     .onFinishChange(restart);
 image5Transforms.add(config.images[4].transform, 'translateY')
     .onChange(restart);
@@ -340,7 +340,9 @@ function init () {
         wrapper,
         scenes,
         animationActive: true,
-        animationFriction: config.scene.friction
+        animationFriction: config.scene.friction,
+        velocityActive: config.images.some(img => img.transform.skewY),
+        velocityMax: 10
     });
 
     // activate

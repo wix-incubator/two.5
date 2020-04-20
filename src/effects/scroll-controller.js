@@ -63,7 +63,7 @@ function calcProgress (p, start, end, duration) {
  * Initialize and return a scroll controller.
  *
  * @param {scrollConfig} config
- * @return {controller}
+ * @return {function}
  */
 export function getEffect (config) {
     const _config = defaultTo(config, DEFAULTS);
@@ -143,7 +143,7 @@ export function getEffect (config) {
             _config.resetProgress({x, y});
 
             // render current position
-            controller({x, y});
+            controller({x, y, vx: 0, vy: 0});
         }
     }
 
@@ -154,10 +154,16 @@ export function getEffect (config) {
      * @param {Object} progress
      * @param {number} progress.x
      * @param {number} progress.y
+     * @param {number} progress.vx
+     * @param {number} progress.vy
      */
-    function controller ({x, y}) {
+    function controller ({x, y, vx, vy}) {
         x = +x.toFixed(1);
         y = +y.toFixed(1);
+
+        const velocity = horizontal
+            ? +vx.toFixed(3)
+            : +vy.toFixed(3);
 
         // if nothing changed bail out
         if (x === lastX && y === lastY) return;
@@ -197,7 +203,7 @@ export function getEffect (config) {
                 const progress = calcProgress(t, start, end, duration);
 
                 // run effect
-                scene.effect(scene, progress);
+                scene.effect(scene, progress, velocity);
             }
         });
 

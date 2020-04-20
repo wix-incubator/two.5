@@ -34,10 +34,14 @@ export default class Scroll extends Two5 {
     resetProgress ({x, y}) {
         this.progress.x = x;
         this.progress.y = y;
+        this.progress.vx = 0;
+        this.progress.vy = 0;
 
         if ( this.config.animationActive) {
             this.currentProgress.x = x;
             this.currentProgress.y = y;
+            this.currentProgress.vx = 0;
+            this.currentProgress.vy = 0;
         }
 
         window.scrollTo(x, y);
@@ -46,7 +50,7 @@ export default class Scroll extends Two5 {
     /**
      * Initializes and returns scroll controller.
      *
-     * @return {[controller]}
+     * @return {function[]}
      */
     getEffects () {
         return [getScrollController(this.config)];
@@ -84,6 +88,8 @@ export default class Scroll extends Two5 {
  * @typedef {object} scrollConfig
  * @property {boolean} animationActive whether to animate effect progress.
  * @property {number} animationFriction between 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
+ * @property {boolean} velocityActive whether to calculate velocity with progress.
+ * @property {number} velocityMax max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
  * @property {Element} [wrapper] element to use as the fixed, viewport sized layer, that clips and holds the scroll content container. If not provided, no setup is done.
  * @property {Element|null} [container] element to use as the container for the scrolled content. If not provided assuming native scroll is desired.
  * @property {ScrollScene[]} scenes list of effect scenes to perform during scroll.
