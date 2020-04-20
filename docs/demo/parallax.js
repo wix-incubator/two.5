@@ -213,7 +213,7 @@ const FILTER_CONF = {
     'blend-dodge': 'dodge'
 };
 
-const SPANS_CONF = {
+const SNAPS_CONF = {
     'image 2': () => ({start: parents[1].offsetTop, duration: 1500}),
     'image 4': () => ({start: parents[3].offsetTop + (config.scene.snaps['image 2'] ? 1500 : 0), duration: 1700})
 };
@@ -270,7 +270,7 @@ function filterChange (i) {
             case 'difference':
             case 'dodge':
                 images[i].dataset.filter = '';
-                break
+                break;
             default:
                 parents[i].dataset.blend = '';
         }
@@ -295,7 +295,7 @@ function init () {
     stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom);
 
-    const snaps = Object.entries(config.scene.snaps).map(([key, toggle]) => toggle && SPANS_CONF[key]());
+    const snaps = Object.entries(config.scene.snaps).map(([key, toggle]) => toggle && SNAPS_CONF[key]());
     const scenes = createScenes(snaps);
     const container = document.querySelector('main');
     const parallax = new Scroll({

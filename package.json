@@ -7,7 +7,11 @@
     "test": "test",
     "build": "rollup -c",
     "copy": "cp index.js ./docs/demo/two.5.js",
-    "demo:build": "cd docs/demo && rollup -c single.config.js && rollup -c layers.config.js && rollup -c parallax.config.js && cd -",
+    "demo:build:single": "cd docs/demo && rollup -c single.config.js && cd -",
+    "demo:build:layers": "cd docs/demo && rollup -c layers.config.js && cd -",
+    "demo:build:parallax": "cd docs/demo && rollup -c parallax.config.js && cd -",
+    "demo:build:background": "cd docs/demo && rollup -c background.config.js && cd -",
+    "demo:build": "npm run demo:build:single && npm run demo:build:layers && npm run demo:build:parallax && npm run demo:build:background",
     "demo": "npm run build && npm run copy && npm run demo:build"
   },
   "repository": {
