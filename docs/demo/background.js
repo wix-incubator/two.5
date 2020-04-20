@@ -164,12 +164,6 @@ const config = {
 /*
  * Create controls for demo config
  */
-/*
- * General scene config
- */
-const extraControls = {
-    hue: []
-};
 
 const sceneConfig = gui.addFolder('Scene config');
 
