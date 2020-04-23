@@ -3,4 +3,4 @@ Respond to user interactions with visual effects
 
 ### *NOTE: WIP! Here be dragons!*
 
-@wow-team
+Maintained by @wow!team
