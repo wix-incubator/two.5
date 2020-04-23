@@ -57,7 +57,7 @@
   }
 
   const ticker = {
-    pool: [],
+    pool: new Set(),
 
     /**
      * Starts the animation loop.
@@ -96,14 +96,10 @@
      * @param {Two5} instance
      */
     add(instance) {
-      const index = ticker.pool.indexOf(instance);
+      ticker.pool.add(instance);
+      instance.ticking = true;
 
-      if (!~index) {
-        ticker.pool.push(instance);
-        instance.ticking = true;
-      }
-
-      if (ticker.pool.length) {
+      if (ticker.pool.size) {
         ticker.start();
       }
     },
@@ -114,19 +110,20 @@
      * @param {Two5} instance
      */
     remove(instance) {
-      const index = ticker.pool.indexOf(instance);
-
-      if (~index) {
-        ticker.pool.splice(index, 1);
+      if (ticker.pool.delete(instance)) {
         instance.ticking = false;
       }
 
-      if (!ticker.pool.length) {
+      if (!ticker.pool.size) {
         ticker.stop();
       }
     }
 
   };
+  /**
+   * @type {two5Config}
+   */
+
   const DEFAULTS$1 = {
     ticker,
     animationActive: false,
@@ -206,7 +203,7 @@
         y
       } = progress; // perform any registered measures
 
-      this.measures.forEach(measure => measure(this.progress)); // if animation is active interpolate to next point
+      this.measures.forEach(measure => measure()); // if animation is active interpolate to next point
 
       if (this.config.animationActive) {
         this.lerp();
@@ -283,10 +280,11 @@
    * @property {boolean} [disabled] whether to perform updates on the scene. Defaults to false.
    *
    * @typedef {object} scrollConfig
-   * @property {boolean} animationActive whether to animate effect progress.
-   * @property {number} animationFriction between 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
-   * @property {boolean} velocityActive whether to calculate velocity with progress.
-   * @property {number} velocityMax max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
+   * @property {boolean} [animationActive] whether to animate effect progress.
+   * @property {number} [animationFriction] between 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
+   * @property {boolean} [velocityActive] whether to calculate velocity with progress.
+   * @property {number} [velocityMax] max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
+   * @property {Element|Window} [root] the scrollable element, defaults to window
    * @property {Element} [wrapper] element to use as the fixed, viewport sized layer, that clips and holds the scroll content container. If not provided, no setup is done.
    * @property {Element|null} [container] element to use as the container for the scrolled content. If not provided assuming native scroll is desired.
    * @property {ScrollScene[]} scenes list of effect scenes to perform during scroll.
@@ -296,23 +294,31 @@
 
 
   const DEFAULTS$2 = {
-    perspectiveZ: 600,
-    elevation: 10,
-    transitionDuration: 200,
-    transitionActive: false,
-    transitionEasing: 'ease-out',
+    // config only
     perspectiveActive: false,
     perspectiveInvertX: false,
     perspectiveInvertY: false,
     perspectiveMaxX: 0,
     perspectiveMaxY: 0,
+    invertRotation: false,
+    // used for orientation compensation when using deviceorientation event, reference see below
+    // layer and config
+    perspectiveZ: 600,
+    //todo: split to layer and container config
+    elevation: 10,
+    // todo: why in line 102 we check for config.hasOwnProperty(elevation)?
+    transitionDuration: 200,
+    // todo: split to layer and container config
+    transitionActive: false,
+    //todo: split to layer and container config
+    transitionEasing: 'ease-out',
+    //todo: split to layer and container config
+    // layer only
     translationActive: true,
     translationInvertX: false,
     translationInvertY: false,
     translationMaxX: 50,
     translationMaxY: 50,
-    invertRotation: false,
-    // used for orientation compensation when using deviceorientation event, reference see below
     rotateActive: false,
     rotateInvert: false,
     rotateMax: 45,
@@ -539,6 +545,10 @@
       handler
     };
   }
+  /**
+   * @type {gyroscopeConfig}
+   */
+
 
   const DEFAULTS$3 = {
     samples: 3,
@@ -673,16 +683,16 @@
 
     setupEvents() {
       // attempt usage of DeviceOrientation event
-      const gyroscoeHandler = getHandler$2({
+      const gyroscopeHandler = getHandler$2({
         progress: this.progress,
         samples: this.config.gyroscopeSamples,
         maxBeta: this.config.maxBeta,
         maxGamma: this.config.maxGamma
       });
 
-      if (gyroscoeHandler) {
+      if (gyroscopeHandler) {
         this.usingGyroscope = true;
-        this.tiltHandler = gyroscoeHandler;
+        this.tiltHandler = gyroscopeHandler;
       } else {
         /*
          * No deviceorientation support
@@ -901,7 +911,7 @@
       return obj === false || obj === true;
     },
     isFunction: function isFunction(obj) {
-      return Object.prototype.toString.call(obj) === '[object Function]';
+      return obj instanceof Function;
     }
   };
   var INTERPRETATIONS = [{
@@ -1401,8 +1411,9 @@
   });
   Object.defineProperty(Color.prototype, 'hex', {
     get: function get$$1() {
-      if (!this.__state.space !== 'HEX') {
+      if (this.__state.space !== 'HEX') {
         this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
+        this.__state.space = 'HEX';
       }
 
       return this.__state.hex;
