@@ -72,16 +72,16 @@ export default class Tilt extends Two5 {
      */
     setupEvents () {
         // attempt usage of DeviceOrientation event
-        const gyroscoeHandler = getGyroscope({
+        const gyroscopeHandler = getGyroscope({
             progress: this.progress,
             samples: this.config.gyroscopeSamples,
             maxBeta: this.config.maxBeta,
             maxGamma: this.config.maxGamma
         });
 
-        if (gyroscoeHandler) {
+        if (gyroscopeHandler) {
             this.usingGyroscope = true;
-            this.tiltHandler = gyroscoeHandler;
+            this.tiltHandler = gyroscopeHandler;
         }
         else {
             /*
@@ -144,12 +144,19 @@ export default class Tilt extends Two5 {
  * @property {number} [scaleMaxY]
  *
  * @typedef {Object} tiltConfig
- * @property {boolean} animationActive whether to animate effect progress.
- * @property {number} animationFriction between 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
- * @property {number} maxBeta
- * @property {number} maxGamma
- * @property {number} gyroscopeSamples
- * @property {Element} mouseTarget
- * @property {Element} layersContainer
+ * @property {boolean} [animationActive] whether to animate effect progress.
+ * @property {number} [animationFriction] between 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
+ * @property {number} [maxBeta]
+ * @property {number} [maxGamma]
+ * @property {number} [gyroscopeSamples]
+ * @property {Element} [mouseTarget]
+ * @property {Element} [layersContainer]
  * @property {Element[]|TiltLayer[]} layers
+ */
+
+/** @typedef {Object} gyroscopeConfig
+ * @property {number} [maxBeta]
+ * @property {number} [maxGamma]
+ * @property {number} [samples]
+ * @property {number} progress
  */

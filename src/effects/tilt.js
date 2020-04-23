@@ -1,22 +1,27 @@
 import { defaultTo } from '../utilities';
 
 const DEFAULTS = {
-    perspectiveZ: 600,
-    elevation: 10,
-    transitionDuration: 200,
-    transitionActive: false,
-    transitionEasing: 'ease-out',
+    // config only
     perspectiveActive: false,
     perspectiveInvertX: false,
     perspectiveInvertY: false,
     perspectiveMaxX: 0,
     perspectiveMaxY: 0,
+    invertRotation: false, // used for orientation compensation when using deviceorientation event, reference see below
+
+    // layer and config
+    perspectiveZ: 600, //todo: split to layer and container config
+    elevation: 10,  // todo: why in line 102 we check for config.hasOwnProperty(elevation)?
+    transitionDuration: 200, // todo: split to layer and container config
+    transitionActive: false, //todo: split to layer and container config
+    transitionEasing: 'ease-out', //todo: split to layer and container config
+
+    // layer only
     translationActive: true,
     translationInvertX: false,
     translationInvertY: false,
     translationMaxX: 50,
     translationMaxY: 50,
-    invertRotation: false, // used for orientation compensation when using deviceorientation event, reference see below
     rotateActive: false,
     rotateInvert: false,
     rotateMax: 45,

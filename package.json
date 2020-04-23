@@ -12,7 +12,8 @@
     "demo:build:parallax": "cd docs/demo && rollup -c parallax.config.js && cd -",
     "demo:build:background": "cd docs/demo && rollup -c background.config.js && cd -",
     "demo:build": "npm run demo:build:single && npm run demo:build:layers && npm run demo:build:parallax && npm run demo:build:background",
-    "demo": "npm run build && npm run copy && npm run demo:build"
+    "demo": "npm run build && npm run copy && npm run demo:build",
+    "demo:start": "npm run demo && http-server ./docs/demo"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@babel/core": "^7.8.7",
     "dat.gui": "^0.7.6",
+    "http-server": "^0.12.1",
     "rollup": "^1.27.8",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-filesize": "^6.2.1",

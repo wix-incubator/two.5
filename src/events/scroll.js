@@ -1,7 +1,8 @@
-export function getHandler () {
-    function handler (progress) {
-        progress.x = window.scrollX || window.pageXOffset;
-        progress.y = window.scrollY || window.pageYOffset;
+export function getHandler ({progress, root}) {
+    function handler () {
+        // get current scroll position (support window, element and window in IE)
+        progress.x = root.scrollX || root.pageXOffset || root.scrollLeft || 0;
+        progress.y = root.scrollY || root.pageYOffset || root.scrollTop || 0;
     }
 
     let frameId;

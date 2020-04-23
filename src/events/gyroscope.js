@@ -1,5 +1,8 @@
 import { clamp } from '../utilities';
 
+/**
+ * @type {gyroscopeConfig}
+ */
 const DEFAULTS = {
     samples: 3,
     maxBeta: 15,

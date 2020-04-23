@@ -41,6 +41,10 @@
   function lerp(a, b, t) {
     return a * (1 - t) + b * t;
   }
+  /**
+   * @type {scrollConfig}
+   */
+
 
   const DEFAULTS = {
     horizontal: false,
@@ -116,7 +120,10 @@
   function getEffect(config) {
     const _config = defaultTo(config, DEFAULTS);
 
+    const root = _config.root;
+    const body = _config.root === window ? window.document.body : _config.root;
     const container = _config.container;
+    const wrapper = _config.wrapper;
     const horizontal = _config.horizontal;
     /*
      * Prepare snap points data.
@@ -157,26 +164,31 @@
       const totalWidth = container.offsetWidth + (horizontal ? extraScroll : 0); // set width/height on the body element
 
       if (horizontal) {
-        window.document.body.style.width = `${totalWidth}px`;
+        body.style.width = `${totalWidth}px`;
       } else {
-        window.document.body.style.height = `${totalHeight}px`;
+        body.style.height = `${totalHeight}px`;
       }
       /*
        * Setup wrapper element and reset progress.
        */
 
 
-      if (_config.wrapper) {
-        // if we got a wrapper element set its style
-        Object.assign(_config.wrapper.style, {
+      if (wrapper) {
+        if (!wrapper.contains(container)) {
+          console.error('When defined, the wrapper element %o must be a parent of the container element %o', wrapper, container);
+          throw "Wrapper element is not a parent of container element";
+        } // if we got a wrapper element set its style
+
+
+        Object.assign(wrapper.style, {
           position: 'fixed',
           width: '100vw',
           height: '100vh',
           overflow: 'hidden'
-        }); // get current scroll position
+        }); // get current scroll position (support window, element and window in IE)
 
-        let x = window.scrollX || window.pageXOffset;
-        let y = window.scrollY || window.pageYOffset; // increment current scroll position by accumulated snap point durations
+        let x = root.scrollX || root.pageXOffset || root.scrollLeft || 0;
+        let y = root.scrollY || root.pageYOffset || root.scrollTop || 0; // increment current scroll position by accumulated snap point durations
 
         if (horizontal) {
           x = snaps.reduce((acc, [start, end]) => start < acc ? acc + (end - start) : acc, x);
@@ -270,10 +282,14 @@
     return controller;
   }
 
-  function getHandler() {
-    function handler(progress) {
-      progress.x = window.scrollX || window.pageXOffset;
-      progress.y = window.scrollY || window.pageYOffset;
+  function getHandler({
+    progress,
+    root
+  }) {
+    function handler() {
+      // get current scroll position (support window, element and window in IE)
+      progress.x = root.scrollX || root.pageXOffset || root.scrollLeft || 0;
+      progress.y = root.scrollY || root.pageYOffset || root.scrollTop || 0;
     }
 
     let frameId;
@@ -294,7 +310,7 @@
   }
 
   const ticker = {
-    pool: [],
+    pool: new Set(),
 
     /**
      * Starts the animation loop.
@@ -333,14 +349,10 @@
      * @param {Two5} instance
      */
     add(instance) {
-      const index = ticker.pool.indexOf(instance);
+      ticker.pool.add(instance);
+      instance.ticking = true;
 
-      if (!~index) {
-        ticker.pool.push(instance);
-        instance.ticking = true;
-      }
-
-      if (ticker.pool.length) {
+      if (ticker.pool.size) {
         ticker.start();
       }
     },
@@ -351,19 +363,20 @@
      * @param {Two5} instance
      */
     remove(instance) {
-      const index = ticker.pool.indexOf(instance);
-
-      if (~index) {
-        ticker.pool.splice(index, 1);
+      if (ticker.pool.delete(instance)) {
         instance.ticking = false;
       }
 
-      if (!ticker.pool.length) {
+      if (!ticker.pool.size) {
         ticker.stop();
       }
     }
 
   };
+  /**
+   * @type {two5Config}
+   */
+
   const DEFAULTS$1 = {
     ticker,
     animationActive: false,
@@ -443,7 +456,7 @@
         y
       } = progress; // perform any registered measures
 
-      this.measures.forEach(measure => measure(this.progress)); // if animation is active interpolate to next point
+      this.measures.forEach(measure => measure()); // if animation is active interpolate to next point
 
       if (this.config.animationActive) {
         this.lerp();
@@ -507,10 +520,10 @@
   }
   /**
    * @typedef {Object} two5Config
-   * @property {boolean} animationActive whether to animate effect progress.
-   * @property {number} animationFriction from 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
-   * @property {boolean} velocityActive whether to calculate velocity with progress.
-   * @property {number} velocityMax max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
+   * @property {boolean} [animationActive] whether to animate effect progress.
+   * @property {number} [animationFriction] from 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
+   * @property {boolean} [velocityActive] whether to calculate velocity with progress.
+   * @property {number} [velocityMax] max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
    */
 
   /**
@@ -533,6 +546,7 @@
   class Scroll extends Two5 {
     constructor(config = {}) {
       super(config);
+      this.config.root = this.config.root || window;
       this.config.resetProgress = this.config.resetProgress || this.resetProgress.bind(this);
     }
     /**
@@ -560,7 +574,7 @@
         this.currentProgress.vy = 0;
       }
 
-      window.scrollTo(x, y);
+      this.config.root.scrollTo(x, y);
     }
     /**
      * Initializes and returns scroll controller.
@@ -578,7 +592,11 @@
 
 
     setupEvents() {
-      this.measures.push(getHandler().handler);
+      const config = {
+        root: this.config.root,
+        progress: this.progress
+      };
+      this.measures.push(getHandler(config).handler);
     }
     /**
      * Remove scroll measuring handler.
@@ -785,7 +803,7 @@
       return obj === false || obj === true;
     },
     isFunction: function isFunction(obj) {
-      return Object.prototype.toString.call(obj) === '[object Function]';
+      return obj instanceof Function;
     }
   };
   var INTERPRETATIONS = [{
@@ -1285,8 +1303,9 @@
   });
   Object.defineProperty(Color.prototype, 'hex', {
     get: function get$$1() {
-      if (!this.__state.space !== 'HEX') {
+      if (this.__state.space !== 'HEX') {
         this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
+        this.__state.space = 'HEX';
       }
 
       return this.__state.hex;
