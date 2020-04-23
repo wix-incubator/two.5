@@ -1,7 +1,7 @@
 import { defaultTo, lerp } from './utilities.js';
 
 const ticker = {
-    pool: [],
+    pool: new Set(),
     /**
      * Starts the animation loop.
      */
@@ -39,14 +39,10 @@ const ticker = {
      * @param {Two5} instance
      */
     add (instance) {
-        const index = ticker.pool.indexOf(instance);
+        ticker.pool.add(instance);
+        instance.ticking = true;
 
-        if ( ! ~ index ) {
-            ticker.pool.push(instance);
-            instance.ticking = true;
-        }
-
-        if ( ticker.pool.length ) {
+        if ( ticker.pool.size ) {
             ticker.start();
         }
     },
@@ -57,19 +53,19 @@ const ticker = {
      * @param {Two5} instance
      */
     remove (instance) {
-        const index = ticker.pool.indexOf(instance);
-
-        if ( ~ index ) {
-            ticker.pool.splice(index, 1);
+        if ( ticker.pool.delete(instance) ) {
             instance.ticking = false;
         }
 
-        if ( ! ticker.pool.length ) {
+        if ( ! ticker.pool.size ) {
             ticker.stop();
         }
     }
 };
 
+/**
+ * @type {two5Config}
+ */
 const DEFAULTS = {
     ticker,
     animationActive: false,
@@ -147,7 +143,7 @@ export default class Two5 {
         const {x, y} = progress;
 
         // perform any registered measures
-        this.measures.forEach(measure => measure(this.progress));
+        this.measures.forEach(measure => measure());
 
         // if animation is active interpolate to next point
         if (this.config.animationActive) {
@@ -215,8 +211,8 @@ export default class Two5 {
 
 /**
  * @typedef {Object} two5Config
- * @property {boolean} animationActive whether to animate effect progress.
- * @property {number} animationFriction from 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
- * @property {boolean} velocityActive whether to calculate velocity with progress.
- * @property {number} velocityMax max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
+ * @property {boolean} [animationActive] whether to animate effect progress.
+ * @property {number} [animationFriction] from 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
+ * @property {boolean} [velocityActive] whether to calculate velocity with progress.
+ * @property {number} [velocityMax] max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
  */
