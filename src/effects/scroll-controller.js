@@ -1,5 +1,8 @@
 import { defaultTo } from '../utilities';
 
+/**
+ * @type {scrollConfig}
+ */
 const DEFAULTS = {
     horizontal: false,
     scrollHandler (container, x, y) {
@@ -67,7 +70,10 @@ function calcProgress (p, start, end, duration) {
  */
 export function getEffect (config) {
     const _config = defaultTo(config, DEFAULTS);
+    const root = _config.root;
+    const body = _config.root === window ? window.document.body : _config.root;
     const container = _config.container;
+    const wrapper = _config.wrapper;
     const horizontal = _config.horizontal;
 
     /*
@@ -109,27 +115,31 @@ export function getEffect (config) {
 
         // set width/height on the body element
         if (horizontal) {
-            window.document.body.style.width = `${totalWidth}px`;
+            body.style.width = `${totalWidth}px`;
         }
         else {
-            window.document.body.style.height = `${totalHeight}px`;
+            body.style.height = `${totalHeight}px`;
         }
 
         /*
          * Setup wrapper element and reset progress.
          */
-        if (_config.wrapper) {
+        if (wrapper) {
+            if (!wrapper.contains(container)) {
+                console.error('When defined, the wrapper element %o must be a parent of the container element %o', wrapper, container)
+                throw "Wrapper element is not a parent of container element";
+            }
             // if we got a wrapper element set its style
-            Object.assign(_config.wrapper.style, {
+            Object.assign(wrapper.style, {
                 position: 'fixed',
                 width: '100vw',
                 height: '100vh',
                 overflow: 'hidden'
             });
 
-            // get current scroll position
-            let x = window.scrollX || window.pageXOffset;
-            let y = window.scrollY || window.pageYOffset;
+            // get current scroll position (support window, element and window in IE)
+            let x = root.scrollX || root.pageXOffset || root.scrollLeft || 0;
+            let y = root.scrollY || root.pageYOffset || root.scrollTop || 0;
 
             // increment current scroll position by accumulated snap point durations
             if (horizontal) {
