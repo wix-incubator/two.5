@@ -64,7 +64,7 @@ export default class Scroll extends Two5 {
         const config = {
             root: this.config.root,
             progress: this.progress
-        }
+        };
         this.measures.push(getScroll(config).handler);
     }
 

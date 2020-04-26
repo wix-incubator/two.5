@@ -11,15 +11,65 @@ import Stats from '../../node_modules/stats.js/src/Stats.js';
  * Simple transforms
  */
 function transform (scene, progress, velocity) {
-    let translate = 'translate3d(0px, 0px, 0px)', skew = '';
+    let translateY, translateX = 0;
+    let skew = '';
+    let scale = '';
 
-    if (scene.translateY) {
-        translate = `translate3d(0px, ${(progress * scene.duration - scene.offset) * scene.speed}px, 0px)`;
+    if (scene.translateY.active) {
+        const p = Math.min(Math.max(progress - scene.translateY.start / 100, 0), scene.translateY.end / 100);
+        translateY = (p * scene.duration - scene.offset) * scene.translateY.speed;
     }
-    if (scene.skewY) {
-        skew = ` skewY(${velocity * scene.angle}deg)`;
+
+    if (scene.translateX.active) {
+        const p = Math.min(Math.max(progress - scene.translateX.start / 100, 0), scene.translateX.end / 100);
+        translateX = (p * scene.duration - scene.offset) * scene.translateX.speed;
     }
-    scene.element.style.transform = `${translate}${skew}`;
+
+    const translate = `translate3d(${translateX}px, ${translateY}px, 0px)`;
+
+    if (scene.skewY.active) {
+        let skewY = 0;
+
+        if (scene.skewY.velocity) {
+            skewY = velocity * scene.angle;
+        }
+        else {
+            const p = Math.min(Math.max(progress - scene.skewY.start / 100, 0), scene.skewY.end / 100);
+            skewY = (p * 2 - 1) * scene.angle;
+        }
+
+        skew = ` skewY(${skewY}deg)`;
+    }
+
+    let scaleFactor = 1;
+
+    if (scene.zoomIn.active) {
+        const p = Math.max(progress - scene.zoomIn.start / 100 , 0);
+        scaleFactor *= p * (scene.zoomIn.factor - 1);
+    }
+
+    if (scene.zoomOut.active) {
+        const p = Math.max(progress - scene.zoomOut.start / 100 , 0);
+        scaleFactor *= (1 - p) * (scene.zoomOut.factor - 1);
+    }
+
+    if (scaleFactor !== 0) {
+        scale = `scale(${1 + scaleFactor}, ${1 + scaleFactor})`;
+    }
+
+    let opacity = 1;
+
+    if (scene.fadeIn.active) {
+        opacity = Math.max(progress - scene.fadeIn.start / 100 , 0);
+    }
+
+    if (scene.fadeOut.active) {
+        const p = Math.max(progress - scene.fadeOut.start / 100 , 0);
+        opacity = (1 - p);
+    }
+
+    scene.element.style.opacity = opacity.toFixed(3);
+    scene.element.style.transform = `${translate}${skew}${scale}`;
 }
 
 /*
@@ -94,6 +144,52 @@ const FILTER_CONF = {
 
 const gui = new dat.GUI();
 
+function generateTransformsConfig () {
+    return {
+        translateY: {
+            active: false,
+            speed: 0.5,
+            end: 100,
+            start: 0
+        },
+        translateX: {
+            active: false,
+            speed: 0,
+            end: 100,
+            start: 0
+        },
+        skewY: {
+            active: false,
+            velocity: true,
+            angle: 20,
+            end: 100,
+            start: 0
+        },
+        zoomIn: {
+            active: false,
+            factor: 2,
+            // duration: 100,
+            start: 0
+        },
+        zoomOut: {
+            active: false,
+            factor: 2,
+            // duration: 100,
+            start: 0
+        },
+        fadeIn: {
+            active: false,
+            // duration: 40,
+            start: 15
+        },
+        fadeOut: {
+            active: false,
+            // duration: 35,
+            start: 65
+        }
+    };
+}
+
 const config = {
     scene: {
         container: true,
@@ -101,14 +197,10 @@ const config = {
     },
     images: [
         {
-            speed: 0,
-            angle: 20,
-            transform: {
-                translateY: false,
-                skewY: false
-            },
+            bgColor: '#000',
+            transforms: generateTransformsConfig(),
             filter: {
-                active: true,
+                active: false,
                 type: 'displacement',
                 start: 15,
                 radius: 12,
@@ -116,14 +208,10 @@ const config = {
             }
         },
         {
-            speed: 0.25,
-            angle: 20,
-            transform: {
-                translateY: false,
-                skewY: false
-            },
+            bgColor: '#000',
+            transforms: generateTransformsConfig(),
             filter: {
-                active: true,
+                active: false,
                 type: 'displacement',
                 start: 15,
                 radius: 12,
@@ -131,14 +219,10 @@ const config = {
             }
         },
         {
-            speed: 0.5,
-            angle: 20,
-            transform: {
-                translateY: false,
-                skewY: false
-            },
+            bgColor: '#000',
+            transforms: generateTransformsConfig(),
             filter: {
-                active: true,
+                active: false,
                 type: 'displacement',
                 start: 15,
                 radius: 12,
@@ -146,14 +230,10 @@ const config = {
             }
         },
         {
-            speed: 0.75,
-            angle: 20,
-            transform: {
-                translateY: false,
-                skewY: false
-            },
+            bgColor: '#000',
+            transforms: generateTransformsConfig(),
             filter: {
-                active: true,
+                active: false,
                 type: 'displacement',
                 start: 15,
                 radius: 12,
@@ -161,14 +241,10 @@ const config = {
             }
         },
         {
-            speed: 1.0,
-            angle: 20,
-            transform: {
-                translateY: false,
-                skewY: false
-            },
+            bgColor: '#000',
+            transforms: generateTransformsConfig(),
             filter: {
-                active: true,
+                active: false,
                 type: 'displacement',
                 start: 15,
                 radius: 12,
@@ -177,6 +253,80 @@ const config = {
         }
     ]
 };
+
+function createTransformsControls (folder, config) {
+    const panY = folder.addFolder('Pan Y');
+    panY.add(config.translateY, 'active')
+        .onChange(restart);
+    panY.add(config.translateY, 'speed', 0, 1, 0.05)
+        .onFinishChange(restart);
+    panY.add(config.translateY, 'end', 0, 100, 5)
+        .onFinishChange(restart);
+    panY.add(config.translateY, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+
+    const panX = folder.addFolder('Pan X');
+    panX.add(config.translateX, 'active')
+        .onChange(restart);
+    panX.add(config.translateX, 'speed', 0, 1, 0.05)
+        .onFinishChange(restart);
+    panX.add(config.translateX, 'end', 0, 100, 5)
+        .onFinishChange(restart);
+    panX.add(config.translateX, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+
+    const skewY = folder.addFolder('Skew Y');
+    skewY.add(config.skewY, 'active')
+        .onChange(restart);
+    skewY.add(config.skewY, 'velocity')
+        .onChange(restart);
+    skewY.add(config.skewY, 'angle', 5, 40, 1)
+        .onFinishChange(restart);
+    skewY.add(config.skewY, 'end', 0, 100, 5)
+        .onFinishChange(restart);
+    skewY.add(config.skewY, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+
+    const zoomIn = folder.addFolder('Zoom In');
+    zoomIn.add(config.zoomIn, 'active')
+        .onChange(restart);
+    zoomIn.add(config.zoomIn, 'factor', 1.1, 4, 0.1)
+        .onFinishChange(restart);
+    // zoomIn.add(config.zoomIn, 'duration', 0, 100, 5)
+    //     .onFinishChange(restart);
+    zoomIn.add(config.zoomIn, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+
+    const zoomOut = folder.addFolder('Zoom Out');
+    zoomOut.add(config.zoomOut, 'active')
+        .onChange(restart);
+    zoomOut.add(config.zoomOut, 'factor', 1.1, 4, 0.1)
+        .onFinishChange(restart);
+    // zoomOut.add(config.zoomOut, 'duration', 0, 100, 5)
+    //     .onFinishChange(restart);
+    zoomOut.add(config.zoomOut, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+
+    const fadeIn = folder.addFolder('Fade In');
+    fadeIn.add(config.fadeIn, 'active')
+        .onChange(restart);
+    // fadeIn.addColor(config.fadeIn, 'color')
+    //     .onFinishChange(restart);
+    // fadeIn.add(config.fadeIn, 'duration', 0, 100, 5)
+    //     .onFinishChange(restart);
+    fadeIn.add(config.fadeIn, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+
+    const fadeOut = folder.addFolder('Fade Out');
+    fadeOut.add(config.fadeOut, 'active')
+        .onChange(restart);
+    // fadeOut.addColor(config.fadeOut, 'color')
+    //     .onFinishChange(restart);
+    // fadeOut.add(config.fadeOut, 'duration', 0, 100, 5)
+    //     .onFinishChange(restart);
+    fadeOut.add(config.fadeOut, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+}
 
 /*
  * Create controls for demo config
@@ -196,18 +346,16 @@ sceneConfig.open();
  */
 const image1 = gui.addFolder('Image 1');
 
+image1.addColor(config.images[0], 'bgColor')
+    .onFinishChange(restart);
+
 const image1Transforms = image1.addFolder('Transforms');
 image1Transforms.open();
-image1Transforms.add(config.images[0], 'speed', 0, 1, 0.05)
-    .onFinishChange(restart);
-image1Transforms.add(config.images[0], 'angle', 5, 30, 1)
-    .onFinishChange(restart);
-image1Transforms.add(config.images[0].transform, 'translateY')
-    .onChange(restart);
-image1Transforms.add(config.images[0].transform, 'skewY')
-    .onChange(restart);
+
+createTransformsControls(image1Transforms, config.images[0].transforms);
+
 const image1Filters = image1.addFolder('Filters');
-image1Filters.open();
+// image1Filters.open();
 image1Filters.add(config.images[0].filter, 'active')
     .onChange(filterToggle(0));
 image1Filters.add(config.images[0].filter, 'type', FILTER_CONF)
@@ -224,19 +372,16 @@ image1Filters.add(config.images[0].filter, 'hue', 0, 359, 5)
  */
 const image2 = gui.addFolder('Image 2');
 
+image2.addColor(config.images[1], 'bgColor')
+    .onFinishChange(restart);
 
 const image2Transforms = image2.addFolder('Transforms');
 image2Transforms.open();
-image2Transforms.add(config.images[1], 'speed', 0, 1, 0.05)
-    .onFinishChange(restart);
-image2Transforms.add(config.images[1], 'angle', 5, 30, 1)
-    .onFinishChange(restart);
-image2Transforms.add(config.images[1].transform, 'translateY')
-    .onChange(restart);
-image2Transforms.add(config.images[1].transform, 'skewY')
-    .onChange(restart);
+
+createTransformsControls(image2Transforms, config.images[1].transforms);
+
 const image2Filters = image2.addFolder('Filters');
-image2Filters.open();
+// image2Filters.open();
 image2Filters.add(config.images[1].filter, 'active')
     .onChange(filterToggle(1));
 image2Filters.add(config.images[1].filter, 'type', FILTER_CONF)
@@ -253,18 +398,16 @@ image2Filters.add(config.images[1].filter, 'hue', 0, 359, 5)
  */
 const image3 = gui.addFolder('image 3');
 
+image3.addColor(config.images[2], 'bgColor')
+    .onFinishChange(restart);
+
 const image3Transforms = image3.addFolder('Transforms');
 image3Transforms.open();
-image3Transforms.add(config.images[2], 'speed', 0, 1, 0.05)
-    .onFinishChange(restart);
-image3Transforms.add(config.images[2], 'angle', 5, 30, 1)
-    .onFinishChange(restart);
-image3Transforms.add(config.images[2].transform, 'translateY')
-    .onChange(restart);
-image3Transforms.add(config.images[2].transform, 'skewY')
-    .onChange(restart);
+
+createTransformsControls(image3Transforms, config.images[2].transforms);
+
 const image3Filters = image3.addFolder('Filters');
-image3Filters.open();
+// image3Filters.open();
 image3Filters.add(config.images[2].filter, 'active')
     .onChange(filterToggle(2));
 image3Filters.add(config.images[2].filter, 'type', FILTER_CONF)
@@ -281,18 +424,16 @@ image3Filters.add(config.images[2].filter, 'hue', 0, 359, 5)
  */
 const image4 = gui.addFolder('Image 4');
 
+image4.addColor(config.images[3], 'bgColor')
+    .onFinishChange(restart);
+
 const image4Transforms = image4.addFolder('Transforms');
 image4Transforms.open();
-image4Transforms.add(config.images[3], 'speed', 0, 1, 0.05)
-    .onFinishChange(restart);
-image4Transforms.add(config.images[3], 'angle', 5, 30, 1)
-    .onFinishChange(restart);
-image4Transforms.add(config.images[3].transform, 'translateY')
-    .onChange(restart);
-image4Transforms.add(config.images[3].transform, 'skewY')
-    .onChange(restart);
+
+createTransformsControls(image4Transforms, config.images[3].transforms);
+
 const image4Filters = image4.addFolder('Filters');
-image4Filters.open();
+// image4Filters.open();
 image4Filters.add(config.images[3].filter, 'active')
     .onChange(filterToggle(3));
 image4Filters.add(config.images[3].filter, 'type', FILTER_CONF)
@@ -309,18 +450,16 @@ image4Filters.add(config.images[3].filter, 'hue', 0, 359, 5)
  */
 const image5 = gui.addFolder('Image 5');
 
+image5.addColor(config.images[4], 'bgColor')
+    .onFinishChange(restart);
+
 const image5Transforms = image5.addFolder('Transforms');
 image5Transforms.open();
-image5Transforms.add(config.images[4], 'speed', 0, 1, 0.05)
-    .onFinishChange(restart);
-image5Transforms.add(config.images[4], 'angle', 5, 30, 1)
-    .onFinishChange(restart);
-image5Transforms.add(config.images[4].transform, 'translateY')
-    .onChange(restart);
-image5Transforms.add(config.images[4].transform, 'skewY')
-    .onChange(restart);
+
+createTransformsControls(image5Transforms, config.images[4].transforms);
+
 const image5Filters = image5.addFolder('Filters');
-image5Filters.open();
+// image5Filters.open();
 image5Filters.add(config.images[4].filter, 'active')
     .onChange(filterToggle(4));
 image5Filters.add(config.images[4].filter, 'type', FILTER_CONF)
@@ -358,7 +497,7 @@ function init () {
         scenes,
         animationActive: true,
         animationFriction: config.scene.friction,
-        velocityActive: config.images.some(img => img.transform.skewY),
+        velocityActive: config.images.some(img => img.transforms.skewY.active),
         velocityMax: 10
     });
 
@@ -408,25 +547,29 @@ function createScenes () {
             return x[0] && x[0].active;
         });
 
-    // create configs for background translateY scenes
+    // create configs for background transform scenes
     return images.map((img, index) => {
         const parent = parents[index];
         const parentTop = parent.offsetTop;
         const parentHeight = parent.offsetHeight;
 
         const start = parentTop - viewportHeight;
-        const duration = (parentHeight > viewportHeight ? parentHeight : viewportHeight) + viewportHeight;
+        const duration = parentHeight + viewportHeight;
+
+        const transforms = config.images[index].transforms;
+
+        if (transforms.fadeIn.active || transforms.fadeOut.active) {
+            parent.style.backgroundColor = config.images[index].bgColor;
+        }
 
         return {
             effect: transform,
-            speed: +config.images[index].speed,
-            angle: +config.images[index].angle,
             start,
             duration,
             element: img,
             pauseDuringSnap: true,
             offset: viewportHeight,
-            ...config.images[index].transform
+            ...transforms
         };
     })
     // create configs for filter effect scenes
