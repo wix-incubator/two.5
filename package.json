@@ -29,6 +29,7 @@
     "@babel/core": "^7.8.7",
     "dat.gui": "^0.7.6",
     "http-server": "^0.12.1",
+    "kampos": "^0.3.5",
     "rollup": "^1.27.8",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-filesize": "^6.2.1",
