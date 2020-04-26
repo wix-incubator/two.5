@@ -28,19 +28,36 @@ main {
 }
 
 .strip .bg {
+    display: grid;
+    grid-template: "media" 100% / 100%;
     grid-area: strip;
     place-self: stretch;
+    place-items: center;
     overflow: hidden;
     z-index: 0;
 }
 
 .strip .bg img {
+    grid-area: media;
     width: 100%;
     height: 100vh;
     min-height: var(--strip-height);
     object-fit: cover;
     will-change: transform;
     transform: translate3d(0px, 0px, 0px);
+}
+
+.strip canvas {
+    grid-area: media;
+    width: 100%;
+    height: 100vh;
+    min-height: var(--strip-height);
+    display: none;
+    z-index: 1;
+}
+
+.strip[data-canvas] canvas {
+    display: block;
 }
 
 .strip .content {

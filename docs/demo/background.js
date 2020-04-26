@@ -1,4 +1,5 @@
 import { Scroll } from './two.5.js';
+import kampos from '../../node_modules/kampos/src/index.js';
 import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
 import Stats from '../../node_modules/stats.js/src/Stats.js';
 
@@ -55,6 +56,20 @@ function dodge (scene, progress) {
     scene.element.style.backgroundColor = `hsl(${scene.hue}, ${(1 - progress) * 100}%, 15%)`;
 }
 
+/*
+ * Kampos
+ */
+function displacement (scene, progress) {
+    const shouldTick = progress < 1 && progress > 0;
+    if (shouldTick && !scene.kampos.animationFrameId) {
+        scene.kampos.play();
+    }
+    else if (!shouldTick && scene.kampos.animationFrameId) {
+        scene.kampos.stop();
+    }
+    scene.displacement.scale = {y: 1 - progress};
+}
+
 const FILTERS = {
     focus,
     saturate,
@@ -62,10 +77,12 @@ const FILTERS = {
     sepia,
     invert,
     difference,
-    dodge
+    dodge,
+    displacement
 };
 
 const FILTER_CONF = {
+    displacement: 'displacement',
     focus: 'focus',
     saturate: 'saturate',
     'hue rotate': 'hueRotate',
@@ -88,12 +105,12 @@ const config = {
             angle: 20,
             transform: {
                 translateY: false,
-                skewY: true
+                skewY: false
             },
             filter: {
-                active: false,
-                type: 'sepia',
-                start: 65,
+                active: true,
+                type: 'displacement',
+                start: 15,
                 radius: 12,
                 hue: 60
             }
@@ -103,12 +120,12 @@ const config = {
             angle: 20,
             transform: {
                 translateY: false,
-                skewY: true
+                skewY: false
             },
             filter: {
-                active: false,
-                type: 'sepia',
-                start: 65,
+                active: true,
+                type: 'displacement',
+                start: 15,
                 radius: 12,
                 hue: 60
             }
@@ -118,12 +135,12 @@ const config = {
             angle: 20,
             transform: {
                 translateY: false,
-                skewY: true
+                skewY: false
             },
             filter: {
-                active: false,
-                type: 'sepia',
-                start: 65,
+                active: true,
+                type: 'displacement',
+                start: 15,
                 radius: 12,
                 hue: 60
             }
@@ -133,12 +150,12 @@ const config = {
             angle: 20,
             transform: {
                 translateY: false,
-                skewY: true
+                skewY: false
             },
             filter: {
-                active: false,
-                type: 'sepia',
-                start: 65,
+                active: true,
+                type: 'displacement',
+                start: 15,
                 radius: 12,
                 hue: 60
             }
@@ -148,12 +165,12 @@ const config = {
             angle: 20,
             transform: {
                 translateY: false,
-                skewY: true
+                skewY: false
             },
             filter: {
-                active: false,
-                type: 'sepia',
-                start: 65,
+                active: true,
+                type: 'displacement',
+                start: 15,
                 radius: 12,
                 hue: 60
             }
@@ -367,11 +384,23 @@ const container = document.querySelector('main');
 const viewportHeight = window.innerHeight;
 const parents = [...window.document.querySelectorAll('[data-effects~="bgparallax"]')];
 const images = [...window.document.querySelectorAll('[data-effects~="bgparallax"] .bg > img')];
+// const canvases = [...window.document.querySelectorAll('canvas')];
+
+const kamposInstances = new Map();
 
 /*
  * Factory of scene data
  */
 function createScenes () {
+    images.forEach(img => {
+        const oldKampos = kamposInstances.get(img);
+
+        if (oldKampos) {
+            oldKampos.destroy();
+            kamposInstances.delete(img);
+        }
+    });
+
     // get only scenes with active filter
     const filterScenes = config.images
         .map((img, index) => [img.filter, images[index]])
@@ -421,6 +450,26 @@ function createScenes () {
         else if (type === 'focus') {
             extra.radius = filter.radius;
         }
+        else if (type === 'displacement') {
+            parent.dataset.canvas = '';
+            const target = scene.nextElementSibling;
+            const displacement = kampos.effects.displacement('DISCARD');
+            const instance = new kampos.Kampos({target, effects: [displacement]});
+            extra.displacement = displacement;
+            extra.kampos = instance;
+            displacement.map = scene;
+            function bootstrap () {
+                instance.setSource({media: scene, width: scene.naturalWidth, height: scene.naturalHeight});
+                instance.play();
+            }
+            if (scene.complete) {
+                bootstrap();
+            }
+            else {
+                scene.onload = bootstrap;
+            }
+            kamposInstances.set(scene, instance);
+        }
 
         return {
             effect: FILTERS[type],
@@ -445,12 +494,20 @@ function filterChange (i) {
     // returns a handler for filter state handler
     return function (v) {
         switch (v) {
+            case 'displacement':
+                parents[i].dataset.blend = '';
+                images[i].dataset.filter = '';
+                images[i].style.filter = '';
+                break;
             case 'difference':
             case 'dodge':
                 images[i].dataset.filter = '';
+                images[i].style.filter = '';
+                delete parents[i].dataset.canvas;
                 break;
             default:
                 parents[i].dataset.blend = '';
+                delete parents[i].dataset.canvas;
         }
 
         restart();
@@ -468,6 +525,8 @@ function filterToggle (i) {
         parents[i].dataset.blend = '';
         images[i].dataset.filter = '';
         images[i].style.filter = '';
+
+        delete parents[i].dataset.canvas;
 
         restart();
     };
