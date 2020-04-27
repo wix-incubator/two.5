@@ -43,14 +43,35 @@ function transform (scene, progress, velocity) {
 
     let scaleFactor = 0;
 
-    if (scene.zoomIn.active) {
-        const p = Math.max(progress - scene.zoomIn.start / 100 , 0);
-        scaleFactor = p * (scene.zoomIn.factor - 1);
+    if (scene.zoomIn.active && !scene.zoomOut.active) {
+        const start = scene.zoomIn.start / 100;
+        const duration = scene.zoomIn.end / 100 - start;
+        scaleFactor = getScaleFactor(start, duration, progress) * (scene.zoomIn.factor - 1);
     }
+    else if (scene.zoomOut.active && !scene.zoomIn.active) {
+        const start = scene.zoomOut.start / 100;
+        const duration = scene.zoomOut.end / 100 - start;
+        scaleFactor = (1 - getScaleFactor(start, duration, progress)) * (scene.zoomOut.factor - 1);
+    }
+    else if (scene.zoomIn.active && scene.zoomOut.active) {
+        const inStart = scene.zoomIn.start / 100;
+        const outStart = scene.zoomOut.start / 100;
+        const inEnd = scene.zoomIn.end / 100;
+        const outEnd = scene.zoomOut.end / 100;
+        const isDuringIn = progress >= inStart && progress <= inEnd;
+        // const isDuringOut = progress >= outStart && progress <= outEnd;
+        const inFirst = inStart < outStart;
+        const isAroundIn = inFirst ? progress < inStart || progress < outStart : progress > inEnd;
+        // const isAroundOut = inFirst ? progress > outEnd : progress < outStart || progress < inStart;
 
-    if (scene.zoomOut.active) {
-        const p = Math.max(progress - scene.zoomOut.start / 100 , 0);
-        scaleFactor = (1 - p) * (scene.zoomOut.factor - 1);
+        if (isDuringIn || isAroundIn) {
+            // inside in
+            scaleFactor = getScaleFactor(inStart, inEnd - inStart, progress) * (scene.zoomIn.factor - 1);
+        }
+        else {
+            // inside out
+            scaleFactor = (1 - getScaleFactor(outStart, outEnd - outStart, progress)) * (scene.zoomOut.factor - 1);
+        }
     }
 
     if (scaleFactor !== 0) {
@@ -59,17 +80,44 @@ function transform (scene, progress, velocity) {
 
     let opacity = 1;
 
-    if (scene.fadeIn.active) {
-        opacity = Math.max(progress - scene.fadeIn.start / 100 , 0);
+    if (scene.fadeIn.active && !scene.fadeOut.active) {
+        const start = scene.fadeIn.start / 100;
+        const duration = scene.fadeIn.end / 100 - start;
+        opacity = getScaleFactor(start, duration, progress);
     }
+    else if (scene.fadeOut.active && !scene.fadeIn.active) {
+        const start = scene.fadeOut.start / 100;
+        const duration = scene.fadeOut.end / 100 - start;
+        opacity = 1 - getScaleFactor(start, duration, progress);
+    }
+    else if (scene.fadeIn.active && scene.fadeOut.active) {
+        const inStart = scene.fadeIn.start / 100;
+        const outStart = scene.fadeOut.start / 100;
+        const inEnd = scene.fadeIn.end / 100;
+        const outEnd = scene.fadeOut.end / 100;
+        const isDuringIn = progress >= inStart && progress <= inEnd;
+        // const isDuringOut = progress >= outStart && progress <= outEnd;
+        const inFirst = inStart < outStart;
+        const isAroundIn = inFirst ? progress < inStart || progress < outStart : progress > inEnd;
+        // const isAroundOut = inFirst ? progress > outEnd : progress < outStart || progress < inStart;
 
-    if (scene.fadeOut.active) {
-        const p = Math.max(progress - scene.fadeOut.start / 100 , 0);
-        opacity = (1 - p);
+        if (isDuringIn || isAroundIn) {
+            // inside in
+            opacity = getScaleFactor(inStart, inEnd - inStart, progress);
+        }
+        else {
+            // inside out
+            opacity = 1 - getScaleFactor(outStart, outEnd - outStart, progress);
+        }
     }
 
     scene.element.style.opacity = opacity.toFixed(3);
     scene.element.style.transform = `${translate}${skew}${scale}`;
+}
+
+function getScaleFactor (start, duration, progress) {
+    const p = Math.min(Math.max(progress - start, 0), duration);
+    return map(p, 0, duration, 0, 1);
 }
 
 /*
@@ -168,23 +216,23 @@ function generateTransformsConfig () {
         zoomIn: {
             active: false,
             factor: 2,
-            // duration: 100,
+            end: 100,
             start: 0
         },
         zoomOut: {
             active: false,
             factor: 2,
-            // duration: 100,
+            end: 50,
             start: 0
         },
         fadeIn: {
             active: false,
-            // duration: 40,
+            end: 40,
             start: 15
         },
         fadeOut: {
             active: false,
-            // duration: 35,
+            end: 100,
             start: 65
         }
     };
@@ -292,9 +340,9 @@ function createTransformsControls (folder, config) {
         .onChange(restart);
     zoomIn.add(config.zoomIn, 'factor', 1.1, 4, 0.1)
         .onFinishChange(restart);
-    // zoomIn.add(config.zoomIn, 'duration', 0, 100, 5)
-    //     .onFinishChange(restart);
-    zoomIn.add(config.zoomIn, 'start', 0, 100, 5)
+    zoomIn.add(config.zoomIn, 'start', 0, 90, 5)
+        .onFinishChange(restart);
+    zoomIn.add(config.zoomIn, 'end', 10, 100, 5)
         .onFinishChange(restart);
 
     const zoomOut = folder.addFolder('Zoom Out');
@@ -302,29 +350,25 @@ function createTransformsControls (folder, config) {
         .onChange(restart);
     zoomOut.add(config.zoomOut, 'factor', 1.1, 4, 0.1)
         .onFinishChange(restart);
-    // zoomOut.add(config.zoomOut, 'duration', 0, 100, 5)
-    //     .onFinishChange(restart);
-    zoomOut.add(config.zoomOut, 'start', 0, 100, 5)
+    zoomOut.add(config.zoomOut, 'start', 0, 90, 5)
+        .onFinishChange(restart);
+    zoomOut.add(config.zoomOut, 'end', 10, 100, 5)
         .onFinishChange(restart);
 
     const fadeIn = folder.addFolder('Fade In');
     fadeIn.add(config.fadeIn, 'active')
         .onChange(restart);
-    // fadeIn.addColor(config.fadeIn, 'color')
-    //     .onFinishChange(restart);
-    // fadeIn.add(config.fadeIn, 'duration', 0, 100, 5)
-    //     .onFinishChange(restart);
-    fadeIn.add(config.fadeIn, 'start', 0, 100, 5)
+    fadeIn.add(config.fadeIn, 'start', 0, 90, 5)
+        .onFinishChange(restart);
+    fadeIn.add(config.fadeIn, 'end', 10, 100, 5)
         .onFinishChange(restart);
 
     const fadeOut = folder.addFolder('Fade Out');
     fadeOut.add(config.fadeOut, 'active')
         .onChange(restart);
-    // fadeOut.addColor(config.fadeOut, 'color')
-    //     .onFinishChange(restart);
-    // fadeOut.add(config.fadeOut, 'duration', 0, 100, 5)
-    //     .onFinishChange(restart);
     fadeOut.add(config.fadeOut, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+    fadeOut.add(config.fadeOut, 'end', 0, 100, 5)
         .onFinishChange(restart);
 }
 
@@ -687,4 +731,8 @@ function filterToggle (i) {
 function restart () {
     instance.off();
     instance = init();
+}
+
+function map (x, a, b, c, d) {
+    return (x - a) * (d - c) / (b - a) + c;
 }
