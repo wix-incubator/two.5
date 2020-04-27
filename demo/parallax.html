@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="cache-control" content="no-cache" />
+    <title>Two.5 scroll parallax demo</title>
+    <link rel="stylesheet" href="css/parallax.css?v=7">
+</head>
+<body>
+    <div id="wrapper">
+        <main>
+            <div class="strip" id="strip-1" data-speed="0" data-effects="bgparallax">
+                <div class="bg">
+                    <img src="https://picsum.photos/1920/1066?random=1"/>
+                </div>
+                <div class="content">
+                    <p>Speed 0 => Normal</p>
+                </div>
+            </div>
+
+            <div class="strip" id="strip-2" data-speed="0.25" data-effects="bgparallax">
+                <div class="bg">
+                    <img src="https://picsum.photos/1920/1066?random=2"/>
+                </div>
+                <div class="content">
+                    <p>Speed 0.25 => Slow Parallax</p>
+                    <div data-effects="cssanimation" class="shape" id="square"></div>
+                    <div data-effects="cssanimation" class="shape" id="hexagon"></div>
+                    <div data-effects="cssanimation" class="shape" id="circle"></div>
+                </div>
+            </div>
+
+            <div class="strip" id="strip-3" data-speed="0.5" data-effects="bgparallax">
+                <div class="bg">
+                    <img src="https://picsum.photos/1920/1066?random=3"/>
+                </div>
+                <div class="content">
+                    <p>Speed 0.5 => Parallax</p>
+                    <img class="photo" data-effects="parallax" src="https://picsum.photos/640/480?random=6"/>
+                    <img class="photo" data-effects="parallax" src="https://picsum.photos/240/480?random=7"/>
+                </div>
+            </div>
+
+            <div class="strip" id="strip-4" data-speed="0.75" data-effects="bgparallax">
+                <div class="bg">
+                    <img src="https://picsum.photos/1920/1066?random=4"/>
+                </div>
+                <div class="content">
+                    <p>Speed 0.75 => Fast Parallax</p>
+                    <div data-effects="cssanimation" class="shape" id="triangle"></div>
+                    <div data-effects="cssanimation" class="shape" id="frame"></div>
+                    <div data-effects="cssanimation" class="shape" id="star"></div>
+                </div>
+            </div>
+
+            <div class="strip" id="strip-5" data-speed="1" data-effects="bgparallax">
+                <div class="bg">
+                    <img src="https://picsum.photos/1920/1066?random=5"/>
+                </div>
+                <div class="content">
+                    <p>Speed 1 => Reveal</p>
+                </div>
+            </div>
+
+            <div class="strip footer">
+                <div class="content">
+                    <p>
+                        <a href="https://github.com/wix-incubator/two.5">Two.5 on Github</a>
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/parallax.js?v=11"></script>
+<!--    <script type="module" src="./parallax.js"></script>-->
+</body>
+</html>

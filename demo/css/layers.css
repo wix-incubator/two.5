@@ -1,0 +1,111 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+
+main {
+    display: grid;
+    width: 100vw;
+    height: 100vh;
+    grid-template-rows:  1fr;
+    grid-template-columns:  1fr;
+    place-items: center;
+    overflow: hidden;
+}
+
+.container {
+    display: none;
+    position: relative;
+    width: 800px;
+    height: 500px;
+    background: rebeccapurple;
+}
+
+@media (max-device-width: 800px) {
+    .container {
+        width: 100vw;
+        height: 100vh;
+    }
+}
+
+.shape {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: coral;
+}
+
+#square {
+    top: 17.5%;
+    left: 25%;
+    background: linear-gradient(45deg, aquamarine, fuchsia);
+}
+
+#hexagon {
+    top: 12.5%;
+    right: 28.75%;
+    -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: linear-gradient(135deg, cornflowerblue, chocolate);
+}
+
+#circle {
+    bottom: 12.5%;
+    right: 32.5%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, crimson, cornflowerblue);
+}
+
+#triangle {
+    top: 25%;
+    left: 31.25%;
+    -webkit-clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    background: linear-gradient(to bottom, tomato, steelblue);
+}
+
+#frame {
+    top: 12.5%;
+    right: 25%;
+    -webkit-clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 25%, 75% 25%, 75% 75%, 25% 75%, 25% 100%, 100% 100%, 100% 0%);
+    clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 25%, 75% 25%, 75% 75%, 25% 75%, 25% 100%, 100% 100%, 100% 0%);
+    background: linear-gradient(to top, hotpink, lightblue);
+}
+
+#star  {
+    bottom: 12.5%;
+    right: 31.25%;
+    -webkit-clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    background: linear-gradient(270deg, firebrick, darkblue);
+}
+
+.image {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+.image img {
+    width: 100%;
+}
+
+#images-container {
+    width: 648px;
+    height: 652px;
+}
+
+@media (max-device-width: 648px) {
+    .container {
+        width: 100vw;
+        height: 100vh;
+    }
+}
+
+[data-scene="images"] #images-container {
+    display: block;
+}
+
+[data-scene="shapes"] #shapes-container {
+    display: block;
+}
