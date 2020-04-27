@@ -12,7 +12,7 @@
     "demo:clear": "rm -rf docs/demo/*",
     "demo:build": "npm run demo:clear && npm run demo:copy && rollup -c rollup-demo.config.js",
     "demo": "npm run build && npm run demo:build",
-    "demo:watch": "npm run build -w && npm run copy && npm run demo:build -w",
+    "demo:watch": "npm run build -w && npm run demo:build -w",
     "demo:start": "npm run demo && npm run start",
     "start:watch": "npm run demo:watch && npm run start"
   },

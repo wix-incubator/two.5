@@ -803,7 +803,7 @@
       return obj === false || obj === true;
     },
     isFunction: function isFunction(obj) {
-      return obj instanceof Function;
+      return Object.prototype.toString.call(obj) === '[object Function]';
     }
   };
   var INTERPRETATIONS = [{
@@ -1303,9 +1303,8 @@
   });
   Object.defineProperty(Color.prototype, 'hex', {
     get: function get$$1() {
-      if (this.__state.space !== 'HEX') {
+      if (!this.__state.space !== 'HEX') {
         this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
-        this.__state.space = 'HEX';
       }
 
       return this.__state.hex;

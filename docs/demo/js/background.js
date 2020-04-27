@@ -3043,7 +3043,7 @@ void main() {
       return obj === false || obj === true;
     },
     isFunction: function isFunction(obj) {
-      return obj instanceof Function;
+      return Object.prototype.toString.call(obj) === '[object Function]';
     }
   };
   var INTERPRETATIONS = [{
@@ -3543,9 +3543,8 @@ void main() {
   });
   Object.defineProperty(Color.prototype, 'hex', {
     get: function get$$1() {
-      if (this.__state.space !== 'HEX') {
+      if (!this.__state.space !== 'HEX') {
         this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
-        this.__state.space = 'HEX';
       }
 
       return this.__state.hex;
@@ -6265,7 +6264,14 @@ void main() {
 
     document.body.appendChild(stats.dom); // create scenes
 
-    const scenes = createScenes(); // create new scroll controller
+    const scenes = createScenes();
+
+    if (!config.scene.container) {
+      wrapper.style.position = 'static';
+      wrapper.style.height = 'auto';
+      wrapper.style.overflow = 'visible';
+    } // create new scroll controller
+
 
     const parallax = new Scroll({
       container: config.scene.container ? container : null,
@@ -6332,6 +6338,9 @@ void main() {
       if (transforms.translateX.active) {
         img.style.width = '200%';
         img.style.objectFit = 'scale-down';
+      } else {
+        img.style.width = '100%';
+        img.style.objectFit = 'cover';
       }
 
       return {

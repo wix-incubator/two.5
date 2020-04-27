@@ -534,6 +534,12 @@ function init () {
     // create scenes
     const scenes = createScenes();
 
+    if (!config.scene.container) {
+        wrapper.style.position = 'static';
+        wrapper.style.height = 'auto';
+        wrapper.style.overflow = 'visible';
+    }
+
     // create new scroll controller
     const parallax = new Scroll({
         container: config.scene.container ? container : null,
@@ -609,6 +615,10 @@ function createScenes () {
         if (transforms.translateX.active) {
             img.style.width = '200%';
             img.style.objectFit = 'scale-down';
+        }
+        else {
+            img.style.width = '100%';
+            img.style.objectFit = 'cover';
         }
 
         return {
