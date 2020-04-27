@@ -6,14 +6,15 @@
   "scripts": {
     "test": "test",
     "build": "rollup -c",
-    "copy": "cp index.js ./docs/demo/two.5.js",
-    "demo:build:single": "cd docs/demo && rollup -c single.config.js && cd -",
-    "demo:build:layers": "cd docs/demo && rollup -c layers.config.js && cd -",
-    "demo:build:parallax": "cd docs/demo && rollup -c parallax.config.js && cd -",
-    "demo:build:background": "cd docs/demo && rollup -c background.config.js && cd -",
-    "demo:build": "npm run demo:build:single && npm run demo:build:layers && npm run demo:build:parallax && npm run demo:build:background",
-    "demo": "npm run build && npm run copy && npm run demo:build",
-    "demo:start": "npm run demo && http-server ./docs/demo"
+    "watch": "rollup -c -w",
+    "start": "http-server ./docs/demo -o",
+    "demo:copy": "cp demo/*.html docs/demo && cp -r demo/static docs/demo/static && cp -r demo/css docs/demo/css",
+    "demo:clear": "rm -rf docs/demo/*",
+    "demo:build": "npm run demo:clear && npm run demo:copy && rollup -c rollup-demo.config.js",
+    "demo": "npm run build && npm run demo:build",
+    "demo:watch": "npm run build -w && npm run copy && npm run demo:build -w",
+    "demo:start": "npm run demo && npm run start",
+    "start:watch": "npm run demo:watch && npm run start"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,7 @@
-import { Scroll } from './two.5.js';
-import kampos from '../../node_modules/kampos/src/index.js';
-import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
-import Stats from '../../node_modules/stats.js/src/Stats.js';
+import { Scroll } from '../../index.js';
+import kampos from '../../node_modules/kampos/src/index';
+import * as dat from '../../node_modules/dat.gui/build/dat.gui.module';
+import Stats from '../../node_modules/stats.js/src/Stats';
 
 /*
  * Effects

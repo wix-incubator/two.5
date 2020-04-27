@@ -1,6 +1,6 @@
-import { Scroll } from './two.5.js';
-import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
-import Stats from '../../node_modules/stats.js/src/Stats.js';
+import { Scroll } from '../../index.js';
+import * as dat from '../../node_modules/dat.gui/build/dat.gui.module';
+import Stats from '../../node_modules/stats.js/src/Stats';
 
 function translateY (scene, progress) {
     scene.element.style.transform = `translate3d(0px, ${(progress * scene.duration - scene.offset) * scene.speed}px, 0px)`;

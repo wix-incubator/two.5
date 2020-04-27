@@ -1,6 +1,6 @@
-import { Tilt } from './two.5.js';
-import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
-import Stats from '../../node_modules/stats.js/src/Stats.js';
+import { Tilt } from '../../index.js';
+import * as dat from '../../node_modules/dat.gui/build/dat.gui.module';
+import Stats from '../../node_modules/stats.js/src/Stats';
 
 const stats = new Stats();
 stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
