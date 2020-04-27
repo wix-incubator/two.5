@@ -1,0 +1,164 @@
+:root {
+    --strip-height: 1000px;
+}
+
+body {
+    margin: 0;
+}
+
+main {
+    /*will-change: transform;*/
+}
+
+.root {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.strip {
+    position: relative;
+    display: grid;
+    grid-template: 100% / 100%;
+    grid-template-areas: "strip";
+    text-align: center;
+    border-bottom: 1px solid #000;
+    height: var(--strip-height);
+}
+
+.strip .bg {
+    grid-area: strip;
+    place-self: stretch;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.strip .bg img {
+    width: 100%;
+    height: 100vh;
+    min-height: var(--strip-height);
+    object-fit: cover;
+    will-change: transform;
+    transform: translate3d(0px, 0px, 0px);
+}
+
+.strip .content {
+    grid-area: strip;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.strip .content p {
+    padding: 2em;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.content .photo {
+    opacity: 0.66;
+}
+
+.content .photo:nth-of-type(2) {
+    margin-left: -10em;
+}
+
+[data-blend="difference"] img {
+    mix-blend-mode: difference;
+}
+
+[data-blend="dodge"] img {
+    mix-blend-mode: color-dodge;
+}
+
+.footer {
+    height: auto;
+}
+
+@keyframes slideRight {
+    from {
+        opacity: 0.001;
+        transform: translateX(-200px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0px);
+    }
+}
+
+@keyframes slideLeft {
+    from {
+        opacity: 0.001;
+        transform: translateX(200px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0px);
+    }
+}
+
+.shape {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: coral;
+}
+
+[data-effects~="cssanimation"] {
+    animation-play-state: paused;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    animation-timing-function: linear;
+}
+
+#square {
+    top: 17.5%;
+    left: 25%;
+    background: linear-gradient(45deg, aquamarine, fuchsia);
+    animation-name: slideRight;
+}
+
+#hexagon {
+    top: 12.5%;
+    right: 28.75%;
+    -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: linear-gradient(135deg, cornflowerblue, chocolate);
+    animation-name: slideLeft;
+}
+
+#circle {
+    bottom: 32.5%;
+    right: 32.5%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, crimson, cornflowerblue);
+    animation-name: slideLeft;
+}
+
+#triangle {
+    top: 25%;
+    left: 31.25%;
+    -webkit-clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    background: linear-gradient(to bottom, tomato, steelblue);
+    animation-name: slideRight;
+}
+
+#frame {
+    top: 12.5%;
+    right: 25%;
+    -webkit-clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 25%, 75% 25%, 75% 75%, 25% 75%, 25% 100%, 100% 100%, 100% 0%);
+    clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 25%, 75% 25%, 75% 75%, 25% 75%, 25% 100%, 100% 100%, 100% 0%);
+    background: linear-gradient(to top, hotpink, lightblue);
+    animation-name: slideLeft;
+}
+
+#star  {
+    bottom: 32.5%;
+    right: 31.25%;
+    -webkit-clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    background: linear-gradient(270deg, firebrick, darkblue);
+    animation-name: slideRight;
+}
