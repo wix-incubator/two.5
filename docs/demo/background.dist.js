@@ -5861,7 +5861,7 @@ void main() {
       let skewY = 0;
 
       if (scene.skewY.velocity) {
-        skewY = velocity * scene.angle;
+        skewY = velocity * scene.skewY.angle;
       } else {
         const p = Math.min(Math.max(progress - scene.skewY.start / 100, 0), scene.skewY.end / 100);
         skewY = (p * 2 - 1) * scene.skewY.angle;
