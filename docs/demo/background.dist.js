@@ -5840,7 +5840,7 @@ void main() {
    */
 
   function transform(scene, progress, velocity) {
-    let translateY,
+    let translateY = 0,
         translateX = 0;
     let skew = '';
     let scale = '';
@@ -5852,7 +5852,7 @@ void main() {
 
     if (scene.translateX.active) {
       const p = Math.min(Math.max(progress - scene.translateX.start / 100, 0), scene.translateX.end / 100);
-      translateX = (p * scene.duration - scene.offset) * scene.translateX.speed;
+      translateX = (p * 2 - 1) * scene.xOffset * scene.translateX.speed;
     }
 
     const translate = `translate3d(${translateX}px, ${translateY}px, 0px)`;
@@ -5864,22 +5864,22 @@ void main() {
         skewY = velocity * scene.angle;
       } else {
         const p = Math.min(Math.max(progress - scene.skewY.start / 100, 0), scene.skewY.end / 100);
-        skewY = (p * 2 - 1) * scene.angle;
+        skewY = (p * 2 - 1) * scene.skewY.angle;
       }
 
       skew = ` skewY(${skewY}deg)`;
     }
 
-    let scaleFactor = 1;
+    let scaleFactor = 0;
 
     if (scene.zoomIn.active) {
       const p = Math.max(progress - scene.zoomIn.start / 100, 0);
-      scaleFactor *= p * (scene.zoomIn.factor - 1);
+      scaleFactor = p * (scene.zoomIn.factor - 1);
     }
 
     if (scene.zoomOut.active) {
       const p = Math.max(progress - scene.zoomOut.start / 100, 0);
-      scaleFactor *= (1 - p) * (scene.zoomOut.factor - 1);
+      scaleFactor = (1 - p) * (scene.zoomOut.factor - 1);
     }
 
     if (scaleFactor !== 0) {
@@ -5987,7 +5987,7 @@ void main() {
       },
       translateX: {
         active: false,
-        speed: 0,
+        speed: 0.5,
         end: 100,
         start: 0
       },
@@ -6296,6 +6296,11 @@ void main() {
         parent.style.backgroundColor = config.images[index].bgColor;
       }
 
+      if (transforms.translateX.active) {
+        img.style.width = '200%';
+        img.style.objectFit = 'scale-down';
+      }
+
       return {
         effect: transform,
         start,
@@ -6303,6 +6308,7 @@ void main() {
         element: img,
         pauseDuringSnap: true,
         offset: viewportHeight,
+        xOffset: (img.offsetWidth - parent.offsetWidth) / 2,
         ...transforms
       };
     }) // create configs for filter effect scenes
