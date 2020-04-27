@@ -1,0 +1,86 @@
+:root {
+    --strip-height: 1000px;
+}
+
+body {
+    margin: 0;
+}
+
+main {
+    /*will-change: transform;*/
+}
+
+.root {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.strip {
+    position: relative;
+    display: grid;
+    grid-template: 100% / 100%;
+    grid-template-areas: "strip";
+    text-align: center;
+    border-bottom: 1px solid #000;
+    height: var(--strip-height);
+}
+
+.strip .bg {
+    display: grid;
+    grid-template: "media" 100% / 100%;
+    grid-area: strip;
+    place-self: stretch;
+    place-items: center;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.strip .bg img {
+    grid-area: media;
+    width: 100%;
+    height: 100vh;
+    min-height: var(--strip-height);
+    object-fit: cover;
+    will-change: transform;
+    transform: translate3d(0px, 0px, 0px);
+}
+
+.strip canvas {
+    grid-area: media;
+    width: 100%;
+    height: 100vh;
+    min-height: var(--strip-height);
+    display: none;
+    z-index: 1;
+}
+
+.strip[data-canvas] canvas {
+    display: block;
+}
+
+.strip .content {
+    grid-area: strip;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.strip .content p {
+    padding: 2em;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+[data-blend="difference"] img {
+    mix-blend-mode: difference;
+}
+
+[data-blend="dodge"] img {
+    mix-blend-mode: color-dodge;
+}
+
+.footer {
+    height: auto;
+}
