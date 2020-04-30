@@ -191,8 +191,8 @@ function getEffect(config) {
 
       Object.assign(wrapper.style, {
         position: 'fixed',
-        width: '100vw',
-        height: '100vh',
+        width: '100%',
+        height: '100%',
         overflow: 'hidden'
       }); // get current scroll position (support window, element and window in IE)
 
