@@ -5842,6 +5842,8 @@ void main() {
   function transform(scene, progress, velocity) {
     let translateY = 0,
         translateX = 0;
+    let skewY = 0,
+        skewX = 0;
     let skew = '';
     let scale = '';
 
@@ -5858,18 +5860,24 @@ void main() {
     const translate = `translate3d(${translateX}px, ${translateY}px, 0px)`;
 
     if (scene.skewY.active) {
-      let skewY = 0;
-
       if (scene.skewY.velocity) {
         skewY = velocity * scene.skewY.angle;
       } else {
         const p = Math.min(Math.max(progress - scene.skewY.start / 100, 0), scene.skewY.end / 100);
         skewY = (p * 2 - 1) * scene.skewY.angle;
       }
-
-      skew = ` skewY(${skewY}deg)`;
     }
 
+    if (scene.skewX.active) {
+      if (scene.skewX.velocity) {
+        skewX = velocity * scene.skewX.angle;
+      } else {
+        const p = Math.min(Math.max(progress - scene.skewX.start / 100, 0), scene.skewX.end / 100);
+        skewX = (p * 2 - 1) * scene.skewX.angle;
+      }
+    }
+
+    skew = ` skew(${skewX}deg, ${skewY}deg)`;
     let scaleFactor = 0;
 
     if (scene.zoomIn.active && !scene.zoomOut.active) {
@@ -6038,6 +6046,13 @@ void main() {
         end: 100,
         start: 0
       },
+      skewX: {
+        active: false,
+        velocity: true,
+        angle: 20,
+        end: 100,
+        start: 0
+      },
       zoomIn: {
         active: false,
         factor: 2,
@@ -6125,19 +6140,25 @@ void main() {
     const panY = folder.addFolder('Pan Y');
     panY.add(config.translateY, 'active').onChange(restart);
     panY.add(config.translateY, 'speed', 0, 1, 0.05).onFinishChange(restart);
-    panY.add(config.translateY, 'end', 0, 100, 5).onFinishChange(restart);
     panY.add(config.translateY, 'start', 0, 100, 5).onFinishChange(restart);
+    panY.add(config.translateY, 'end', 0, 100, 5).onFinishChange(restart);
     const panX = folder.addFolder('Pan X');
     panX.add(config.translateX, 'active').onChange(restart);
     panX.add(config.translateX, 'speed', 0, 1, 0.05).onFinishChange(restart);
-    panX.add(config.translateX, 'end', 0, 100, 5).onFinishChange(restart);
     panX.add(config.translateX, 'start', 0, 100, 5).onFinishChange(restart);
+    panX.add(config.translateX, 'end', 0, 100, 5).onFinishChange(restart);
     const skewY = folder.addFolder('Skew Y');
     skewY.add(config.skewY, 'active').onChange(restart);
     skewY.add(config.skewY, 'velocity').onChange(restart);
     skewY.add(config.skewY, 'angle', 5, 40, 1).onFinishChange(restart);
-    skewY.add(config.skewY, 'end', 0, 100, 5).onFinishChange(restart);
     skewY.add(config.skewY, 'start', 0, 100, 5).onFinishChange(restart);
+    skewY.add(config.skewY, 'end', 0, 100, 5).onFinishChange(restart);
+    const skewX = folder.addFolder('Skew X');
+    skewX.add(config.skewX, 'active').onChange(restart);
+    skewX.add(config.skewX, 'velocity').onChange(restart);
+    skewX.add(config.skewX, 'angle', 5, 40, 1).onFinishChange(restart);
+    skewX.add(config.skewX, 'start', 0, 100, 5).onFinishChange(restart);
+    skewX.add(config.skewX, 'end', 0, 100, 5).onFinishChange(restart);
     const zoomIn = folder.addFolder('Zoom In');
     zoomIn.add(config.zoomIn, 'active').onChange(restart);
     zoomIn.add(config.zoomIn, 'factor', 1.1, 4, 0.1).onFinishChange(restart);
@@ -6279,7 +6300,7 @@ void main() {
       scenes,
       animationActive: true,
       animationFriction: config.scene.friction,
-      velocityActive: config.images.some(img => img.transforms.skewY.active),
+      velocityActive: config.images.some(img => img.transforms.skewY.active || img.transforms.skewX.active),
       velocityMax: 10
     }); // activate
 
