@@ -568,9 +568,15 @@ function init () {
         wrapper.style.overflow = 'visible';
     }
 
+    const scrollContainer = config.scene.container ? container : null;
+
+    if (!scrollContainer) {
+        container.style.transform = 'none';
+    }
+
     // create new scroll controller
     const parallax = new Scroll({
-        container: config.scene.container ? container : null,
+        container: scrollContainer,
         wrapper,
         scenes,
         animationActive: true,
@@ -635,6 +641,8 @@ function createScenes () {
         const duration = parentHeight + viewportHeight;
 
         const transforms = config.images[index].transforms;
+        const filter = config.images[index].filter;
+        const hasWebGL = filter.active && filter.type === 'displacement';
 
         if (transforms.fadeIn.active || transforms.fadeOut.active) {
             parent.style.backgroundColor = config.images[index].bgColor;
@@ -653,7 +661,7 @@ function createScenes () {
             effect: transform,
             start,
             duration,
-            element: img,
+            element: hasWebGL ? img.nextElementSibling : img,
             pauseDuringSnap: true,
             offset: viewportHeight,
             xOffset: (img.offsetWidth - parent.offsetWidth) / 2,
@@ -682,7 +690,7 @@ function createScenes () {
             extra.radius = filter.radius;
         }
         else if (type === 'displacement') {
-            parent.dataset.canvas = '';
+            parent.dataset.canvas = 'displacement';
             const target = scene.nextElementSibling;
             const displacement = kampos.effects.displacement('DISCARD');
             const instance = new kampos.Kampos({target, effects: [displacement]});

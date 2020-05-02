@@ -84,3 +84,7 @@ main {
 .footer {
     height: auto;
 }
+
+.dg.ac {
+    z-index: 1 !important;
+}
