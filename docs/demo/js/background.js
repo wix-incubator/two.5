@@ -3043,7 +3043,7 @@ void main() {
       return obj === false || obj === true;
     },
     isFunction: function isFunction(obj) {
-      return Object.prototype.toString.call(obj) === '[object Function]';
+      return obj instanceof Function;
     }
   };
   var INTERPRETATIONS = [{
@@ -3543,8 +3543,9 @@ void main() {
   });
   Object.defineProperty(Color.prototype, 'hex', {
     get: function get$$1() {
-      if (!this.__state.space !== 'HEX') {
+      if (this.__state.space !== 'HEX') {
         this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
+        this.__state.space = 'HEX';
       }
 
       return this.__state.hex;
@@ -6023,7 +6024,7 @@ void main() {
     'blend-difference': 'difference',
     'blend-dodge': 'dodge'
   };
-  const gui = new GUI$1();
+  window.gui = new GUI$1();
 
   function generateTransformsConfig() {
     return {
@@ -6138,42 +6139,50 @@ void main() {
 
   function createTransformsControls(folder, config) {
     const panY = folder.addFolder('Pan Y');
+    gui.remember(config.translateY);
     panY.add(config.translateY, 'active').onChange(restart);
     panY.add(config.translateY, 'speed', 0, 1, 0.05).onFinishChange(restart);
     panY.add(config.translateY, 'start', 0, 100, 5).onFinishChange(restart);
     panY.add(config.translateY, 'end', 0, 100, 5).onFinishChange(restart);
     const panX = folder.addFolder('Pan X');
+    gui.remember(config.translateX);
     panX.add(config.translateX, 'active').onChange(restart);
     panX.add(config.translateX, 'speed', 0, 1, 0.05).onFinishChange(restart);
     panX.add(config.translateX, 'start', 0, 100, 5).onFinishChange(restart);
     panX.add(config.translateX, 'end', 0, 100, 5).onFinishChange(restart);
     const skewY = folder.addFolder('Skew Y');
+    gui.remember(config.skewY);
     skewY.add(config.skewY, 'active').onChange(restart);
     skewY.add(config.skewY, 'velocity').onChange(restart);
     skewY.add(config.skewY, 'angle', 5, 40, 1).onFinishChange(restart);
     skewY.add(config.skewY, 'start', 0, 100, 5).onFinishChange(restart);
     skewY.add(config.skewY, 'end', 0, 100, 5).onFinishChange(restart);
     const skewX = folder.addFolder('Skew X');
+    gui.remember(config.skewX);
     skewX.add(config.skewX, 'active').onChange(restart);
     skewX.add(config.skewX, 'velocity').onChange(restart);
     skewX.add(config.skewX, 'angle', 5, 40, 1).onFinishChange(restart);
     skewX.add(config.skewX, 'start', 0, 100, 5).onFinishChange(restart);
     skewX.add(config.skewX, 'end', 0, 100, 5).onFinishChange(restart);
     const zoomIn = folder.addFolder('Zoom In');
+    gui.remember(config.zoomIn);
     zoomIn.add(config.zoomIn, 'active').onChange(restart);
     zoomIn.add(config.zoomIn, 'factor', 1.1, 4, 0.1).onFinishChange(restart);
     zoomIn.add(config.zoomIn, 'start', 0, 90, 5).onFinishChange(restart);
     zoomIn.add(config.zoomIn, 'end', 10, 100, 5).onFinishChange(restart);
     const zoomOut = folder.addFolder('Zoom Out');
+    gui.remember(config.zoomOut);
     zoomOut.add(config.zoomOut, 'active').onChange(restart);
     zoomOut.add(config.zoomOut, 'factor', 1.1, 4, 0.1).onFinishChange(restart);
     zoomOut.add(config.zoomOut, 'start', 0, 90, 5).onFinishChange(restart);
     zoomOut.add(config.zoomOut, 'end', 10, 100, 5).onFinishChange(restart);
     const fadeIn = folder.addFolder('Fade In');
+    gui.remember(config.fadeIn);
     fadeIn.add(config.fadeIn, 'active').onChange(restart);
     fadeIn.add(config.fadeIn, 'start', 0, 90, 5).onFinishChange(restart);
     fadeIn.add(config.fadeIn, 'end', 10, 100, 5).onFinishChange(restart);
     const fadeOut = folder.addFolder('Fade Out');
+    gui.remember(config.fadeOut);
     fadeOut.add(config.fadeOut, 'active').onChange(restart);
     fadeOut.add(config.fadeOut, 'start', 0, 100, 5).onFinishChange(restart);
     fadeOut.add(config.fadeOut, 'end', 0, 100, 5).onFinishChange(restart);
@@ -6184,6 +6193,7 @@ void main() {
 
 
   const sceneConfig = gui.addFolder('Scene config');
+  gui.remember(config.scene);
   sceneConfig.add(config.scene, 'container').onChange(restart);
   sceneConfig.add(config.scene, 'friction', 0, 0.95, 0.05).onFinishChange(restart);
   sceneConfig.open();
@@ -6192,6 +6202,8 @@ void main() {
    */
 
   const image1 = gui.addFolder('Image 1');
+  gui.remember(config.images[0]);
+  gui.remember(config.images[0].filter);
   image1.addColor(config.images[0], 'bgColor').onFinishChange(restart);
   const image1Transforms = image1.addFolder('Transforms');
   image1Transforms.open();
@@ -6208,6 +6220,8 @@ void main() {
    */
 
   const image2 = gui.addFolder('Image 2');
+  gui.remember(config.images[1]);
+  gui.remember(config.images[1].filter);
   image2.addColor(config.images[1], 'bgColor').onFinishChange(restart);
   const image2Transforms = image2.addFolder('Transforms');
   image2Transforms.open();
@@ -6224,6 +6238,8 @@ void main() {
    */
 
   const image3 = gui.addFolder('image 3');
+  gui.remember(config.images[2]);
+  gui.remember(config.images[2].filter);
   image3.addColor(config.images[2], 'bgColor').onFinishChange(restart);
   const image3Transforms = image3.addFolder('Transforms');
   image3Transforms.open();
@@ -6240,6 +6256,8 @@ void main() {
    */
 
   const image4 = gui.addFolder('Image 4');
+  gui.remember(config.images[3]);
+  gui.remember(config.images[3].filter);
   image4.addColor(config.images[3], 'bgColor').onFinishChange(restart);
   const image4Transforms = image4.addFolder('Transforms');
   image4Transforms.open();
@@ -6256,6 +6274,8 @@ void main() {
    */
 
   const image5 = gui.addFolder('Image 5');
+  gui.remember(config.images[4]);
+  gui.remember(config.images[4].filter);
   image5.addColor(config.images[4], 'bgColor').onFinishChange(restart);
   const image5Transforms = image5.addFolder('Transforms');
   image5Transforms.open();
