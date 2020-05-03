@@ -199,7 +199,7 @@ const FILTER_CONF = {
     'blend-dodge': 'dodge'
 };
 
-const gui = new dat.GUI();
+window.gui = new dat.GUI();
 
 function generateTransformsConfig () {
     return {
@@ -320,6 +320,8 @@ const config = {
 
 function createTransformsControls (folder, config) {
     const panY = folder.addFolder('Pan Y');
+    gui.remember(config.translateY)
+
     panY.add(config.translateY, 'active')
         .onChange(restart);
     panY.add(config.translateY, 'speed', 0, 1, 0.05)
@@ -330,6 +332,8 @@ function createTransformsControls (folder, config) {
         .onFinishChange(restart);
 
     const panX = folder.addFolder('Pan X');
+    gui.remember(config.translateX)
+
     panX.add(config.translateX, 'active')
         .onChange(restart);
     panX.add(config.translateX, 'speed', 0, 1, 0.05)
@@ -340,6 +344,8 @@ function createTransformsControls (folder, config) {
         .onFinishChange(restart);
 
     const skewY = folder.addFolder('Skew Y');
+    gui.remember(config.skewY)
+
     skewY.add(config.skewY, 'active')
         .onChange(restart);
     skewY.add(config.skewY, 'velocity')
@@ -352,6 +358,8 @@ function createTransformsControls (folder, config) {
         .onFinishChange(restart);
 
     const skewX = folder.addFolder('Skew X');
+    gui.remember(config.skewX)
+
     skewX.add(config.skewX, 'active')
         .onChange(restart);
     skewX.add(config.skewX, 'velocity')
@@ -364,6 +372,8 @@ function createTransformsControls (folder, config) {
         .onFinishChange(restart);
 
     const zoomIn = folder.addFolder('Zoom In');
+    gui.remember(config.zoomIn)
+
     zoomIn.add(config.zoomIn, 'active')
         .onChange(restart);
     zoomIn.add(config.zoomIn, 'factor', 1.1, 4, 0.1)
@@ -374,6 +384,8 @@ function createTransformsControls (folder, config) {
         .onFinishChange(restart);
 
     const zoomOut = folder.addFolder('Zoom Out');
+    gui.remember(config.zoomOut)
+
     zoomOut.add(config.zoomOut, 'active')
         .onChange(restart);
     zoomOut.add(config.zoomOut, 'factor', 1.1, 4, 0.1)
@@ -384,6 +396,8 @@ function createTransformsControls (folder, config) {
         .onFinishChange(restart);
 
     const fadeIn = folder.addFolder('Fade In');
+    gui.remember(config.fadeIn)
+
     fadeIn.add(config.fadeIn, 'active')
         .onChange(restart);
     fadeIn.add(config.fadeIn, 'start', 0, 90, 5)
@@ -392,6 +406,8 @@ function createTransformsControls (folder, config) {
         .onFinishChange(restart);
 
     const fadeOut = folder.addFolder('Fade Out');
+    gui.remember(config.fadeOut)
+
     fadeOut.add(config.fadeOut, 'active')
         .onChange(restart);
     fadeOut.add(config.fadeOut, 'start', 0, 100, 5)
@@ -405,6 +421,7 @@ function createTransformsControls (folder, config) {
  */
 
 const sceneConfig = gui.addFolder('Scene config');
+gui.remember(config.scene)
 
 sceneConfig.add(config.scene, 'container')
     .onChange(restart);
@@ -417,6 +434,8 @@ sceneConfig.open();
  * Image 1 controls
  */
 const image1 = gui.addFolder('Image 1');
+gui.remember(config.images[0])
+gui.remember(config.images[0].filter)
 
 image1.addColor(config.images[0], 'bgColor')
     .onFinishChange(restart);
@@ -443,6 +462,8 @@ image1Filters.add(config.images[0].filter, 'hue', 0, 359, 5)
  * Image 2 controls
  */
 const image2 = gui.addFolder('Image 2');
+gui.remember(config.images[1])
+gui.remember(config.images[1].filter)
 
 image2.addColor(config.images[1], 'bgColor')
     .onFinishChange(restart);
@@ -469,6 +490,8 @@ image2Filters.add(config.images[1].filter, 'hue', 0, 359, 5)
  * Image 3 controls
  */
 const image3 = gui.addFolder('image 3');
+gui.remember(config.images[2])
+gui.remember(config.images[2].filter)
 
 image3.addColor(config.images[2], 'bgColor')
     .onFinishChange(restart);
@@ -495,6 +518,8 @@ image3Filters.add(config.images[2].filter, 'hue', 0, 359, 5)
  * Image 4 controls
  */
 const image4 = gui.addFolder('Image 4');
+gui.remember(config.images[3])
+gui.remember(config.images[3].filter)
 
 image4.addColor(config.images[3], 'bgColor')
     .onFinishChange(restart);
@@ -521,6 +546,8 @@ image4Filters.add(config.images[3].filter, 'hue', 0, 359, 5)
  * Image 5 controls
  */
 const image5 = gui.addFolder('Image 5');
+gui.remember(config.images[4])
+gui.remember(config.images[4].filter)
 
 image5.addColor(config.images[4], 'bgColor')
     .onFinishChange(restart);
