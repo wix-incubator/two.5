@@ -506,12 +506,14 @@ function createTransformsControls (folder, config) {
 const sceneConfig = gui.addFolder('Scene config');
 gui.remember(config.scene)
 
+sceneConfig.add(config.scene, 'Save to File')
+sceneConfig.add(config.scene, 'Load from File')
+
 sceneConfig.add(config.scene, 'container')
     .onChange(restart);
 sceneConfig.add(config.scene, 'friction', 0, 0.95, 0.05)
     .onFinishChange(restart);
-sceneConfig.add(config.scene, 'Save to File')
-sceneConfig.add(config.scene, 'Load from File')
+
 sceneConfig.open();
 
 /*
