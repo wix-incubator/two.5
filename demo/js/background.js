@@ -307,9 +307,14 @@ function generateTransformsConfig () {
         }
     };
 }
-
 const config = {
     scene: {
+        'Save to File': function() {
+            download(getValues(), `background-effects-${getTimeStamp()}.txt`, 'text/plain');
+        },
+        'Load from File': function() {
+            upload(); // stub
+        },
         container: true,
         friction: 0.8
     },
@@ -505,7 +510,8 @@ sceneConfig.add(config.scene, 'container')
     .onChange(restart);
 sceneConfig.add(config.scene, 'friction', 0, 0.95, 0.05)
     .onFinishChange(restart);
-
+sceneConfig.add(config.scene, 'Save to File')
+sceneConfig.add(config.scene, 'Load from File')
 sceneConfig.open();
 
 /*
@@ -886,4 +892,91 @@ function restart () {
 
 function map (x, a, b, c, d) {
     return (x - a) * (d - c) / (b - a) + c;
+}
+
+/**
+ * Get a date string
+ * @returns {string} YYYY-MM-DD-HH:MM:SS
+ */
+function getTimeStamp() {
+    const date = new Date();
+    return `${date.toISOString().split('T')[0]}-${date.toLocaleTimeString('en-US', { hour12: false })}`
+}
+
+/**
+ * Download data to a file
+ * https://stackoverflow.com/a/30832210
+ * @param {string} data the file contents
+ * @param {string} filename the file to save
+ * @param {string} type file mime type ('text/plain' etc.)
+ */
+function download(data, filename, type) {
+    const file = new Blob([data], {type: type});
+    const a = document.createElement("a");
+    const url = URL.createObjectURL(file);
+
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+
+    a.click();
+    setTimeout(function() {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 0);
+}
+
+/**
+ * Read data from a text file
+ * https://stackoverflow.com/a/45815534
+ */
+function upload() {
+    //alert('Not implemented yet')
+    const input = document.createElement("input");
+    input.type = 'file'
+    input.accept = 'text/plain'
+    input.onchange = function () {
+      if (this.files && this.files[0]) {
+        var myFile = this.files[0];
+        var reader = new FileReader();
+
+        reader.addEventListener('load', function (e) {
+            setValues(JSON.parse(e.target.result));
+        });
+
+        reader.readAsBinaryString(myFile);
+      }
+    };
+    document.body.appendChild(input);
+
+    input.click();
+    setTimeout(function() {
+        document.body.removeChild(input);
+    }, 0);
+}
+
+/**
+ * @param {Object<Object>} values in the format of the output of getValues()
+ * [
+ *   0: {
+ *     "someKey": "value",
+ *     "otherKey": "otherVlaue"
+ *   },
+ *   1: {
+ *     "thirdKey": "thirdValue"
+ *   },
+ *   ...
+ * ]
+ */
+function setValues(rememberedValues) {
+    rememberedValues.forEach((values, index) => {
+        Object.keys(values).forEach((key) => {
+            const controller = gui.__rememberedObjectIndecesToControllers[index][key];
+            controller && controller.setValue(values[key]);
+        });
+    });
+}
+
+function getValues() {
+    return JSON.stringify(gui.__rememberedObjects, null, 2);
 }
