@@ -5845,8 +5845,10 @@ void main() {
         translateX = 0;
     let skewY = 0,
         skewX = 0;
+    let rotationAngle = 0;
     let skew = '';
     let scale = '';
+    let rotate = '';
 
     if (scene.translateY.active) {
       const p = Math.min(Math.max(progress - scene.translateY.start / 100, 0), scene.translateY.end / 100);
@@ -5878,7 +5880,40 @@ void main() {
       }
     }
 
-    skew = ` skew(${skewX}deg, ${skewY}deg)`;
+    skew = `skew(${skewX}deg, ${skewY}deg)`; // -------
+
+    if (scene.rotateIn.active && !scene.rotateOut.active) {
+      const start = scene.rotateIn.start / 100;
+      const duration = scene.rotateIn.end / 100 - start;
+      rotationAngle = getScaleFactor(start, duration, progress) * scene.rotateIn.angle;
+    } else if (scene.rotateOut.active && !scene.rotateIn.active) {
+      const start = scene.rotateOut.start / 100;
+      const duration = scene.rotateOut.end / 100 - start;
+      rotationAngle = (1 - getScaleFactor(start, duration, progress)) * scene.rotateOut.angle;
+    } else if (scene.rotateIn.active && scene.rotateOut.active) {
+      const inStart = scene.rotateIn.start / 100;
+      const outStart = scene.rotateOut.start / 100;
+      const inEnd = scene.rotateIn.end / 100;
+      const outEnd = scene.rotateOut.end / 100;
+      const isDuringIn = progress >= inStart && progress <= inEnd; // const isDuringOut = progress >= outStart && progress <= outEnd;
+
+      const inFirst = inStart < outStart;
+      const isAroundIn = inFirst ? progress < inStart || progress < outStart : progress > inEnd; // const isAroundOut = inFirst ? progress > outEnd : progress < outStart || progress < inStart;
+
+      if (isDuringIn || isAroundIn) {
+        // inside in
+        rotationAngle = getScaleFactor(inStart, inEnd - inStart, progress) * scene.rotateIn.angle;
+      } else {
+        // inside out
+        rotationAngle = (1 - getScaleFactor(outStart, outEnd - outStart, progress)) * scene.rotateOut.angle;
+      }
+    }
+
+    if (rotationAngle !== 0) {
+      rotate = `rotate(${rotationAngle}deg)`;
+    } // -------
+
+
     let scaleFactor = 0;
 
     if (scene.zoomIn.active && !scene.zoomOut.active) {
@@ -5942,7 +5977,7 @@ void main() {
     }
 
     scene.element.style.opacity = opacity.toFixed(3);
-    scene.element.style.transform = `${translate}${skew}${scale}`;
+    scene.element.style.transform = `${translate} ${skew} ${scale} ${rotate}`;
   }
 
   function getScaleFactor(start, duration, progress) {
@@ -6075,6 +6110,18 @@ void main() {
         active: false,
         end: 100,
         start: 65
+      },
+      rotateIn: {
+        active: false,
+        angle: -30,
+        end: 100,
+        start: 50
+      },
+      rotateOut: {
+        active: false,
+        angle: 30,
+        end: 50,
+        start: 0
       }
     };
   }
@@ -6186,6 +6233,18 @@ void main() {
     fadeOut.add(config.fadeOut, 'active').onChange(restart);
     fadeOut.add(config.fadeOut, 'start', 0, 100, 5).onFinishChange(restart);
     fadeOut.add(config.fadeOut, 'end', 0, 100, 5).onFinishChange(restart);
+    const rotateIn = folder.addFolder('Rotate In');
+    gui.remember(config.rotateIn);
+    rotateIn.add(config.rotateIn, 'active').onChange(restart);
+    rotateIn.add(config.rotateIn, 'angle', -180, 180, 1).onFinishChange(restart);
+    rotateIn.add(config.rotateIn, 'start', 0, 100, 5).onFinishChange(restart);
+    rotateIn.add(config.rotateIn, 'end', 0, 100, 5).onFinishChange(restart);
+    const rotateOut = folder.addFolder('Rotate Out');
+    gui.remember(config.rotateOut);
+    rotateOut.add(config.rotateOut, 'active').onChange(restart);
+    rotateOut.add(config.rotateOut, 'angle', -180, 180, 1).onFinishChange(restart);
+    rotateOut.add(config.rotateOut, 'start', 0, 100, 5).onFinishChange(restart);
+    rotateOut.add(config.rotateOut, 'end', 0, 100, 5).onFinishChange(restart);
   }
   /*
    * Create controls for demo config
