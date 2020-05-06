@@ -3043,7 +3043,7 @@ void main() {
       return obj === false || obj === true;
     },
     isFunction: function isFunction(obj) {
-      return obj instanceof Function;
+      return Object.prototype.toString.call(obj) === '[object Function]';
     }
   };
   var INTERPRETATIONS = [{
@@ -3543,9 +3543,8 @@ void main() {
   });
   Object.defineProperty(Color.prototype, 'hex', {
     get: function get$$1() {
-      if (this.__state.space !== 'HEX') {
+      if (!this.__state.space !== 'HEX') {
         this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
-        this.__state.space = 'HEX';
       }
 
       return this.__state.hex;
@@ -6129,7 +6128,7 @@ void main() {
   const config = {
     scene: {
       'Save to File': function () {
-        download(getValues(), `background-effects-${getTimeStamp()}.txt`, 'text/plain');
+        download(getValues(), `background-effects-${getTimeStamp()}.txt`);
       },
       'Load from Files': function () {
         upload(); // stub
@@ -6138,6 +6137,7 @@ void main() {
       friction: 0.8
     },
     images: [{
+      height: 1000,
       bgColor: '#000',
       transforms: generateTransformsConfig(),
       filter: {
@@ -6148,6 +6148,7 @@ void main() {
         hue: 60
       }
     }, {
+      height: 1000,
       bgColor: '#000',
       transforms: generateTransformsConfig(),
       filter: {
@@ -6158,6 +6159,7 @@ void main() {
         hue: 60
       }
     }, {
+      height: 1000,
       bgColor: '#000',
       transforms: generateTransformsConfig(),
       filter: {
@@ -6168,6 +6170,7 @@ void main() {
         hue: 60
       }
     }, {
+      height: 1000,
       bgColor: '#000',
       transforms: generateTransformsConfig(),
       filter: {
@@ -6178,6 +6181,7 @@ void main() {
         hue: 60
       }
     }, {
+      height: 1000,
       bgColor: '#000',
       transforms: generateTransformsConfig(),
       filter: {
@@ -6189,6 +6193,11 @@ void main() {
       }
     }]
   };
+
+  function createImageControls(folder, config) {
+    folder.add(config, 'height', 100, 2000, 50).onFinishChange(restart);
+    folder.addColor(config, 'bgColor').onFinishChange(restart);
+  }
 
   function createTransformsControls(folder, config) {
     const panY = folder.addFolder('Pan Y');
@@ -6252,6 +6261,14 @@ void main() {
     rotateOut.add(config.rotateOut, 'start', 0, 100, 5).onFinishChange(restart);
     rotateOut.add(config.rotateOut, 'end', 0, 100, 5).onFinishChange(restart);
   }
+
+  function createFilterControls(folder, config) {
+    folder.add(config, 'active').onChange(filterToggle(0));
+    folder.add(config, 'type', FILTER_CONF).onChange(filterChange(0));
+    folder.add(config, 'start', 0, 100, 5).onChange(restart);
+    folder.add(config, 'radius', 5, 30, 1).onChange(restart);
+    folder.add(config, 'hue', 0, 359, 5).onChange(restart);
+  }
   /*
    * Create controls for demo config
    */
@@ -6271,17 +6288,13 @@ void main() {
   const image1 = gui.addFolder('Image 1');
   gui.remember(config.images[0]);
   gui.remember(config.images[0].filter);
-  image1.addColor(config.images[0], 'bgColor').onFinishChange(restart);
+  createImageControls(image1, config.images[0]);
   const image1Transforms = image1.addFolder('Transforms');
   image1Transforms.open();
   createTransformsControls(image1Transforms, config.images[0].transforms);
   const image1Filters = image1.addFolder('Filters'); // image1Filters.open();
 
-  image1Filters.add(config.images[0].filter, 'active').onChange(filterToggle(0));
-  image1Filters.add(config.images[0].filter, 'type', FILTER_CONF).onChange(filterChange(0));
-  image1Filters.add(config.images[0].filter, 'start', 0, 100, 5).onChange(restart);
-  image1Filters.add(config.images[0].filter, 'radius', 5, 30, 1).onChange(restart);
-  image1Filters.add(config.images[0].filter, 'hue', 0, 359, 5).onChange(restart);
+  createFilterControls(image1Filters, config.images[0].filter);
   /*
    * Image 2 controls
    */
@@ -6289,17 +6302,13 @@ void main() {
   const image2 = gui.addFolder('Image 2');
   gui.remember(config.images[1]);
   gui.remember(config.images[1].filter);
-  image2.addColor(config.images[1], 'bgColor').onFinishChange(restart);
+  createImageControls(image2, config.images[1]);
   const image2Transforms = image2.addFolder('Transforms');
   image2Transforms.open();
   createTransformsControls(image2Transforms, config.images[1].transforms);
   const image2Filters = image2.addFolder('Filters'); // image2Filters.open();
 
-  image2Filters.add(config.images[1].filter, 'active').onChange(filterToggle(1));
-  image2Filters.add(config.images[1].filter, 'type', FILTER_CONF).onChange(filterChange(1));
-  image2Filters.add(config.images[1].filter, 'start', 0, 100, 5).onChange(restart);
-  image2Filters.add(config.images[1].filter, 'radius', 5, 30, 1).onChange(restart);
-  image2Filters.add(config.images[1].filter, 'hue', 0, 359, 5).onChange(restart);
+  createFilterControls(image2Filters, config.images[1].filter);
   /*
    * Image 3 controls
    */
@@ -6307,17 +6316,13 @@ void main() {
   const image3 = gui.addFolder('image 3');
   gui.remember(config.images[2]);
   gui.remember(config.images[2].filter);
-  image3.addColor(config.images[2], 'bgColor').onFinishChange(restart);
+  createImageControls(image3, config.images[2]);
   const image3Transforms = image3.addFolder('Transforms');
   image3Transforms.open();
   createTransformsControls(image3Transforms, config.images[2].transforms);
   const image3Filters = image3.addFolder('Filters'); // image3Filters.open();
 
-  image3Filters.add(config.images[2].filter, 'active').onChange(filterToggle(2));
-  image3Filters.add(config.images[2].filter, 'type', FILTER_CONF).onChange(filterChange(2));
-  image3Filters.add(config.images[2].filter, 'start', 0, 100, 5).onChange(restart);
-  image3Filters.add(config.images[2].filter, 'radius', 5, 30, 1).onChange(restart);
-  image3Filters.add(config.images[2].filter, 'hue', 0, 359, 5).onChange(restart);
+  createFilterControls(image3Filters, config.images[2].filter);
   /*
    * Image 4 controls
    */
@@ -6325,17 +6330,13 @@ void main() {
   const image4 = gui.addFolder('Image 4');
   gui.remember(config.images[3]);
   gui.remember(config.images[3].filter);
-  image4.addColor(config.images[3], 'bgColor').onFinishChange(restart);
+  createImageControls(image4, config.images[3]);
   const image4Transforms = image4.addFolder('Transforms');
   image4Transforms.open();
   createTransformsControls(image4Transforms, config.images[3].transforms);
   const image4Filters = image4.addFolder('Filters'); // image4Filters.open();
 
-  image4Filters.add(config.images[3].filter, 'active').onChange(filterToggle(3));
-  image4Filters.add(config.images[3].filter, 'type', FILTER_CONF).onChange(filterChange(3));
-  image4Filters.add(config.images[3].filter, 'start', 0, 100, 5).onChange(restart);
-  image4Filters.add(config.images[3].filter, 'radius', 5, 30, 1).onChange(restart);
-  image4Filters.add(config.images[3].filter, 'hue', 0, 359, 5).onChange(restart);
+  createFilterControls(image4Filters, config.images[3].filter);
   /*
    * Image 5 controls
    */
@@ -6343,17 +6344,13 @@ void main() {
   const image5 = gui.addFolder('Image 5');
   gui.remember(config.images[4]);
   gui.remember(config.images[4].filter);
-  image5.addColor(config.images[4], 'bgColor').onFinishChange(restart);
+  createImageControls(image5, config.images[4]);
   const image5Transforms = image5.addFolder('Transforms');
   image5Transforms.open();
   createTransformsControls(image5Transforms, config.images[4].transforms);
   const image5Filters = image5.addFolder('Filters'); // image5Filters.open();
 
-  image5Filters.add(config.images[4].filter, 'active').onChange(filterToggle(4));
-  image5Filters.add(config.images[4].filter, 'type', FILTER_CONF).onChange(filterChange(4));
-  image5Filters.add(config.images[4].filter, 'start', 0, 100, 5).onChange(restart);
-  image5Filters.add(config.images[4].filter, 'radius', 5, 30, 1).onChange(restart);
-  image5Filters.add(config.images[4].filter, 'hue', 0, 359, 5).onChange(restart);
+  createFilterControls(image5Filters, config.images[4].filter);
   let instance;
   let stats;
 
@@ -6446,17 +6443,17 @@ void main() {
       const transforms = config.images[index].transforms;
       const filter = config.images[index].filter;
       const hasWebGL = filter.active && filter.type === 'displacement';
+      /*
+       * Setup parents styling
+       */
 
-      if (transforms.fadeIn.active || transforms.fadeOut.active) {
-        parent.style.backgroundColor = config.images[index].bgColor;
-      }
+      parent.style.setProperty('--strip-height', `${config.images[index].height}px`);
+      parent.style.backgroundColor = config.images[index].bgColor;
 
       if (transforms.translateX.active) {
         img.style.width = '200%';
-        img.style.objectFit = 'scale-down';
       } else {
         img.style.width = '100%';
-        img.style.objectFit = 'cover';
       }
 
       return {
@@ -6609,13 +6606,13 @@ void main() {
    * https://stackoverflow.com/a/30832210
    * @param {string} data the file contents
    * @param {string} filename the file to save
-   * @param {string} type file mime type ('text/plain' etc.)
+   * @param {string} [type='text/plain'] file mime type ('text/plain' etc.)
    */
 
 
-  function download(data, filename, type) {
+  function download(data, filename, type = 'text/plain') {
     const file = new Blob([data], {
-      type: type
+      type
     });
     const a = document.createElement("a");
     const url = URL.createObjectURL(file);
@@ -6636,7 +6633,7 @@ void main() {
 
   function upload() {
     //alert('Not implemented yet')
-    const input = document.createElement("input");
+    const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'text/plain';
     input.multiple = 'multiple';
@@ -6662,7 +6659,7 @@ void main() {
     }, 0);
   }
   /**
-   * @param {Array<Object>} values in the format of the output of getValues()
+   * @param {Array<Object>} rememberedValues in the format of the output of getValues()
    * [
    *   {
    *     "someKey": "value",
