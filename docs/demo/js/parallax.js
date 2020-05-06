@@ -49,10 +49,7 @@
   const DEFAULTS = {
     horizontal: false,
 
-    scrollHandler({
-      container,
-      wrapper
-    }, x, y) {
+    scrollHandler(container, wrapper, x, y) {
       container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
     }
 
@@ -253,10 +250,7 @@
 
       if (container) {
         // handle content scrolling
-        _config.scrollHandler({
-          container,
-          wrapper
-        }, _x, _y);
+        _config.scrollHandler(container, wrapper, _x, _y);
       }
       /*
        * Perform scene progression.

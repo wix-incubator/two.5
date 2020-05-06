@@ -58,10 +58,7 @@ function lerp(a, b, t) {
 const DEFAULTS = {
   horizontal: false,
 
-  scrollHandler({
-    container,
-    wrapper
-  }, x, y) {
+  scrollHandler(container, wrapper, x, y) {
     container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
   }
 
@@ -262,10 +259,7 @@ function getEffect(config) {
 
     if (container) {
       // handle content scrolling
-      _config.scrollHandler({
-        container,
-        wrapper
-      }, _x, _y);
+      _config.scrollHandler(container, wrapper, _x, _y);
     }
     /*
      * Perform scene progression.
@@ -646,7 +640,7 @@ class Scroll extends Two5 {
  * @property {Element|null} [container] element to use as the container for the scrolled content. If not provided assuming native scroll is desired.
  * @property {ScrollScene[]} scenes list of effect scenes to perform during scroll.
  * @property {SnapPoint[]} snaps list of scroll snap points.
- * @property {function({container: HTMLElement, wrapper: HTMLElement|undefined}, x: number, y: number)} [scrollHandler] if using a container, this allows overriding the function used for scrolling the content. Defaults to setting `style.transform`.
+ * @property {function(container: HTMLElement, wrapper: HTMLElement|undefined, x: number, y: number)} [scrollHandler] if using a container, this allows overriding the function used for scrolling the content. Defaults to setting `style.transform`.
  */
 
 const DEFAULTS$2 = {

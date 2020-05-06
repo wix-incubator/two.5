@@ -100,5 +100,5 @@ export default class Scroll extends Two5 {
  * @property {Element|null} [container] element to use as the container for the scrolled content. If not provided assuming native scroll is desired.
  * @property {ScrollScene[]} scenes list of effect scenes to perform during scroll.
  * @property {SnapPoint[]} snaps list of scroll snap points.
- * @property {function({container: HTMLElement, wrapper: HTMLElement|undefined}, x: number, y: number)} [scrollHandler] if using a container, this allows overriding the function used for scrolling the content. Defaults to setting `style.transform`.
+ * @property {function(container: HTMLElement, wrapper: HTMLElement|undefined, x: number, y: number)} [scrollHandler] if using a container, this allows overriding the function used for scrolling the content. Defaults to setting `style.transform`.
  */
