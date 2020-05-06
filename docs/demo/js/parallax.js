@@ -49,7 +49,10 @@
   const DEFAULTS = {
     horizontal: false,
 
-    scrollHandler(container, x, y) {
+    scrollHandler({
+      container,
+      wrapper
+    }, x, y) {
       container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
     }
 
@@ -250,7 +253,10 @@
 
       if (container) {
         // handle content scrolling
-        _config.scrollHandler(container, _x, _y);
+        _config.scrollHandler({
+          container,
+          wrapper
+        }, _x, _y);
       }
       /*
        * Perform scene progression.
@@ -803,7 +809,7 @@
       return obj === false || obj === true;
     },
     isFunction: function isFunction(obj) {
-      return Object.prototype.toString.call(obj) === '[object Function]';
+      return obj instanceof Function;
     }
   };
   var INTERPRETATIONS = [{
@@ -1303,8 +1309,9 @@
   });
   Object.defineProperty(Color.prototype, 'hex', {
     get: function get$$1() {
-      if (!this.__state.space !== 'HEX') {
+      if (this.__state.space !== 'HEX') {
         this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
+        this.__state.space = 'HEX';
       }
 
       return this.__state.hex;

@@ -289,7 +289,7 @@
    * @property {Element|null} [container] element to use as the container for the scrolled content. If not provided assuming native scroll is desired.
    * @property {ScrollScene[]} scenes list of effect scenes to perform during scroll.
    * @property {SnapPoint[]} snaps list of scroll snap points.
-   * @property {function} [scrollHandler] if using a container, this allows overriding the function used for scrolling the content. Defaults to setting `style.transform`.
+   * @property {function({container: HTMLElement, wrapper: HTMLElement|undefined}, x: number, y: number)} [scrollHandler] if using a container, this allows overriding the function used for scrolling the content. Defaults to setting `style.transform`.
    */
 
 
@@ -911,7 +911,7 @@
       return obj === false || obj === true;
     },
     isFunction: function isFunction(obj) {
-      return Object.prototype.toString.call(obj) === '[object Function]';
+      return obj instanceof Function;
     }
   };
   var INTERPRETATIONS = [{
@@ -1411,8 +1411,9 @@
   });
   Object.defineProperty(Color.prototype, 'hex', {
     get: function get$$1() {
-      if (!this.__state.space !== 'HEX') {
+      if (this.__state.space !== 'HEX') {
         this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
+        this.__state.space = 'HEX';
       }
 
       return this.__state.hex;
