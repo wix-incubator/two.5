@@ -15,7 +15,6 @@ function transform (scene, progress, velocity) {
     let skewY = 0, skewX = 0;
     let rotationAngle = 0;
 
-    let skew = '';
     let scale = '';
     let rotate = '';
 
@@ -51,7 +50,7 @@ function transform (scene, progress, velocity) {
         }
     }
 
-    skew = `skew(${skewX}deg, ${skewY}deg)`;
+    const skew = `skew(${skewX}deg, ${skewY}deg)`;
 
    // -------
 
@@ -97,12 +96,12 @@ function transform (scene, progress, velocity) {
     if (scene.zoomIn.active && !scene.zoomOut.active) {
         const start = scene.zoomIn.start / 100;
         const duration = scene.zoomIn.end / 100 - start;
-        scaleFactor = getScaleFactor(start, duration, progress) * (scene.zoomIn.factor - 1);
+        scaleFactor = lerp(scene.zoomIn.startFactor, scene.zoomIn.endFactor, getScaleFactor(start, duration, progress));
     }
     else if (scene.zoomOut.active && !scene.zoomIn.active) {
         const start = scene.zoomOut.start / 100;
         const duration = scene.zoomOut.end / 100 - start;
-        scaleFactor = (1 - getScaleFactor(start, duration, progress)) * (scene.zoomOut.factor - 1);
+        scaleFactor = lerp(scene.zoomOut.startFactor, scene.zoomOut.endFactor, getScaleFactor(start, duration, progress));
     }
     else if (scene.zoomIn.active && scene.zoomOut.active) {
         const inStart = scene.zoomIn.start / 100;
@@ -117,16 +116,16 @@ function transform (scene, progress, velocity) {
 
         if (isDuringIn || isAroundIn) {
             // inside in
-            scaleFactor = getScaleFactor(inStart, inEnd - inStart, progress) * (scene.zoomIn.factor - 1);
+            scaleFactor = lerp(scene.zoomIn.startFactor, scene.zoomIn.endFactor, getScaleFactor(inStart, inEnd - inStart, progress));
         }
         else {
             // inside out
-            scaleFactor = (1 - getScaleFactor(outStart, outEnd - outStart, progress)) * (scene.zoomOut.factor - 1);
+            scaleFactor = lerp(scene.zoomOut.startFactor, scene.zoomOut.endFactor, getScaleFactor(outStart, outEnd - outStart, progress));
         }
     }
 
     if (scaleFactor !== 0) {
-        scale = `scale(${1 + scaleFactor}, ${1 + scaleFactor})`;
+        scale = `scale(${scaleFactor}, ${scaleFactor})`;
     }
 
     let opacity = 1;
@@ -273,13 +272,15 @@ function generateTransformsConfig () {
         },
         zoomIn: {
             active: false,
-            factor: 2,
+            startFactor: 1,
+            endFactor: 2,
             end: 100,
             start: 0
         },
         zoomOut: {
             active: false,
-            factor: 2,
+            startFactor: 2,
+            endFactor: 1,
             end: 50,
             start: 0
         },
@@ -307,6 +308,17 @@ function generateTransformsConfig () {
         }
     };
 }
+
+function generateFilterConfig () {
+    return {
+        active: false,
+        type: 'displacement',
+        start: 15,
+        radius: 12,
+        hue: 60
+    };
+}
+
 const config = {
     scene: {
         'Save to File': function() {
@@ -323,61 +335,31 @@ const config = {
             height: 1000,
             bgColor: '#000',
             transforms: generateTransformsConfig(),
-            filter: {
-                active: false,
-                type: 'displacement',
-                start: 15,
-                radius: 12,
-                hue: 60
-            }
+            filter: generateFilterConfig()
         },
         {
             height: 1000,
             bgColor: '#000',
             transforms: generateTransformsConfig(),
-            filter: {
-                active: false,
-                type: 'displacement',
-                start: 15,
-                radius: 12,
-                hue: 60
-            }
+            filter: generateFilterConfig()
         },
         {
             height: 1000,
             bgColor: '#000',
             transforms: generateTransformsConfig(),
-            filter: {
-                active: false,
-                type: 'displacement',
-                start: 15,
-                radius: 12,
-                hue: 60
-            }
+            filter: generateFilterConfig()
         },
         {
             height: 1000,
             bgColor: '#000',
             transforms: generateTransformsConfig(),
-            filter: {
-                active: false,
-                type: 'displacement',
-                start: 15,
-                radius: 12,
-                hue: 60
-            }
+            filter: generateFilterConfig()
         },
         {
             height: 1000,
             bgColor: '#000',
             transforms: generateTransformsConfig(),
-            filter: {
-                active: false,
-                type: 'displacement',
-                start: 15,
-                radius: 12,
-                hue: 60
-            }
+            filter: generateFilterConfig()
         }
     ]
 };
@@ -447,7 +429,9 @@ function createTransformsControls (folder, config) {
 
     zoomIn.add(config.zoomIn, 'active')
         .onChange(restart);
-    zoomIn.add(config.zoomIn, 'factor', 1.1, 4, 0.1)
+    zoomIn.add(config.zoomIn, 'startFactor', 0.1, 2, 0.1)
+        .onFinishChange(restart);
+    zoomIn.add(config.zoomIn, 'endFactor', 1, 4, 0.1)
         .onFinishChange(restart);
     zoomIn.add(config.zoomIn, 'start', 0, 90, 5)
         .onFinishChange(restart);
@@ -459,7 +443,9 @@ function createTransformsControls (folder, config) {
 
     zoomOut.add(config.zoomOut, 'active')
         .onChange(restart);
-    zoomOut.add(config.zoomOut, 'factor', 1.1, 4, 0.1)
+    zoomOut.add(config.zoomOut, 'startFactor', 1, 4, 0.1)
+        .onFinishChange(restart);
+    zoomOut.add(config.zoomOut, 'endFactor', 0.1, 2, 0.1)
         .onFinishChange(restart);
     zoomOut.add(config.zoomOut, 'start', 0, 90, 5)
         .onFinishChange(restart);
@@ -869,6 +855,10 @@ function restart () {
 
 function map (x, a, b, c, d) {
     return (x - a) * (d - c) / (b - a) + c;
+}
+
+function lerp (a, b, t) {
+    return a * (1 - t) + b * t;
 }
 
 /**

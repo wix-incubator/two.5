@@ -5845,7 +5845,6 @@ void main() {
     let skewY = 0,
         skewX = 0;
     let rotationAngle = 0;
-    let skew = '';
     let scale = '';
     let rotate = '';
 
@@ -5879,7 +5878,7 @@ void main() {
       }
     }
 
-    skew = `skew(${skewX}deg, ${skewY}deg)`; // -------
+    const skew = `skew(${skewX}deg, ${skewY}deg)`; // -------
 
     if (scene.rotateIn.active && !scene.rotateOut.active) {
       const start = scene.rotateIn.start / 100;
@@ -5918,11 +5917,11 @@ void main() {
     if (scene.zoomIn.active && !scene.zoomOut.active) {
       const start = scene.zoomIn.start / 100;
       const duration = scene.zoomIn.end / 100 - start;
-      scaleFactor = getScaleFactor(start, duration, progress) * (scene.zoomIn.factor - 1);
+      scaleFactor = lerp$1(scene.zoomIn.startFactor, scene.zoomIn.endFactor, getScaleFactor(start, duration, progress));
     } else if (scene.zoomOut.active && !scene.zoomIn.active) {
       const start = scene.zoomOut.start / 100;
       const duration = scene.zoomOut.end / 100 - start;
-      scaleFactor = (1 - getScaleFactor(start, duration, progress)) * (scene.zoomOut.factor - 1);
+      scaleFactor = lerp$1(scene.zoomOut.startFactor, scene.zoomOut.endFactor, getScaleFactor(start, duration, progress));
     } else if (scene.zoomIn.active && scene.zoomOut.active) {
       const inStart = scene.zoomIn.start / 100;
       const outStart = scene.zoomOut.start / 100;
@@ -5935,15 +5934,15 @@ void main() {
 
       if (isDuringIn || isAroundIn) {
         // inside in
-        scaleFactor = getScaleFactor(inStart, inEnd - inStart, progress) * (scene.zoomIn.factor - 1);
+        scaleFactor = lerp$1(scene.zoomIn.startFactor, scene.zoomIn.endFactor, getScaleFactor(inStart, inEnd - inStart, progress));
       } else {
         // inside out
-        scaleFactor = (1 - getScaleFactor(outStart, outEnd - outStart, progress)) * (scene.zoomOut.factor - 1);
+        scaleFactor = lerp$1(scene.zoomOut.startFactor, scene.zoomOut.endFactor, getScaleFactor(outStart, outEnd - outStart, progress));
       }
     }
 
     if (scaleFactor !== 0) {
-      scale = `scale(${1 + scaleFactor}, ${1 + scaleFactor})`;
+      scale = `scale(${scaleFactor}, ${scaleFactor})`;
     }
 
     let opacity = 1;
@@ -6090,13 +6089,15 @@ void main() {
       },
       zoomIn: {
         active: false,
-        factor: 2,
+        startFactor: 1,
+        endFactor: 2,
         end: 100,
         start: 0
       },
       zoomOut: {
         active: false,
-        factor: 2,
+        startFactor: 2,
+        endFactor: 1,
         end: 50,
         start: 0
       },
@@ -6125,6 +6126,16 @@ void main() {
     };
   }
 
+  function generateFilterConfig() {
+    return {
+      active: false,
+      type: 'displacement',
+      start: 15,
+      radius: 12,
+      hue: 60
+    };
+  }
+
   const config = {
     scene: {
       'Save to File': function () {
@@ -6140,57 +6151,27 @@ void main() {
       height: 1000,
       bgColor: '#000',
       transforms: generateTransformsConfig(),
-      filter: {
-        active: false,
-        type: 'displacement',
-        start: 15,
-        radius: 12,
-        hue: 60
-      }
+      filter: generateFilterConfig()
     }, {
       height: 1000,
       bgColor: '#000',
       transforms: generateTransformsConfig(),
-      filter: {
-        active: false,
-        type: 'displacement',
-        start: 15,
-        radius: 12,
-        hue: 60
-      }
+      filter: generateFilterConfig()
     }, {
       height: 1000,
       bgColor: '#000',
       transforms: generateTransformsConfig(),
-      filter: {
-        active: false,
-        type: 'displacement',
-        start: 15,
-        radius: 12,
-        hue: 60
-      }
+      filter: generateFilterConfig()
     }, {
       height: 1000,
       bgColor: '#000',
       transforms: generateTransformsConfig(),
-      filter: {
-        active: false,
-        type: 'displacement',
-        start: 15,
-        radius: 12,
-        hue: 60
-      }
+      filter: generateFilterConfig()
     }, {
       height: 1000,
       bgColor: '#000',
       transforms: generateTransformsConfig(),
-      filter: {
-        active: false,
-        type: 'displacement',
-        start: 15,
-        radius: 12,
-        hue: 60
-      }
+      filter: generateFilterConfig()
     }]
   };
 
@@ -6229,13 +6210,15 @@ void main() {
     const zoomIn = folder.addFolder('Zoom In');
     gui.remember(config.zoomIn);
     zoomIn.add(config.zoomIn, 'active').onChange(restart);
-    zoomIn.add(config.zoomIn, 'factor', 1.1, 4, 0.1).onFinishChange(restart);
+    zoomIn.add(config.zoomIn, 'startFactor', 0.1, 2, 0.1).onFinishChange(restart);
+    zoomIn.add(config.zoomIn, 'endFactor', 1, 4, 0.1).onFinishChange(restart);
     zoomIn.add(config.zoomIn, 'start', 0, 90, 5).onFinishChange(restart);
     zoomIn.add(config.zoomIn, 'end', 10, 100, 5).onFinishChange(restart);
     const zoomOut = folder.addFolder('Zoom Out');
     gui.remember(config.zoomOut);
     zoomOut.add(config.zoomOut, 'active').onChange(restart);
-    zoomOut.add(config.zoomOut, 'factor', 1.1, 4, 0.1).onFinishChange(restart);
+    zoomOut.add(config.zoomOut, 'startFactor', 1, 4, 0.1).onFinishChange(restart);
+    zoomOut.add(config.zoomOut, 'endFactor', 0.1, 2, 0.1).onFinishChange(restart);
     zoomOut.add(config.zoomOut, 'start', 0, 90, 5).onFinishChange(restart);
     zoomOut.add(config.zoomOut, 'end', 10, 100, 5).onFinishChange(restart);
     const fadeIn = folder.addFolder('Fade In');
@@ -6588,6 +6571,10 @@ void main() {
 
   function map$1(x, a, b, c, d) {
     return (x - a) * (d - c) / (b - a) + c;
+  }
+
+  function lerp$1(a, b, t) {
+    return a * (1 - t) + b * t;
   }
   /**
    * Get a date string
