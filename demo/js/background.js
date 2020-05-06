@@ -312,7 +312,7 @@ const config = {
         'Save to File': function() {
             download(getValues(), `background-effects-${getTimeStamp()}.txt`, 'text/plain');
         },
-        'Load from File': function() {
+        'Load from Files': function() {
             upload(); // stub
         },
         container: true,
@@ -507,7 +507,7 @@ const sceneConfig = gui.addFolder('Scene config');
 gui.remember(config.scene)
 
 sceneConfig.add(config.scene, 'Save to File')
-sceneConfig.add(config.scene, 'Load from File')
+sceneConfig.add(config.scene, 'Load from Files')
 
 sceneConfig.add(config.scene, 'container')
     .onChange(restart);
@@ -935,19 +935,23 @@ function download(data, filename, type) {
 function upload() {
     //alert('Not implemented yet')
     const input = document.createElement("input");
-    input.type = 'file'
-    input.accept = 'text/plain'
+    input.type = 'file';
+    input.accept = 'text/plain';
+    input.multiple = 'multiple';
     input.onchange = function () {
-      if (this.files && this.files[0]) {
-        var myFile = this.files[0];
-        var reader = new FileReader();
+        for (const file of this.files || []) {
+            if (file) {
+                const reader = new FileReader();
 
-        reader.addEventListener('load', function (e) {
-            setValues(JSON.parse(e.target.result));
-        });
+                reader.addEventListener('load', function (e) {
+                    console.log('loading', file.name);
+                    setValues(JSON.parse(e.target.result));
+                    gui.saveAs(file.name);
+                });
 
-        reader.readAsBinaryString(myFile);
-      }
+                reader.readAsBinaryString(file);
+            }
+        }
     };
     document.body.appendChild(input);
 
@@ -958,13 +962,13 @@ function upload() {
 }
 
 /**
- * @param {Object<Object>} values in the format of the output of getValues()
+ * @param {Array<Object>} values in the format of the output of getValues()
  * [
- *   0: {
+ *   {
  *     "someKey": "value",
- *     "otherKey": "otherVlaue"
+ *     "otherKey": "otherValue"
  *   },
- *   1: {
+ *   {
  *     "thirdKey": "thirdValue"
  *   },
  *   ...

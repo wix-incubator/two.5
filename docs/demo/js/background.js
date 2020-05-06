@@ -6131,7 +6131,7 @@ void main() {
       'Save to File': function () {
         download(getValues(), `background-effects-${getTimeStamp()}.txt`, 'text/plain');
       },
-      'Load from File': function () {
+      'Load from Files': function () {
         upload(); // stub
       },
       container: true,
@@ -6260,7 +6260,7 @@ void main() {
   const sceneConfig = gui.addFolder('Scene config');
   gui.remember(config.scene);
   sceneConfig.add(config.scene, 'Save to File');
-  sceneConfig.add(config.scene, 'Load from File');
+  sceneConfig.add(config.scene, 'Load from Files');
   sceneConfig.add(config.scene, 'container').onChange(restart);
   sceneConfig.add(config.scene, 'friction', 0, 0.95, 0.05).onFinishChange(restart);
   sceneConfig.open();
@@ -6639,15 +6639,19 @@ void main() {
     const input = document.createElement("input");
     input.type = 'file';
     input.accept = 'text/plain';
+    input.multiple = 'multiple';
 
     input.onchange = function () {
-      if (this.files && this.files[0]) {
-        var myFile = this.files[0];
-        var reader = new FileReader();
-        reader.addEventListener('load', function (e) {
-          setValues(JSON.parse(e.target.result));
-        });
-        reader.readAsBinaryString(myFile);
+      for (const file of this.files || []) {
+        if (file) {
+          const reader = new FileReader();
+          reader.addEventListener('load', function (e) {
+            console.log('loading', file.name);
+            setValues(JSON.parse(e.target.result));
+            gui.saveAs(file.name);
+          });
+          reader.readAsBinaryString(file);
+        }
       }
     };
 
@@ -6658,13 +6662,13 @@ void main() {
     }, 0);
   }
   /**
-   * @param {Object<Object>} values in the format of the output of getValues()
+   * @param {Array<Object>} values in the format of the output of getValues()
    * [
-   *   0: {
+   *   {
    *     "someKey": "value",
-   *     "otherKey": "otherVlaue"
+   *     "otherKey": "otherValue"
    *   },
-   *   1: {
+   *   {
    *     "thirdKey": "thirdValue"
    *   },
    *   ...
