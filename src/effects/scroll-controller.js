@@ -110,8 +110,8 @@ export function getEffect (config) {
      */
     if (container) {
         // calculate total scroll height/width
-        const totalHeight = container.offsetHeight + (horizontal ? 0 : extraScroll);
-        const totalWidth = container.offsetWidth + (horizontal ? extraScroll : 0);
+        const totalHeight = container.offsetHeight + container.offsetTop + (horizontal ? 0 : extraScroll);
+        const totalWidth = container.offsetWidth + container.offsetLeft + (horizontal ? extraScroll : 0);
 
         // set width/height on the body element
         if (horizontal) {
