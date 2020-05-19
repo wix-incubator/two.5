@@ -3664,7 +3664,7 @@
         duration,
         element: img,
         pauseDuringSnap: true,
-        offset: viewportHeight
+        offset: viewportHeight + img.offsetTop
       };
     }).concat(photos.map((img, index) => {
       const parent = img.closest('.strip');

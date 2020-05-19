@@ -779,7 +779,7 @@ function createScenes () {
             duration,
             element: hasWebGL ? img.nextElementSibling : img,
             pauseDuringSnap: true,
-            offset: viewportHeight,
+            offset: viewportHeight + img.offsetTop, // add img.offsetTop to compensate for image offset in its parent
             xOffset: (img.offsetWidth - parent.offsetWidth) / 2,
             ...transforms
         };
