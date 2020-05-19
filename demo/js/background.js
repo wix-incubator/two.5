@@ -91,8 +91,7 @@ function transform (scene, progress, velocity) {
 
    // -------
 
-    let scaleFactor = 1;
-    let scaleXFactor = 1, scaleYFactor = 1;
+    let scaleFactor = 0;
 
     if (scene.zoomIn.active && !scene.zoomOut.active) {
         const start = scene.zoomIn.start / 100;
@@ -125,22 +124,8 @@ function transform (scene, progress, velocity) {
         }
     }
 
-    if (scene.scaleX.active) {
-        scaleXFactor = scaleFactor * (1 + Math.abs(velocity) * scene.scaleX.factor);
-    }
-    else {
-        scaleXFactor = scaleFactor;
-    }
-
-    if (scene.scaleY.active) {
-        scaleYFactor = scaleFactor * (1 + Math.abs(velocity) * scene.scaleY.factor);
-    }
-    else {
-        scaleYFactor = scaleFactor;
-    }
-
-    if (scaleXFactor !== 1 || scaleYFactor !== 1) {
-        scale = `scale(${scaleXFactor}, ${scaleYFactor})`;
+    if (scaleFactor !== 0) {
+        scale = `scale(${scaleFactor}, ${scaleFactor})`;
     }
 
     let opacity = 1;
@@ -320,14 +305,6 @@ function generateTransformsConfig () {
             angle: 30,
             end: 50,
             start: 0,
-        },
-        scaleY: {
-            active: false,
-            factor: 0.5
-        },
-        scaleX: {
-            active: false,
-            factor: 0.5
         }
     };
 }
@@ -518,20 +495,6 @@ function createTransformsControls (folder, config) {
         .onFinishChange(restart);
     rotateOut.add(config.rotateOut, 'end', 0, 100, 5)
         .onFinishChange(restart);
-
-    const scaleY = folder.addFolder('Velocity Scale Y');
-    gui.remember(config.scaleY);
-    scaleY.add(config.scaleY, 'active')
-        .onChange(restart);
-    scaleY.add(config.scaleY, 'factor', -0.9, 3, 0.1)
-        .onFinishChange(restart);
-
-    const scaleX = folder.addFolder('Velocity Scale X');
-    gui.remember(config.scaleX);
-    scaleX.add(config.scaleX, 'active')
-        .onChange(restart);
-    scaleX.add(config.scaleX, 'factor', -0.9, 3, 0.1)
-        .onFinishChange(restart);
 }
 
 function createFilterControls (folder, config) {
@@ -692,12 +655,7 @@ function init () {
         scenes,
         animationActive: true,
         animationFriction: config.scene.friction,
-        velocityActive: config.images.some(
-            img => img.transforms.skewY.active && img.transforms.skewY.velocity
-                || img.transforms.skewX.active && img.transforms.skewX.velocity
-                || img.transforms.scaleY.active
-                || img.transforms.scaleX.active
-        ),
+        velocityActive: config.images.some(img => img.transforms.skewY.active || img.transforms.skewX.active),
         velocityMax: 10
     });
 
