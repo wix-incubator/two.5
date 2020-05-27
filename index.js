@@ -60,6 +60,10 @@ const DEFAULTS = {
 
   scrollHandler(container, wrapper, x, y) {
     container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
+  },
+
+  scrollClear(container, wrapper, x, y) {
+    container.style.transform = '';
   }
 
 };
@@ -185,7 +189,7 @@ function getEffect(config) {
     if (wrapper) {
       if (!wrapper.contains(container)) {
         console.error('When defined, the wrapper element %o must be a parent of the container element %o', wrapper, container);
-        throw "Wrapper element is not a parent of container element";
+        throw new Error('Wrapper element is not a parent of container element');
       } // if we got a wrapper element set its style
 
 
@@ -287,6 +291,27 @@ function getEffect(config) {
     lastX = x;
     lastY = y;
   }
+
+  controller.destroy = function () {
+    if (container) {
+      if (horizontal) {
+        body.style.width = '';
+      } else {
+        body.style.height = '';
+      }
+
+      if (wrapper) {
+        Object.assign(wrapper.style, {
+          position: '',
+          width: '',
+          height: '',
+          overflow: ''
+        });
+      }
+
+      _config.scrollClear(container);
+    }
+  };
 
   return controller;
 }
@@ -525,6 +550,15 @@ class Two5 {
     this.measures.length = 0;
     this.effects.length = 0;
   }
+  /**
+   * Stop all events and effects, and remove all DOM side effects.
+   */
+
+
+  destroy() {
+    this.off();
+    this.teardownEffects();
+  }
 
 }
 /**
@@ -613,6 +647,11 @@ class Scroll extends Two5 {
 
   teardownEvents() {
     this.measures.length = 0;
+  }
+
+  teardownEffects() {
+    this.effects.forEach(effect => effect.destroy && effect.destroy());
+    super.teardownEffects();
   }
 
 }

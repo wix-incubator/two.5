@@ -207,6 +207,14 @@ export default class Two5 {
         this.measures.length = 0;
         this.effects.length = 0;
     }
+
+    /**
+     * Stop all events and effects, and remove all DOM side effects.
+     */
+    destroy () {
+        this.off();
+        this.teardownEffects();
+    }
 }
 
 /**

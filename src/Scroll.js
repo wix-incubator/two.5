@@ -74,6 +74,12 @@ export default class Scroll extends Two5 {
     teardownEvents () {
         this.measures.length = 0;
     }
+
+    teardownEffects () {
+        this.effects.forEach(effect => effect.destroy && effect.destroy());
+
+        super.teardownEffects();
+    }
 }
 
 /**
@@ -101,4 +107,5 @@ export default class Scroll extends Two5 {
  * @property {ScrollScene[]} scenes list of effect scenes to perform during scroll.
  * @property {SnapPoint[]} snaps list of scroll snap points.
  * @property {function(container: HTMLElement, wrapper: HTMLElement|undefined, x: number, y: number)} [scrollHandler] if using a container, this allows overriding the function used for scrolling the content. Defaults to setting `style.transform`.
+ * @property {function(container: HTMLElement, wrapper: HTMLElement|undefined, x: number, y: number)} [scrollClear] if using a container, this allows overriding the function used for clearing content scrolling side-effects when effect is removed. Defaults to clearing `container.style.transform`.
  */
