@@ -5,6 +5,7 @@ import { defaultTo } from '../utilities';
  */
 const DEFAULTS = {
     horizontal: false,
+    observeSize: true,
     scrollHandler (container, wrapper, x, y) {
         container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
     },
@@ -95,6 +96,7 @@ export function getEffect (config) {
     const extraScroll = snaps.reduce((acc, snap) => acc + (snap[1] - snap[0]), 0);
 
     let lastX, lastY;
+    let resizeObserver;
 
     /*
      * Prepare scenes data.
@@ -112,16 +114,24 @@ export function getEffect (config) {
      * Setup Smooth Scroll technique
      */
     if (container) {
-        // calculate total scroll height/width
-        const totalHeight = container.offsetHeight + container.offsetTop + (horizontal ? 0 : extraScroll);
-        const totalWidth = container.offsetWidth + container.offsetLeft + (horizontal ? extraScroll : 0);
-
-        // set width/height on the body element
-        if (horizontal) {
-            body.style.width = `${totalWidth}px`;
+        function setSize () {
+            // calculate total scroll height/width
+            // set width/height on the body element
+            if (horizontal) {
+                const totalWidth = container.offsetWidth + container.offsetLeft + (horizontal ? extraScroll : 0);
+                body.style.width = `${totalWidth}px`;
+            }
+            else {
+                const totalHeight = container.offsetHeight + container.offsetTop + (horizontal ? 0 : extraScroll);
+                body.style.height = `${totalHeight}px`;
+            }
         }
-        else {
-            body.style.height = `${totalHeight}px`;
+
+        setSize();
+
+        if (_config.observeSize && window.ResizeObserver) {
+            resizeObserver = new window.ResizeObserver(setSize);
+            resizeObserver.observe(container, {box: 'border-box'});
         }
 
         /*
@@ -245,6 +255,11 @@ export function getEffect (config) {
             }
 
             _config.scrollClear(container);
+
+            if (resizeObserver) {
+                resizeObserver.disconnect();
+                resizeObserver = null;
+            }
         }
     };
 

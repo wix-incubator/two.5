@@ -57,6 +57,7 @@ function lerp(a, b, t) {
 
 const DEFAULTS = {
   horizontal: false,
+  observeSize: true,
 
   scrollHandler(container, wrapper, x, y) {
     container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
@@ -155,6 +156,7 @@ function getEffect(config) {
 
   const extraScroll = snaps.reduce((acc, snap) => acc + (snap[1] - snap[0]), 0);
   let lastX, lastY;
+  let resizeObserver;
   /*
    * Prepare scenes data.
    */
@@ -172,14 +174,25 @@ function getEffect(config) {
 
 
   if (container) {
-    // calculate total scroll height/width
-    const totalHeight = container.offsetHeight + container.offsetTop + (horizontal ? 0 : extraScroll);
-    const totalWidth = container.offsetWidth + container.offsetLeft + (horizontal ? extraScroll : 0); // set width/height on the body element
+    function setSize() {
+      // calculate total scroll height/width
+      // set width/height on the body element
+      if (horizontal) {
+        const totalWidth = container.offsetWidth + container.offsetLeft + (horizontal ? extraScroll : 0);
+        body.style.width = `${totalWidth}px`;
+      } else {
+        const totalHeight = container.offsetHeight + container.offsetTop + (horizontal ? 0 : extraScroll);
+        body.style.height = `${totalHeight}px`;
+      }
+    }
 
-    if (horizontal) {
-      body.style.width = `${totalWidth}px`;
-    } else {
-      body.style.height = `${totalHeight}px`;
+    setSize();
+
+    if (_config.observeSize && window.ResizeObserver) {
+      resizeObserver = new window.ResizeObserver(setSize);
+      resizeObserver.observe(container, {
+        box: 'border-box'
+      });
     }
     /*
      * Setup wrapper element and reset progress.
@@ -310,6 +323,11 @@ function getEffect(config) {
       }
 
       _config.scrollClear(container);
+
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+        resizeObserver = null;
+      }
     }
   };
 
@@ -680,6 +698,7 @@ class Scroll extends Two5 {
  * @property {ScrollScene[]} scenes list of effect scenes to perform during scroll.
  * @property {SnapPoint[]} snaps list of scroll snap points.
  * @property {function(container: HTMLElement, wrapper: HTMLElement|undefined, x: number, y: number)} [scrollHandler] if using a container, this allows overriding the function used for scrolling the content. Defaults to setting `style.transform`.
+ * @property {function(container: HTMLElement, wrapper: HTMLElement|undefined, x: number, y: number)} [scrollClear] if using a container, this allows overriding the function used for clearing content scrolling side-effects when effect is removed. Defaults to clearing `container.style.transform`.
  */
 
 const DEFAULTS$2 = {
