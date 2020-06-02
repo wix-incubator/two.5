@@ -6111,8 +6111,8 @@ void main() {
     'hue rotate': 'hueRotate',
     sepia: 'sepia',
     invert: 'invert',
-    'blend-difference': 'difference',
-    'blend-dodge': 'dodge'
+    'blend difference': 'difference',
+    'blend dodge': 'dodge'
   };
   window.gui = new GUI$1();
 
