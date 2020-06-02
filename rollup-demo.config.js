@@ -19,6 +19,21 @@ const config = [
         ]
     },
     {
+        input: './demo/js/background2.js',
+        output: {
+            dir: './docs/demo/js',
+            format: 'umd',
+            sourcemap: false
+        },
+        plugins: [
+            progress({
+                clearLine: false
+            }),
+            babel(),
+            filesize()
+        ]
+    },
+    {
         input: './demo/js/layers.js',
         output: {
             dir: './docs/demo/js',
