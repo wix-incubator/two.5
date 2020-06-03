@@ -287,6 +287,7 @@
    * @property {function} effect the effect to perform.
    * @property {boolean} [pauseDuringSnap] whether to pause the effect during snap points, effectively ignoring scroll during duration of scroll snapping.
    * @property {boolean} [disabled] whether to perform updates on the scene. Defaults to false.
+   * @property {Element} [viewport] an element to be used for observing intersection with viewport for disabling/enabling the scene.
    *
    * @typedef {object} scrollConfig
    * @property {boolean} [animationActive] whether to animate effect progress.
@@ -294,6 +295,8 @@
    * @property {boolean} [velocityActive] whether to calculate velocity with progress.
    * @property {number} [velocityMax] max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
    * @property {boolean} [observeSize] whether to observe size changes of `container`. Defaults to `true`.
+   * @property {boolean} [observeViewport] whether to observe entry/exit of scenes into viewport for disabling/enabling them. Defaults to `true`.
+   * @property {boolean} [viewportRootMargin] `rootMargin` option to be used for viewport observation. Defaults to `'7% 7%'`.
    * @property {Element|Window} [root] the scrollable element, defaults to window.
    * @property {Element} [wrapper] element to use as the fixed, viewport sized layer, that clips and holds the scroll content container. If not provided, no setup is done.
    * @property {Element|null} [container] element to use as the container for the scrolled content. If not provided assuming native scroll is desired.

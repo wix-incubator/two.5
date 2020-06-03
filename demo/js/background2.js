@@ -822,6 +822,7 @@ function createScenes () {
             start,
             duration,
             element: hasWebGL ? img.nextElementSibling : img,
+            viewport: parent,
             pauseDuringSnap: true,
             offset: viewportHeight + img.offsetTop, // add img.offsetTop to compensate for image offset in its parent
             xOffset: (img.offsetWidth - parent.offsetWidth) / 2,
@@ -875,6 +876,7 @@ function createScenes () {
             start,
             duration,
             element,
+            viewport: parent,
             viewportHeight,
             ...extra
         };
@@ -935,7 +937,7 @@ function filterToggle (i) {
  * Restart scroll controller and effects
  */
 function restart () {
-    instance.off();
+    instance.destroy();
     instance = init();
 }
 

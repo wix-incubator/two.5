@@ -49,6 +49,8 @@
   const DEFAULTS = {
     horizontal: false,
     observeSize: true,
+    observeViewport: true,
+    viewportRootMargin: '7% 7%',
 
     scrollHandler(container, wrapper, x, y) {
       container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
@@ -130,6 +132,7 @@
     const container = _config.container;
     const wrapper = _config.wrapper;
     const horizontal = _config.horizontal;
+    const scenesByElement = new WeakMap();
     /*
      * Prepare snap points data.
      */
@@ -147,7 +150,7 @@
 
     const extraScroll = snaps.reduce((acc, snap) => acc + (snap[1] - snap[0]), 0);
     let lastX, lastY;
-    let resizeObserver;
+    let resizeObserver, viewportObserver;
     /*
      * Prepare scenes data.
      */
@@ -228,6 +231,38 @@
         });
       }
     }
+    /*
+     * Observe entry and exit of scenes into view
+     */
+
+
+    if (_config.observeViewport && window.IntersectionObserver) {
+      viewportObserver = new window.IntersectionObserver(function (intersections) {
+        intersections.forEach(intersection => {
+          (scenesByElement.get(intersection.target) || []).forEach(scene => {
+            scene.disabled = !intersection.isIntersecting;
+          });
+        });
+      }, {
+        root: wrapper || null,
+        rootMargin: _config.viewportRootMargin,
+        threshold: 0
+      });
+
+      _config.scenes.forEach(scene => {
+        if (scene.viewport) {
+          let scenesArray = scenesByElement.get(scene.viewport);
+
+          if (!scenesArray) {
+            scenesArray = [];
+            scenesByElement.set(scene.viewport, scenesArray);
+            viewportObserver.observe(scene.viewport);
+          }
+
+          scenesArray.push(scene);
+        }
+      });
+    }
     /**
      * Scroll scenes controller.
      * Takes progress object and orchestrates scenes.
@@ -248,7 +283,7 @@
     }) {
       x = +x.toFixed(1);
       y = +y.toFixed(1);
-      const velocity = horizontal ? +vx.toFixed(3) : +vy.toFixed(3); // if nothing changed bail out
+      const velocity = horizontal ? +vx.toFixed(4) : +vy.toFixed(4); // if nothing changed bail out
 
       if (x === lastX && y === lastY) return;
       let _x = x,
@@ -320,8 +355,14 @@
           resizeObserver = null;
         }
       }
+
+      if (viewportObserver) {
+        viewportObserver.disconnect();
+        controller.viewportObserver = viewportObserver = null;
+      }
     };
 
+    controller.viewportObserver = viewportObserver;
     return controller;
   }
 

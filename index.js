@@ -58,6 +58,8 @@ function lerp(a, b, t) {
 const DEFAULTS = {
   horizontal: false,
   observeSize: true,
+  observeViewport: true,
+  viewportRootMargin: '7% 7%',
 
   scrollHandler(container, wrapper, x, y) {
     container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
@@ -139,6 +141,7 @@ function getEffect(config) {
   const container = _config.container;
   const wrapper = _config.wrapper;
   const horizontal = _config.horizontal;
+  const scenesByElement = new WeakMap();
   /*
    * Prepare snap points data.
    */
@@ -156,7 +159,7 @@ function getEffect(config) {
 
   const extraScroll = snaps.reduce((acc, snap) => acc + (snap[1] - snap[0]), 0);
   let lastX, lastY;
-  let resizeObserver;
+  let resizeObserver, viewportObserver;
   /*
    * Prepare scenes data.
    */
@@ -237,6 +240,38 @@ function getEffect(config) {
       });
     }
   }
+  /*
+   * Observe entry and exit of scenes into view
+   */
+
+
+  if (_config.observeViewport && window.IntersectionObserver) {
+    viewportObserver = new window.IntersectionObserver(function (intersections) {
+      intersections.forEach(intersection => {
+        (scenesByElement.get(intersection.target) || []).forEach(scene => {
+          scene.disabled = !intersection.isIntersecting;
+        });
+      });
+    }, {
+      root: wrapper || null,
+      rootMargin: _config.viewportRootMargin,
+      threshold: 0
+    });
+
+    _config.scenes.forEach(scene => {
+      if (scene.viewport) {
+        let scenesArray = scenesByElement.get(scene.viewport);
+
+        if (!scenesArray) {
+          scenesArray = [];
+          scenesByElement.set(scene.viewport, scenesArray);
+          viewportObserver.observe(scene.viewport);
+        }
+
+        scenesArray.push(scene);
+      }
+    });
+  }
   /**
    * Scroll scenes controller.
    * Takes progress object and orchestrates scenes.
@@ -257,7 +292,7 @@ function getEffect(config) {
   }) {
     x = +x.toFixed(1);
     y = +y.toFixed(1);
-    const velocity = horizontal ? +vx.toFixed(3) : +vy.toFixed(3); // if nothing changed bail out
+    const velocity = horizontal ? +vx.toFixed(4) : +vy.toFixed(4); // if nothing changed bail out
 
     if (x === lastX && y === lastY) return;
     let _x = x,
@@ -329,8 +364,14 @@ function getEffect(config) {
         resizeObserver = null;
       }
     }
+
+    if (viewportObserver) {
+      viewportObserver.disconnect();
+      controller.viewportObserver = viewportObserver = null;
+    }
   };
 
+  controller.viewportObserver = viewportObserver;
   return controller;
 }
 
@@ -686,6 +727,7 @@ class Scroll extends Two5 {
  * @property {function} effect the effect to perform.
  * @property {boolean} [pauseDuringSnap] whether to pause the effect during snap points, effectively ignoring scroll during duration of scroll snapping.
  * @property {boolean} [disabled] whether to perform updates on the scene. Defaults to false.
+ * @property {Element} [viewport] an element to be used for observing intersection with viewport for disabling/enabling the scene.
  *
  * @typedef {object} scrollConfig
  * @property {boolean} [animationActive] whether to animate effect progress.
@@ -693,6 +735,8 @@ class Scroll extends Two5 {
  * @property {boolean} [velocityActive] whether to calculate velocity with progress.
  * @property {number} [velocityMax] max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
  * @property {boolean} [observeSize] whether to observe size changes of `container`. Defaults to `true`.
+ * @property {boolean} [observeViewport] whether to observe entry/exit of scenes into viewport for disabling/enabling them. Defaults to `true`.
+ * @property {boolean} [viewportRootMargin] `rootMargin` option to be used for viewport observation. Defaults to `'7% 7%'`.
  * @property {Element|Window} [root] the scrollable element, defaults to window.
  * @property {Element} [wrapper] element to use as the fixed, viewport sized layer, that clips and holds the scroll content container. If not provided, no setup is done.
  * @property {Element|null} [container] element to use as the container for the scrolled content. If not provided assuming native scroll is desired.
