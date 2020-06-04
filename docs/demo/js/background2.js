@@ -5939,7 +5939,8 @@ void main() {
 
   function transform(scene, progress, velocity) {
     let translateY = 0,
-        translateX = 0;
+        translateX = 0,
+        translateZ = 0;
     let skewY = 0,
         skewX = 0;
     let rotationAngle = 0;
@@ -5963,7 +5964,14 @@ void main() {
       translateX = (p * 2 - 1) * scene.xOffset * scene.translateX.speed;
     }
 
-    const translate = `translate3d(${translateX}px, ${translateY}px, 0px)`;
+    if (scene.translateZ.active) {
+      const start = scene.translateZ.start / 100;
+      const duration = scene.translateZ.end / 100 - start;
+      const p = scene.translateZ.symmetric ? 1 - Math.abs(progress * 2 - 1) : progress;
+      translateZ = lerp$1(scene.translateZ.distance, 0, getScaleFactor(start, duration, p));
+    }
+
+    const translate = `translate3d(${translateX}px, ${translateY}px, ${translateZ}px)`;
 
     if (scene.skewY.active) {
       if (scene.skewY.velocity) {
@@ -6223,6 +6231,13 @@ void main() {
         end: 100,
         start: 0
       },
+      translateZ: {
+        active: false,
+        symmetric: true,
+        distance: -500,
+        end: 100,
+        start: 0
+      },
       skewY: {
         active: false,
         velocity: true,
@@ -6366,7 +6381,7 @@ void main() {
     const perspectiveZ = folder.addFolder('Perspective Z');
     gui.remember(config.perspectiveZ);
     perspectiveZ.add(config.perspectiveZ, 'active').onChange(restart);
-    perspectiveZ.add(config.perspectiveZ, 'distance', 50, 1000, 50).onFinishChange(restart);
+    perspectiveZ.add(config.perspectiveZ, 'distance', 50, 2000, 50).onFinishChange(restart);
     const panY = folder.addFolder('Pan Y');
     gui.remember(config.translateY);
     panY.add(config.translateY, 'active').onChange(restart);
@@ -6379,6 +6394,13 @@ void main() {
     panX.add(config.translateX, 'speed', 0, 1, 0.05).onFinishChange(restart);
     panX.add(config.translateX, 'start', 0, 100, 5).onFinishChange(restart);
     panX.add(config.translateX, 'end', 0, 100, 5).onFinishChange(restart);
+    const panZ = folder.addFolder('Pan Z');
+    gui.remember(config.translateZ);
+    panZ.add(config.translateZ, 'active').onChange(restart);
+    panZ.add(config.translateZ, 'symmetric').onChange(restart);
+    panZ.add(config.translateZ, 'distance', -2000, 2000, 50).onFinishChange(restart);
+    panZ.add(config.translateZ, 'start', 0, 100, 5).onFinishChange(restart);
+    panZ.add(config.translateZ, 'end', 0, 100, 5).onFinishChange(restart);
     const skewY = folder.addFolder('Skew Y');
     gui.remember(config.skewY);
     skewY.add(config.skewY, 'active').onChange(restart);

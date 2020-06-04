@@ -11,7 +11,7 @@ import Stats from '../../node_modules/stats.js/src/Stats';
  * Simple transforms
  */
 function transform (scene, progress, velocity) {
-    let translateY = 0, translateX = 0;
+    let translateY = 0, translateX = 0, translateZ = 0;
     let skewY = 0, skewX = 0;
     let rotationAngle = 0;
     let tiltXAngle = 0, tiltYAngle = 0;
@@ -34,7 +34,14 @@ function transform (scene, progress, velocity) {
         translateX = (p * 2 - 1) * scene.xOffset * scene.translateX.speed;
     }
 
-    const translate = `translate3d(${translateX}px, ${translateY}px, 0px)`;
+    if (scene.translateZ.active) {
+        const start = scene.translateZ.start / 100;
+        const duration = scene.translateZ.end / 100 - start;
+        const p = scene.translateZ.symmetric ? 1 - Math.abs(progress * 2 - 1) : progress;
+        translateZ = lerp(scene.translateZ.distance, 0, getScaleFactor(start, duration, p));
+    }
+
+    const translate = `translate3d(${translateX}px, ${translateY}px, ${translateZ}px)`;
 
     if (scene.skewY.active) {
         if (scene.skewY.velocity) {
@@ -309,6 +316,13 @@ function generateTransformsConfig () {
             end: 100,
             start: 0
         },
+        translateZ: {
+            active: false,
+            symmetric: true,
+            distance: -500,
+            end: 100,
+            start: 0
+        },
         skewY: {
             active: false,
             velocity: true,
@@ -487,6 +501,20 @@ function createTransformsControls (folder, config) {
     panX.add(config.translateX, 'start', 0, 100, 5)
         .onFinishChange(restart);
     panX.add(config.translateX, 'end', 0, 100, 5)
+        .onFinishChange(restart);
+
+    const panZ = folder.addFolder('Pan Z');
+    gui.remember(config.translateZ);
+
+    panZ.add(config.translateZ, 'active')
+        .onChange(restart);
+    panZ.add(config.translateZ, 'symmetric')
+        .onChange(restart);
+    panZ.add(config.translateZ, 'distance', -2000, 2000, 50)
+        .onFinishChange(restart);
+    panZ.add(config.translateZ, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+    panZ.add(config.translateZ, 'end', 0, 100, 5)
         .onFinishChange(restart);
 
     const skewY = folder.addFolder('Skew Y');
