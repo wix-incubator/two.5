@@ -14,9 +14,15 @@ function transform (scene, progress, velocity) {
     let translateY = 0, translateX = 0;
     let skewY = 0, skewX = 0;
     let rotationAngle = 0;
+    let tiltXAngle = 0, tiltYAngle = 0;
 
+    let perspective = '';
     let scale = '';
     let rotate = '';
+
+    if (scene.perspectiveZ.active) {
+        perspective = `perspective(${scene.perspectiveZ.distance}px) `;
+    }
 
     if (scene.translateY.active) {
         const p = Math.min(Math.max(progress - scene.translateY.start / 100, 0), scene.translateY.end / 100);
@@ -52,41 +58,57 @@ function transform (scene, progress, velocity) {
 
     const skew = `skew(${skewX}deg, ${skewY}deg)`;
 
-   // -------
+    // -------
 
-   if (scene.rotateIn.active && !scene.rotateOut.active) {
-       const start = scene.rotateIn.start / 100;
-       const duration = scene.rotateIn.end / 100 - start;
-       rotationAngle = getScaleFactor(start, duration, progress) * (scene.rotateIn.angle);
-   }
-   else if (scene.rotateOut.active && !scene.rotateIn.active) {
-       const start = scene.rotateOut.start / 100;
-       const duration = scene.rotateOut.end / 100 - start;
-       rotationAngle = (1 - getScaleFactor(start, duration, progress)) * (scene.rotateOut.angle);
-   }
-   else if (scene.rotateIn.active && scene.rotateOut.active) {
-       const inStart = scene.rotateIn.start / 100;
-       const outStart = scene.rotateOut.start / 100;
-       const inEnd = scene.rotateIn.end / 100;
-       const outEnd = scene.rotateOut.end / 100;
-       const isDuringIn = progress >= inStart && progress <= inEnd;
-       // const isDuringOut = progress >= outStart && progress <= outEnd;
-       const inFirst = inStart < outStart;
-       const isAroundIn = inFirst ? progress < inStart || progress < outStart : progress > inEnd;
-       // const isAroundOut = inFirst ? progress > outEnd : progress < outStart || progress < inStart;
+    if (scene.rotateIn.active && !scene.rotateOut.active) {
+        const start = scene.rotateIn.start / 100;
+        const duration = scene.rotateIn.end / 100 - start;
+        rotationAngle = getScaleFactor(start, duration, progress) * (scene.rotateIn.angle);
+    }
+    else if (scene.rotateOut.active && !scene.rotateIn.active) {
+        const start = scene.rotateOut.start / 100;
+        const duration = scene.rotateOut.end / 100 - start;
+        rotationAngle = (1 - getScaleFactor(start, duration, progress)) * (scene.rotateOut.angle);
+    }
+    else if (scene.rotateIn.active && scene.rotateOut.active) {
+        const inStart = scene.rotateIn.start / 100;
+        const outStart = scene.rotateOut.start / 100;
+        const inEnd = scene.rotateIn.end / 100;
+        const outEnd = scene.rotateOut.end / 100;
+        const isDuringIn = progress >= inStart && progress <= inEnd;
+        // const isDuringOut = progress >= outStart && progress <= outEnd;
+        const inFirst = inStart < outStart;
+        const isAroundIn = inFirst ? progress < inStart || progress < outStart : progress > inEnd;
+        // const isAroundOut = inFirst ? progress > outEnd : progress < outStart || progress < inStart;
 
-       if (isDuringIn || isAroundIn) {
-           // inside in
-           rotationAngle = getScaleFactor(inStart, inEnd - inStart, progress) * (scene.rotateIn.angle);
-       }
-       else {
-           // inside out
-           rotationAngle = (1 - getScaleFactor(outStart, outEnd - outStart, progress)) * (scene.rotateOut.angle);
-       }
+        if (isDuringIn || isAroundIn) {
+            // inside in
+            rotationAngle = getScaleFactor(inStart, inEnd - inStart, progress) * (scene.rotateIn.angle);
+        }
+        else {
+            // inside out
+            rotationAngle = (1 - getScaleFactor(outStart, outEnd - outStart, progress)) * (scene.rotateOut.angle);
+        }
     }
 
-    if (rotationAngle !== 0) {
-        rotate = `rotate(${rotationAngle}deg)`;
+    if (scene.tiltX.active) {
+        const start = scene.tiltX.start / 100;
+        const duration = scene.tiltX.end / 100 - start;
+        const p = scene.tiltX.symmetric ? 1 - Math.abs(progress * 2 - 1) : progress;
+        const flip = scene.tiltX.symmetric && progress > 0.5 ? -1 : 1;
+        tiltXAngle = lerp(scene.tiltX.angle, 0, getScaleFactor(start, duration, p)) * flip;
+    }
+
+    if (scene.tiltY.active) {
+        const start = scene.tiltY.start / 100;
+        const duration = scene.tiltY.end / 100 - start;
+        const p = scene.tiltY.symmetric ? 1 - Math.abs(progress * 2 - 1) : progress;
+        const flip = scene.tiltY.symmetric && progress > 0.5 ? -1 : 1;
+        tiltYAngle = lerp(scene.tiltY.angle, 0, getScaleFactor(start, duration, p)) * flip;
+    }
+
+    if (rotationAngle !== 0 || tiltXAngle !== 0 || tiltYAngle !== 0) {
+        rotate = `rotateX(${tiltXAngle}deg) rotateY(${tiltYAngle}deg) rotateZ(${rotationAngle}deg)`;
     }
 
     // -------
@@ -189,7 +211,7 @@ function transform (scene, progress, velocity) {
     }
 
     scene.element.style.opacity = opacity.toFixed(3);
-    scene.element.style.transform = `${translate} ${skew} ${scale} ${rotate}`;
+    scene.element.style.transform = `${perspective}${translate} ${skew} ${scale} ${rotate}`;
 }
 
 function getScaleFactor (start, duration, progress) {
@@ -271,6 +293,10 @@ window.gui = new dat.GUI();
 
 function generateTransformsConfig () {
     return {
+        perspectiveZ: {
+            active: false,
+            distance: 50
+        },
         translateY: {
             active: false,
             speed: 0.5,
@@ -296,6 +322,20 @@ function generateTransformsConfig () {
             angle: 20,
             end: 100,
             start: 0
+        },
+        tiltX: {
+            active: false,
+            symmetric: true,
+            angle: 90,
+            start: 0,
+            end: 100
+        },
+        tiltY: {
+            active: false,
+            symmetric: true,
+            angle: 90,
+            start: 0,
+            end: 100
         },
         stretchX: {
             active: false,
@@ -417,6 +457,14 @@ function createImageControls (folder, config) {
 }
 
 function createTransformsControls (folder, config) {
+    const perspectiveZ = folder.addFolder('Perspective Z');
+    gui.remember(config.perspectiveZ);
+
+    perspectiveZ.add(config.perspectiveZ, 'active')
+        .onChange(restart);
+    perspectiveZ.add(config.perspectiveZ, 'distance', 50, 2000, 50)
+        .onFinishChange(restart);
+
     const panY = folder.addFolder('Pan Y');
     gui.remember(config.translateY);
 
@@ -467,6 +515,34 @@ function createTransformsControls (folder, config) {
     skewX.add(config.skewX, 'start', 0, 100, 5)
         .onFinishChange(restart);
     skewX.add(config.skewX, 'end', 0, 100, 5)
+        .onFinishChange(restart);
+
+    const tiltX = folder.addFolder('Tilt X');
+    gui.remember(config.tiltX);
+
+    tiltX.add(config.tiltX, 'active')
+        .onChange(restart);
+    tiltX.add(config.tiltX, 'symmetric')
+        .onChange(restart);
+    tiltX.add(config.tiltX, 'angle', 0, 180, 5)
+        .onFinishChange(restart);
+    tiltX.add(config.tiltX, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+    tiltX.add(config.tiltX, 'end', 0, 100, 5)
+        .onFinishChange(restart);
+
+    const tiltY = folder.addFolder('Tilt Y');
+    gui.remember(config.tiltY);
+
+    tiltY.add(config.tiltY, 'active')
+        .onChange(restart);
+    tiltY.add(config.tiltY, 'symmetric')
+        .onChange(restart);
+    tiltY.add(config.tiltY, 'angle', 0, 180, 5)
+        .onFinishChange(restart);
+    tiltY.add(config.tiltY, 'start', 0, 100, 5)
+        .onFinishChange(restart);
+    tiltY.add(config.tiltY, 'end', 0, 100, 5)
         .onFinishChange(restart);
 
     const stretchX = folder.addFolder('Stretch X');
