@@ -986,6 +986,16 @@ function createScenes () {
             return x[0] && x[0].active;
         });
 
+    // fix position so that we can get proper offsets
+    parents.forEach((parent, index) => {
+        if (config.scene.container) {
+            delete parent.dataset.fixed;
+        }
+        else if (config.images[index].transforms.translateY.active) {
+            parent.dataset.fixed = true;
+        }
+    });
+
     // get only scenes with active filter
     const filterScenes = config.images
         .map((img, index) => [img.filter, images[index]])
@@ -996,15 +1006,7 @@ function createScenes () {
     // create configs for background transform scenes
     return images.map((img, index) => {
         const parent = parents[index];
-        const parentTop = parent.offsetTop;
-        const parentHeight = parent.offsetHeight;
-
-        const start = parentTop - viewportHeight;
-        const duration = parentHeight + viewportHeight;
-
         const transforms = config.images[index].transforms;
-        const filter = config.images[index].filter;
-        const hasWebGL = filter.active && filter.type === 'displacement';
 
         /*
          * Setup parents styling
@@ -1014,14 +1016,23 @@ function createScenes () {
 
         if (transforms.translateY.active) {
             if (config.scene.container) {
-                delete parent.dataset.fixed;
                 transforms.translateY.factor = transforms.translateY.speed;
             }
             else {
-                parent.dataset.fixed = true;
                 transforms.translateY.factor = (1 - transforms.translateY.speed) * -1;
             }
         }
+
+        const parentTop = parent.offsetTop;
+        const parentHeight = parent.offsetHeight;
+
+        const start = parentTop - viewportHeight;
+        const duration = parentHeight + viewportHeight;
+
+        const filter = config.images[index].filter;
+        const hasWebGL = filter.active && filter.type === 'displacement';
+
+        let offset = config.scene.container ? viewportHeight + img.offsetTop : viewportHeight - (img.offsetHeight - parentHeight);
 
         if (transforms.translateX.active) {
             img.style.width = '200%';
@@ -1037,7 +1048,7 @@ function createScenes () {
             element: hasWebGL ? img.nextElementSibling : img,
             viewport: parent,
             pauseDuringSnap: true,
-            offset: config.scene.container ? viewportHeight + img.offsetTop : parentHeight, // add img.offsetTop to compensate for image offset in its parent
+            offset,
             xOffset: (img.offsetWidth - parent.offsetWidth) / 2,
             ...transforms
         };

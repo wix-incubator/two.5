@@ -1,6 +1,6 @@
 :root {
     --strip-height: 1000px;
-    --vw: 1920px;
+    --vw: 100vw;
 }
 
 body {
@@ -29,7 +29,7 @@ main {
 }
 
 .strip[data-fixed] {
-    display: block;
+    display: grid;
 }
 
 .strip .bg {
