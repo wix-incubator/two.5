@@ -1,6 +1,7 @@
 import { clamp } from '../utilities';
 
 /**
+ * @private
  * @type {gyroscopeConfig}
  */
 const DEFAULTS = {

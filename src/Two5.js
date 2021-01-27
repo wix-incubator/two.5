@@ -1,5 +1,8 @@
 import { defaultTo, lerp } from './utilities.js';
 
+/**
+ * @type {ticker}
+ */
 const ticker = {
     pool: new Set(),
     /**
@@ -64,6 +67,7 @@ const ticker = {
 };
 
 /**
+ * @private
  * @type {two5Config}
  */
 const DEFAULTS = {

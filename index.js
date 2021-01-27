@@ -52,6 +52,7 @@ function lerp(a, b, t) {
 }
 
 /**
+ * @private
  * @type {scrollConfig}
  */
 
