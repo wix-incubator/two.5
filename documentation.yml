@@ -1,0 +1,14 @@
+toc:
+  - Two5
+  - two5Config
+  - name: effects
+    children:
+      - scrollConfig
+      - tiltConfig
+      - gyroscopeConfig
+  - name: utilities
+    children:
+      - clamp
+      - clone
+      - defaultTo
+      - lerp

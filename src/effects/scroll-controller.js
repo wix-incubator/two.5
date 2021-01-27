@@ -1,6 +1,7 @@
 import { defaultTo } from '../utilities';
 
 /**
+ * @private
  * @type {scrollConfig}
  */
 const DEFAULTS = {
@@ -23,6 +24,7 @@ const DEFAULTS = {
 /**
  * Utility for calculating the virtual scroll position, taking snap points into account.
  *
+ * @private
  * @param {number} p real scroll position
  * @param {[number[]]} snaps list of snap point
  * @return {number} virtual scroll position
@@ -46,6 +48,7 @@ function calcPosition (p, snaps) {
 /**
  * Utility for calculating effect progress.
  *
+ * @private
  * @param {number} p current scroll position
  * @param {number} start start position
  * @param {number} end end position
@@ -71,6 +74,7 @@ function calcProgress (p, start, end, duration) {
 /**
  * Initialize and return a scroll controller.
  *
+ * @private
  * @param {scrollConfig} config
  * @return {function}
  */
@@ -210,6 +214,7 @@ export function getEffect (config) {
      * Scroll scenes controller.
      * Takes progress object and orchestrates scenes.
      *
+     * @private
      * @param {Object} progress
      * @param {number} progress.x
      * @param {number} progress.y

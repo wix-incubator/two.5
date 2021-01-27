@@ -1,5 +1,8 @@
 import { defaultTo } from '../utilities';
 
+/**
+ * @private
+ */
 const DEFAULTS = {
     // config only
     perspectiveActive: false,

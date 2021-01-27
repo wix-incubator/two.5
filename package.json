@@ -15,7 +15,8 @@
     "demo": "npm run build && npm run demo:build",
     "demo:watch": "npm run build -w && npm run demo:build -w",
     "demo:start": "npm run demo && npm run start",
-    "start:watch": "npm run demo:watch && npm run start"
+    "start:watch": "npm run demo:watch && npm run start",
+    "docs": "documentation build src/index.js -f html -o docs -c documentation.yml"
   },
   "repository": {
     "type": "git",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@babel/core": "^7.11.1",
     "dat.gui": "^0.7.7",
+    "documentation": "^13.1.1",
     "http-server": "^0.12.1",
     "kampos": "^0.3.5",
     "npm-check": "^5.9.2",
