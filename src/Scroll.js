@@ -38,7 +38,7 @@ export default class Scroll extends Two5 {
         this.progress.vx = 0;
         this.progress.vy = 0;
 
-        if ( this.config.animationActive) {
+        if ( this.config.animationActive ) {
             this.currentProgress.x = x;
             this.currentProgress.y = y;
             this.currentProgress.vx = 0;

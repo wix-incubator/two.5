@@ -1,4 +1,4 @@
-import { defaultTo } from '../utilities';
+import { defaultTo } from '../utilities.js';
 
 /**
  * @private

@@ -1,4 +1,4 @@
-import { clamp } from '../utilities';
+import { clamp } from '../utilities.js';
 
 /**
  * @private

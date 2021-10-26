@@ -56,7 +56,7 @@ function lerp(a, b, t) {
  * @type {scrollConfig}
  */
 
-const DEFAULTS = {
+const DEFAULTS$3 = {
   horizontal: false,
   observeSize: true,
   observeViewport: true,
@@ -134,8 +134,8 @@ function calcProgress(p, start, end, duration) {
  */
 
 
-function getEffect(config) {
-  const _config = defaultTo(config, DEFAULTS);
+function getEffect$1(config) {
+  const _config = defaultTo(config, DEFAULTS$3);
 
   const root = _config.root;
   const body = _config.root === window ? window.document.body : _config.root;
@@ -147,8 +147,8 @@ function getEffect(config) {
    * Prepare snap points data.
    */
 
-  const snaps = (_config.snaps || []). // sort points by start position
-  sort((a, b) => a.start > b.start ? 1 : -1) // map objects to arrays of [start, end]
+  const snaps = (_config.snaps || [] // sort points by start position
+  ).sort((a, b) => a.start > b.start ? 1 : -1) // map objects to arrays of [start, end]
   .map(snap => {
     const {
       start,
@@ -376,7 +376,7 @@ function getEffect(config) {
   return controller;
 }
 
-function getHandler({
+function getHandler$2({
   progress,
   root
 }) {
@@ -471,7 +471,7 @@ const ticker = {
  * @type {two5Config}
  */
 
-const DEFAULTS$1 = {
+const DEFAULTS$2 = {
   ticker,
   animationActive: false,
   animationFriction: 0.4,
@@ -488,7 +488,7 @@ const DEFAULTS$1 = {
 
 class Two5 {
   constructor(config = {}) {
-    this.config = defaultTo(config, DEFAULTS$1);
+    this.config = defaultTo(config, DEFAULTS$2);
     this.progress = {
       x: 0,
       y: 0,
@@ -686,7 +686,7 @@ class Scroll extends Two5 {
 
 
   getEffects() {
-    return [getEffect(this.config)];
+    return [getEffect$1(this.config)];
   }
   /**
    * Register scroll position measuring.
@@ -698,7 +698,7 @@ class Scroll extends Two5 {
       root: this.config.root,
       progress: this.progress
     };
-    this.measures.push(getHandler(config).handler);
+    this.measures.push(getHandler$2(config).handler);
   }
   /**
    * Remove scroll measuring handler.
@@ -747,7 +747,7 @@ class Scroll extends Two5 {
  * @property {function(container: HTMLElement, wrapper: HTMLElement|undefined, x: number, y: number)} [scrollClear] if using a container, this allows overriding the function used for clearing content scrolling side-effects when effect is removed. Defaults to clearing `container.style.transform`.
  */
 
-const DEFAULTS$2 = {
+const DEFAULTS$1 = {
   // config only
   perspectiveActive: false,
   perspectiveInvertX: false,
@@ -801,8 +801,8 @@ function formatTransition({
   return `${property} ${duration}ms ${easing}`;
 }
 
-function getEffect$1(config) {
-  const _config = defaultTo(config, DEFAULTS$2);
+function getEffect(config) {
+  const _config = defaultTo(config, DEFAULTS$1);
 
   const container = _config.container;
   const perspectiveZ = _config.perspectiveZ;
@@ -1004,16 +1004,16 @@ function getHandler$1({
  * @type {gyroscopeConfig}
  */
 
-const DEFAULTS$3 = {
+const DEFAULTS = {
   samples: 3,
   maxBeta: 15,
   maxGamma: 15
 };
-function getHandler$2({
+function getHandler({
   progress,
-  samples = DEFAULTS$3.samples,
-  maxBeta = DEFAULTS$3.maxBeta,
-  maxGamma = DEFAULTS$3.maxGamma
+  samples = DEFAULTS.samples,
+  maxBeta = DEFAULTS.maxBeta,
+  maxGamma = DEFAULTS.maxGamma
 }) {
   const hasSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 
@@ -1118,7 +1118,7 @@ class Tilt extends Two5 {
 
 
   getEffects() {
-    return [getEffect$1( // we invert rotation transform order in case of device orientation,
+    return [getEffect( // we invert rotation transform order in case of device orientation,
     // see: https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Using_device_orientation_with_3D_transforms#Orientation_compensation
     clone({
       invertRotation: !!this.usingGyroscope
@@ -1136,7 +1136,7 @@ class Tilt extends Two5 {
 
   setupEvents() {
     // attempt usage of DeviceOrientation event
-    const gyroscopeHandler = getHandler$2({
+    const gyroscopeHandler = getHandler({
       progress: this.progress,
       samples: this.config.gyroscopeSamples,
       maxBeta: this.config.maxBeta,
