@@ -1,0 +1,136 @@
+:root {
+    --strip-height: 1000px;
+    --vw: 100vw;
+}
+
+body {
+    margin: 0;
+}
+
+main {
+    /*will-change: transform;*/
+}
+
+.root {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.strip {
+    position: relative;
+    display: grid;
+    grid-template: 100% / 100%;
+    grid-template-areas: "strip";
+    text-align: center;
+    border-bottom: 1px solid #000;
+    height: var(--strip-height);
+}
+
+.strip[data-fixed] {
+    display: grid;
+}
+
+.strip .bg {
+    display: grid;
+    grid-template: "media" 100% / 100%;
+    grid-area: strip;
+    place-self: stretch;
+    place-items: center;
+    overflow: hidden;
+    z-index: 0;
+    /*will-change: transform;*/
+    /*transform: translate3d(0px, 0px, 0px);*/
+}
+
+#strip-1 .bg {
+    background-image: linear-gradient(var(--angle, to right), var(--stop0-color, #fa4040) var(--stop0, 0%), var(--stop100-color, #4141fc) var(--stop100, 100%));
+}
+
+#strip-2 .bg {
+    background-image: linear-gradient(var(--angle, to right), var(--stop0-color, #95ffff) var(--stop0, 0%), var(--stop100-color, #ffd600) var(--stop100, 100%));
+}
+
+#strip-3 .bg {
+    background-image: linear-gradient(var(--angle, 45deg), var(--stop0-color, lightsalmon) var(--stop0, 0%), var(--stop100-color, cornflowerblue) var(--stop100, 100%));
+}
+
+#strip-4 .bg {
+    background-image: linear-gradient(var(--angle, -45deg), var(--stop0-color, rebeccapurple) var(--stop0, 0%), var(--stop50-color, deeppink) var(--stop50, 50%), var(--stop100-color, rebeccapurple) var(--stop100, 100%));
+}
+
+#strip-5 .bg {
+    background-image: linear-gradient(var(--angle, to bottom), var(--stop0-color, forestgreen) var(--stop0, 0%), var(--stop33-color, paleturquoise) var(--stop33, 33%), var(--stop66-color, lemonchiffon) var(--stop66, 66%), var(--stop100-color, indianred) var(--stop100, 100%));
+}
+
+/*.strip .bg img {*/
+/*    grid-area: media;*/
+/*    width: 100%;*/
+/*    height: 100vh;*/
+/*    min-height: var(--strip-height);*/
+/*    object-fit: cover;*/
+/*    will-change: transform;*/
+/*    transform: translate3d(0px, 0px, 0px);*/
+/*}*/
+
+.strip[data-fixed] .bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    clip: rect(0px, var(--vw), var(--strip-height), 0px);
+}
+
+.strip[data-fixed] .bg img {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.strip canvas {
+    grid-area: media;
+    width: 100%;
+    height: 100vh;
+    min-height: var(--strip-height);
+    display: none;
+    z-index: 1;
+}
+
+.strip[data-canvas] canvas {
+    display: block;
+}
+
+.strip .content {
+    grid-area: strip;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.strip[data-fixed] .content {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.strip .content p {
+    padding: 2em;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+[data-blend="difference"] img {
+    mix-blend-mode: difference;
+}
+
+[data-blend="dodge"] img {
+    mix-blend-mode: color-dodge;
+}
+
+.footer {
+    height: auto;
+}
+
+.dg.ac {
+    z-index: 1 !important;
+}

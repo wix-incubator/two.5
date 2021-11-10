@@ -1,7 +1,7 @@
 (function (factory) {
   typeof define === 'function' && define.amd ? define(factory) :
   factory();
-}((function () { 'use strict';
+})((function () { 'use strict';
 
   /**
    * Clamps a value between limits.
@@ -55,6 +55,10 @@
   function lerp(a, b, t) {
     return a * (1 - t) + b * t;
   }
+  /**
+   * @type {ticker}
+   */
+
 
   const ticker = {
     pool: new Set(),
@@ -121,10 +125,11 @@
 
   };
   /**
+   * @private
    * @type {two5Config}
    */
 
-  const DEFAULTS$1 = {
+  const DEFAULTS$2 = {
     ticker,
     animationActive: false,
     animationFriction: 0.4,
@@ -141,7 +146,7 @@
 
   class Two5 {
     constructor(config = {}) {
-      this.config = defaultTo(config, DEFAULTS$1);
+      this.config = defaultTo(config, DEFAULTS$2);
       this.progress = {
         x: 0,
         y: 0,
@@ -306,8 +311,12 @@
    * @property {function(container: HTMLElement, wrapper: HTMLElement|undefined, x: number, y: number)} [scrollClear] if using a container, this allows overriding the function used for clearing content scrolling side-effects when effect is removed. Defaults to clearing `container.style.transform`.
    */
 
+  /**
+   * @private
+   */
 
-  const DEFAULTS$2 = {
+
+  const DEFAULTS$1 = {
     // config only
     perspectiveActive: false,
     perspectiveInvertX: false,
@@ -361,8 +370,8 @@
     return `${property} ${duration}ms ${easing}`;
   }
 
-  function getEffect$1(config) {
-    const _config = defaultTo(config, DEFAULTS$2);
+  function getEffect(config) {
+    const _config = defaultTo(config, DEFAULTS$1);
 
     const container = _config.container;
     const perspectiveZ = _config.perspectiveZ;
@@ -560,21 +569,22 @@
     };
   }
   /**
+   * @private
    * @type {gyroscopeConfig}
    */
 
 
-  const DEFAULTS$3 = {
+  const DEFAULTS = {
     samples: 3,
     maxBeta: 15,
     maxGamma: 15
   };
 
-  function getHandler$2({
+  function getHandler({
     progress,
-    samples = DEFAULTS$3.samples,
-    maxBeta = DEFAULTS$3.maxBeta,
-    maxGamma = DEFAULTS$3.maxGamma
+    samples = DEFAULTS.samples,
+    maxBeta = DEFAULTS.maxBeta,
+    maxGamma = DEFAULTS.maxGamma
   }) {
     const hasSupport = window.DeviceOrientationEvent && 'ontouchstart' in window.document.body;
 
@@ -679,7 +689,7 @@
 
 
     getEffects() {
-      return [getEffect$1( // we invert rotation transform order in case of device orientation,
+      return [getEffect( // we invert rotation transform order in case of device orientation,
       // see: https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Using_device_orientation_with_3D_transforms#Orientation_compensation
       clone({
         invertRotation: !!this.usingGyroscope
@@ -697,7 +707,7 @@
 
     setupEvents() {
       // attempt usage of DeviceOrientation event
-      const gyroscopeHandler = getHandler$2({
+      const gyroscopeHandler = getHandler({
         progress: this.progress,
         samples: this.config.gyroscopeSamples,
         maxBeta: this.config.maxBeta,
@@ -3946,6 +3956,6 @@
 
   }
 
-  const demo = new Demo();
+  new Demo();
 
-})));
+}));

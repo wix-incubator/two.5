@@ -7060,6 +7060,34 @@ void main() {
     scene.element.style.transform = `${perspective}${translate} ${skew} ${scale} ${rotate}`;
   }
 
+  function gradient(scene, progress) {
+    const angle = scene.gradient.angle;
+    const stops = scene.gradient.stops;
+
+    if (angle.active) {
+      const p = Math.min(Math.max(progress - angle.start / 100, 0), angle.end / 100);
+      const value = p * 360 * angle.speed + angle.offset;
+      scene.element.style.setProperty('--angle', `${value}deg`);
+    }
+
+    const p = Math.min(Math.max(progress - stops.start / 100, 0), stops.end / 100);
+    Object.entries(stops).forEach(([key, stop]) => {
+      if (!key.startsWith('stop')) return;
+      let position;
+      let color;
+
+      if (stop.position.active) {
+        position = lerp(stop.position.start, stop.position.end, p);
+        scene.element.style.setProperty(`--${key}`, `${position}%`);
+      }
+
+      if (stop.color.active) {
+        color = [lerp(scene.colors[key][0][0], scene.colors[key][1][0], p), lerp(scene.colors[key][0][1], scene.colors[key][1][1], p), lerp(scene.colors[key][0][2], scene.colors[key][1][2], p)];
+        scene.element.style.setProperty(`--${key}-color`, `rgb(${color.join(', ')})`);
+      }
+    });
+  }
+
   function clip(scene, progress) {
     const start = scene.clip.start / 100;
     const duration = scene.clip.end / 100 - start;
@@ -7188,6 +7216,180 @@ void main() {
     rect: 'rect'
   };
   window.gui = new GUI$1();
+
+  function generateGradientsConfig(stops = 2, colors) {
+    const gradientsConfig = {
+      angle: {
+        active: false,
+        offset: 0,
+        start: 0,
+        end: 100,
+        speed: 1
+      },
+      stops: {
+        start: 0,
+        end: 100,
+        stop0: {
+          position: {
+            active: false,
+            start: 0,
+            end: 100
+          },
+          color: {
+            active: false,
+            start: colors[0][0],
+            end: colors[0][1]
+          }
+        },
+        stop100: {
+          position: {
+            active: false,
+            start: 100,
+            end: 0
+          },
+          color: {
+            active: false,
+            start: colors[colors.length - 1][0],
+            end: colors[colors.length - 1][1]
+          }
+        }
+      }
+    };
+
+    if (stops === 3) {
+      gradientsConfig.stops.stop50 = {
+        position: {
+          active: false,
+          start: 0,
+          end: 100
+        },
+        color: {
+          active: false,
+          start: colors[1][0],
+          end: colors[1][1]
+        }
+      };
+    }
+
+    if (stops === 4) {
+      gradientsConfig.stops.stop33 = {
+        position: {
+          active: false,
+          start: 0,
+          end: 66
+        },
+        color: {
+          active: false,
+          start: colors[1][0],
+          end: colors[1][1]
+        }
+      };
+      gradientsConfig.stops.stop66 = {
+        position: {
+          active: false,
+          start: 33,
+          end: 100
+        },
+        color: {
+          active: false,
+          start: colors[2][0],
+          end: colors[2][1]
+        }
+      };
+    }
+
+    if (stops === 5) {
+      gradientsConfig.stops.stop25 = {
+        position: {
+          active: false,
+          start: 0,
+          end: 50
+        },
+        color: {
+          active: false,
+          start: colors[1][0],
+          end: colors[1][1]
+        }
+      };
+      gradientsConfig.stops.stop50 = {
+        position: {
+          active: false,
+          start: 25,
+          end: 75
+        },
+        color: {
+          active: false,
+          start: colors[2][0],
+          end: colors[2][1]
+        }
+      };
+      gradientsConfig.stops.stop75 = {
+        position: {
+          active: false,
+          start: 50,
+          end: 100
+        },
+        color: {
+          active: false,
+          start: colors[3][0],
+          end: colors[3][1]
+        }
+      };
+    }
+
+    if (stops === 6) {
+      gradientsConfig.stops.stop20 = {
+        position: {
+          active: false,
+          start: 0,
+          end: 40
+        },
+        color: {
+          active: false,
+          start: colors[1][0],
+          end: colors[1][1]
+        }
+      };
+      gradientsConfig.stops.stop40 = {
+        position: {
+          active: false,
+          start: 20,
+          end: 60
+        },
+        color: {
+          active: false,
+          start: colors[2][0],
+          end: colors[2][1]
+        }
+      };
+      gradientsConfig.stops.stop60 = {
+        position: {
+          active: false,
+          start: 40,
+          end: 80
+        },
+        color: {
+          active: false,
+          start: colors[3][0],
+          end: colors[3][1]
+        }
+      };
+      gradientsConfig.stops.stop80 = {
+        position: {
+          active: false,
+          start: 60,
+          end: 100
+        },
+        color: {
+          active: false,
+          start: colors[4][0],
+          end: colors[4][1]
+        }
+      };
+    }
+
+    return gradientsConfig;
+  }
 
   function generateTransformsConfig() {
     return {
@@ -7333,30 +7535,35 @@ void main() {
     images: [{
       height: 1000,
       bgColor: '#000',
+      gradients: generateGradientsConfig(2, [['#fa4040', '#4141fc'], ['#4141fc', '#fa4040']]),
       transforms: generateTransformsConfig(),
       clip: generateClipConfig(),
       filter: generateFilterConfig()
     }, {
       height: 1000,
       bgColor: '#000',
+      gradients: generateGradientsConfig(2, [['#95ffff', '#ffd600'], ['#ffd600', '#95ffff']]),
       transforms: generateTransformsConfig(),
       clip: generateClipConfig(),
       filter: generateFilterConfig()
     }, {
       height: 1000,
       bgColor: '#000',
+      gradients: generateGradientsConfig(2, [['#FFA07A', '#6495ED'], ['#6495ED', '#FFA07A']]),
       transforms: generateTransformsConfig(),
       clip: generateClipConfig(),
       filter: generateFilterConfig()
     }, {
       height: 1000,
       bgColor: '#000',
+      gradients: generateGradientsConfig(3, [['#663399', '#FF1493'], ['#FF1493', '#663399'], ['#663399', '#FF1493']]),
       transforms: generateTransformsConfig(),
       clip: generateClipConfig(),
       filter: generateFilterConfig()
     }, {
       height: 1000,
       bgColor: '#000',
+      gradients: generateGradientsConfig(4, [['#228B22', '#AFEEEE'], ['#AFEEEE', '#FFFACD'], ['#FFFACD', '#CD5C5C'], ['#CD5C5C', '#FFFACD']]),
       transforms: generateTransformsConfig(),
       clip: generateClipConfig(),
       filter: generateFilterConfig()
@@ -7366,6 +7573,34 @@ void main() {
   function createImageControls(folder, config) {
     folder.add(config, 'height', 100, 2000, 50).onFinishChange(restart);
     folder.addColor(config, 'bgColor').onFinishChange(restart);
+  }
+
+  function createGradientStopControls(folder, config, key) {
+    const stopFolder = folder.addFolder(`Stop ${key.slice(4)}`);
+    const position = stopFolder.addFolder('Position');
+    position.add(config.position, 'active').onChange(restart);
+    position.add(config.position, 'start', 0, 100, 1).onChange(restart);
+    position.add(config.position, 'end', 0, 100, 1).onChange(restart);
+    const color = stopFolder.addFolder('Color');
+    color.add(config.color, 'active').onChange(restart);
+    color.addColor(config.color, 'start').onFinishChange(restart);
+    color.addColor(config.color, 'end').onFinishChange(restart);
+  }
+
+  function createGradientsControls(folder, config) {
+    const angle = folder.addFolder('Angle');
+    gui.remember(config.angle);
+    angle.add(config.angle, 'active').onChange(restart);
+    angle.add(config.angle, 'offset', -180, 180, 5).onChange(restart);
+    angle.add(config.angle, 'start', 0, 100, 5).onChange(restart);
+    angle.add(config.angle, 'end', 0, 100, 5).onChange(restart);
+    angle.add(config.angle, 'speed', -5, 5, 0.1).onChange(restart);
+    const stops = folder.addFolder('Stops');
+    stops.open();
+    gui.remember(config.angle);
+    stops.add(config.stops, 'start', 0, 100, 5).onChange(restart);
+    stops.add(config.stops, 'end', 0, 100, 5).onChange(restart);
+    Object.keys(config.stops).filter(key => key.startsWith('stop')).forEach(key => createGradientStopControls(stops, config.stops[key], key));
   }
 
   function createTransformsControls(folder, config) {
@@ -7512,8 +7747,11 @@ void main() {
   gui.remember(config.images[0].clip);
   gui.remember(config.images[0].filter);
   createImageControls(image1, config.images[0]);
-  const image1Transforms = image1.addFolder('Transforms');
-  image1Transforms.open();
+  const image1Gradients = image1.addFolder('Gradients');
+  image1Gradients.open();
+  createGradientsControls(image1Gradients, config.images[0].gradients);
+  const image1Transforms = image1.addFolder('Transforms'); // image1Transforms.open();
+
   createTransformsControls(image1Transforms, config.images[0].transforms);
   const image1Reveal = image1.addFolder('Reveal');
   createClipControls(image1Reveal, config.images[0].clip);
@@ -7529,8 +7767,11 @@ void main() {
   gui.remember(config.images[1].clip);
   gui.remember(config.images[1].filter);
   createImageControls(image2, config.images[1]);
-  const image2Transforms = image2.addFolder('Transforms');
-  image2Transforms.open();
+  const image2Gradients = image2.addFolder('Gradients');
+  image2Gradients.open();
+  createGradientsControls(image2Gradients, config.images[1].gradients);
+  const image2Transforms = image2.addFolder('Transforms'); // image2Transforms.open();
+
   createTransformsControls(image2Transforms, config.images[1].transforms);
   const image2Reveal = image2.addFolder('Reveal');
   createClipControls(image2Reveal, config.images[1].clip);
@@ -7546,8 +7787,11 @@ void main() {
   gui.remember(config.images[2].clip);
   gui.remember(config.images[2].filter);
   createImageControls(image3, config.images[2]);
-  const image3Transforms = image3.addFolder('Transforms');
-  image3Transforms.open();
+  const image3Gradients = image3.addFolder('Gradients');
+  image3Gradients.open();
+  createGradientsControls(image3Gradients, config.images[2].gradients);
+  const image3Transforms = image3.addFolder('Transforms'); // image3Transforms.open();
+
   createTransformsControls(image3Transforms, config.images[2].transforms);
   const image3Reveal = image3.addFolder('Reveal');
   createClipControls(image3Reveal, config.images[2].clip);
@@ -7563,8 +7807,11 @@ void main() {
   gui.remember(config.images[3].clip);
   gui.remember(config.images[3].filter);
   createImageControls(image4, config.images[3]);
-  const image4Transforms = image4.addFolder('Transforms');
-  image4Transforms.open();
+  const image4Gradients = image4.addFolder('Gradients');
+  image4Gradients.open();
+  createGradientsControls(image4Gradients, config.images[3].gradients);
+  const image4Transforms = image4.addFolder('Transforms'); // image4Transforms.open();
+
   createTransformsControls(image4Transforms, config.images[3].transforms);
   const image4Reveal = image4.addFolder('Reveal');
   createClipControls(image4Reveal, config.images[3].clip);
@@ -7580,8 +7827,11 @@ void main() {
   gui.remember(config.images[4].clip);
   gui.remember(config.images[4].filter);
   createImageControls(image5, config.images[4]);
-  const image5Transforms = image5.addFolder('Transforms');
-  image5Transforms.open();
+  const image5Gradients = image5.addFolder('Gradients');
+  image5Gradients.open();
+  createGradientsControls(image5Gradients, config.images[4].gradients);
+  const image5Transforms = image5.addFolder('Transforms'); // image5Transforms.open();
+
   createTransformsControls(image5Transforms, config.images[4].transforms);
   const image5Reveal = image5.addFolder('Reveal');
   createClipControls(image5Reveal, config.images[4].clip);
@@ -7650,7 +7900,7 @@ void main() {
   const container = document.querySelector('main');
   const viewportHeight = window.innerHeight;
   const parents = [...window.document.querySelectorAll('[data-effects~="bgparallax"]')];
-  const images = [...window.document.querySelectorAll('[data-effects~="bgparallax"] .bg > img')]; // const canvases = [...window.document.querySelectorAll('canvas')];
+  const images = [...window.document.querySelectorAll('[data-effects~="bgparallax"] .bg')]; // const canvases = [...window.document.querySelectorAll('canvas')];
 
   const kamposInstances = new Map();
   /*
@@ -7665,6 +7915,10 @@ void main() {
         oldKampos.destroy();
         kamposInstances.delete(img);
       }
+    }); // get only scenes with active gradient effect
+
+    const gradientScenes = config.images.map((img, index) => [img.gradients, images[index]]).filter(x => {
+      return x[0] && (x[0].angle.active || Object.values(x[0].stops).filter(val => typeof val === 'object').some(stop => stop.position.active || stop.color.active));
     }); // get only scenes with active reveal
 
     const revealScenes = config.images.map((img, index) => [img.clip, images[index]]).filter(x => {
@@ -7726,7 +7980,30 @@ void main() {
         xOffset: (img.offsetWidth - parent.offsetWidth) / 2,
         ...transforms
       };
-    }) // create configs for reveal effect scenes
+    }) // create configs for gradient effect scenes
+    .concat(gradientScenes.map(([sceneConfig, scene]) => {
+      const parent = scene.closest('[data-effects]');
+      const parentTop = parent.offsetTop; // const parentHeight = parent.offsetHeight;
+
+      const start = parentTop - viewportHeight;
+      const duration = viewportHeight + parent.offsetHeight;
+      const colors = Object.entries(sceneConfig.stops).filter(([k, v]) => k.startsWith('stop')).reduce((acc, [key, stop]) => {
+        if (stop.color.active) {
+          acc[key] = [hex2rgb(stop.color.start), hex2rgb(stop.color.end)];
+        }
+
+        return acc;
+      }, {});
+      return {
+        effect: gradient,
+        start,
+        duration,
+        colors,
+        element: scene,
+        viewport: parent,
+        gradient: sceneConfig
+      };
+    })) // create configs for reveal effect scenes
     .concat(revealScenes.map(([reveal, scene]) => {
       const parent = scene.closest('[data-effects]');
       const parentTop = parent.offsetTop; // const parentHeight = parent.offsetHeight;
@@ -7964,6 +8241,14 @@ void main() {
 
   function getValues() {
     return JSON.stringify(gui.__rememberedObjects, null, 2);
+  }
+
+  function hex2rgb(hex) {
+    const bigint = parseInt(hex.slice(1) || '0', 16);
+    const r = bigint >> 16 & 255;
+    const g = bigint >> 8 & 255;
+    const b = bigint & 255;
+    return [r, g, b];
   }
 
 }));

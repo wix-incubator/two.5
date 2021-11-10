@@ -1,7 +1,7 @@
 (function (factory) {
   typeof define === 'function' && define.amd ? define(factory) :
   factory();
-}((function () { 'use strict';
+})((function () { 'use strict';
 
   /**
    * Clamps a value between limits.
@@ -42,11 +42,12 @@
     return a * (1 - t) + b * t;
   }
   /**
+   * @private
    * @type {scrollConfig}
    */
 
 
-  const DEFAULTS = {
+  const DEFAULTS$3 = {
     horizontal: false,
     observeSize: true,
     observeViewport: true,
@@ -68,6 +69,7 @@
   /**
    * Utility for calculating the virtual scroll position, taking snap points into account.
    *
+   * @private
    * @param {number} p real scroll position
    * @param {[number[]]} snaps list of snap point
    * @return {number} virtual scroll position
@@ -93,6 +95,7 @@
   /**
    * Utility for calculating effect progress.
    *
+   * @private
    * @param {number} p current scroll position
    * @param {number} start start position
    * @param {number} end end position
@@ -119,13 +122,14 @@
   /**
    * Initialize and return a scroll controller.
    *
+   * @private
    * @param {scrollConfig} config
    * @return {function}
    */
 
 
-  function getEffect(config) {
-    const _config = defaultTo(config, DEFAULTS);
+  function getEffect$1(config) {
+    const _config = defaultTo(config, DEFAULTS$3);
 
     const root = _config.root;
     const body = _config.root === window ? window.document.body : _config.root;
@@ -137,8 +141,8 @@
      * Prepare snap points data.
      */
 
-    const snaps = (_config.snaps || []). // sort points by start position
-    sort((a, b) => a.start > b.start ? 1 : -1) // map objects to arrays of [start, end]
+    const snaps = (_config.snaps || [] // sort points by start position
+    ).sort((a, b) => a.start > b.start ? 1 : -1) // map objects to arrays of [start, end]
     .map(snap => {
       const {
         start,
@@ -267,6 +271,7 @@
      * Scroll scenes controller.
      * Takes progress object and orchestrates scenes.
      *
+     * @private
      * @param {Object} progress
      * @param {number} progress.x
      * @param {number} progress.y
@@ -366,7 +371,7 @@
     return controller;
   }
 
-  function getHandler({
+  function getHandler$2({
     progress,
     root
   }) {
@@ -392,6 +397,10 @@
       off
     };
   }
+  /**
+   * @type {ticker}
+   */
+
 
   const ticker = {
     pool: new Set(),
@@ -458,10 +467,11 @@
 
   };
   /**
+   * @private
    * @type {two5Config}
    */
 
-  const DEFAULTS$1 = {
+  const DEFAULTS$2 = {
     ticker,
     animationActive: false,
     animationFriction: 0.4,
@@ -478,7 +488,7 @@
 
   class Two5 {
     constructor(config = {}) {
-      this.config = defaultTo(config, DEFAULTS$1);
+      this.config = defaultTo(config, DEFAULTS$2);
       this.progress = {
         x: 0,
         y: 0,
@@ -677,7 +687,7 @@
 
 
     getEffects() {
-      return [getEffect(this.config)];
+      return [getEffect$1(this.config)];
     }
     /**
      * Register scroll position measuring.
@@ -689,7 +699,7 @@
         root: this.config.root,
         progress: this.progress
       };
-      this.measures.push(getHandler(config).handler);
+      this.measures.push(getHandler$2(config).handler);
     }
     /**
      * Remove scroll measuring handler.
@@ -3968,4 +3978,4 @@
 
   instance = init();
 
-})));
+}));
