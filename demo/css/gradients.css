@@ -64,6 +64,18 @@ main {
     background-image: linear-gradient(var(--angle, to bottom), var(--stop0-color, forestgreen) var(--stop0, 0%), var(--stop33-color, paleturquoise) var(--stop33, 33%), var(--stop66-color, lemonchiffon) var(--stop66, 66%), var(--stop100-color, indianred) var(--stop100, 100%));
 }
 
+#strip-6 .bg {
+    background-image: linear-gradient(var(--angle, 310deg), var(--stop0-color, rgba(255, 246, 5, 1)) var(--stop0, 50%), var(--stop100-color, rgba(255, 0, 247, 1)) var(--stop100, 70%));
+}
+
+#strip-7 .bg {
+    background-image: linear-gradient(var(--angle, 90deg), var(--stop0-color, rgba(5, 37, 255, 1)) var(--stop0, 20%), var(--stop50-color, rgba(255, 10, 0, 1)) var(--stop50, 50%), var(--stop100-color, rgba(229, 0, 255, 1)) var(--stop100, 80%));
+}
+
+#strip-8 .bg {
+    background-image: linear-gradient(var(--angle, 180deg), var(--stop0-color, rgba(5, 243, 255, 1)) var(--stop0, 9%), var(--stop25-color, rgba(255, 237, 0, 1)) var(--stop25, 26%), var(--stop50-color, rgba(255, 10, 0, 1)) var(--stop50, 45%), var(--stop75-color, rgba(4, 228, 239, 1)) var(--stop75, 68%), var(--stop100-color, rgba(255, 224, 0, 1)) var(--stop100, 85%));
+}
+
 /*.strip .bg img {*/
 /*    grid-area: media;*/
 /*    width: 100%;*/
