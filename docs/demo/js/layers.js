@@ -56,7 +56,9 @@
     return a * (1 - t) + b * t;
   }
   /**
-   * @type {ticker}
+   * @typedef {Ticker}
+   * @property {Set} pool
+   * @property {number} animationFrame
    */
 
 
@@ -68,9 +70,9 @@
      */
     start() {
       if (!ticker.animationFrame) {
-        const loop = time => {
+        const loop = () => {
           ticker.animationFrame = window.requestAnimationFrame(loop);
-          ticker.tick(time);
+          ticker.tick();
         };
 
         ticker.animationFrame = window.requestAnimationFrame(loop);
@@ -87,11 +89,11 @@
 
     /**
      * Invoke `.tick()` on all instances in the pool.
-     *
-     * @param {number} time animation frame time argument.
      */
-    tick(time) {
-      ticker.pool.forEach(instance => instance.tick(time));
+    tick() {
+      for (let instance of ticker.pool) {
+        instance.tick();
+      }
     },
 
     /**
@@ -163,8 +165,6 @@
       this.effects = [];
       this.ticking = false;
       this.ticker = this.config.ticker;
-      this.time = 0;
-      this.dt = 1;
     }
     /**
      * Setup events and effects, and starts animation loop.
@@ -173,12 +173,7 @@
 
     on() {
       this.setupEvents();
-      this.setupEffects();
-
-      if (this.config.velocityActive) {
-        this.time = window.performance && window.performance.now ? window.performance.now() : Date.now();
-      } // start animating
-
+      this.setupEffects(); // start animating
 
       this.ticker.add(this);
     }
@@ -194,12 +189,10 @@
     }
     /**
      * Handle animation frame work.
-     *
-     *
      */
 
 
-    tick(time) {
+    tick() {
       // choose the object we iterate on
       const progress = this.config.animationActive ? this.currentProgress : this.progress; // cache values for calculating deltas for velocity
 
@@ -215,14 +208,12 @@
       }
 
       if (this.config.velocityActive) {
-        this.dt = time - this.time;
-        this.time = time;
         const dx = progress.x - x;
         const dy = progress.y - y;
         const factorX = dx < 0 ? -1 : 1;
         const factorY = dy < 0 ? -1 : 1;
-        progress.vx = Math.min(this.config.velocityMax, Math.abs(dx / this.dt)) / this.config.velocityMax * factorX;
-        progress.vy = Math.min(this.config.velocityMax, Math.abs(dy / this.dt)) / this.config.velocityMax * factorY;
+        progress.vx = Math.min(this.config.velocityMax, Math.abs(dx)) / this.config.velocityMax * factorX;
+        progress.vy = Math.min(this.config.velocityMax, Math.abs(dy)) / this.config.velocityMax * factorY;
       } // perform all registered effects
 
 

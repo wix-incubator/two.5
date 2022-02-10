@@ -937,7 +937,7 @@ function init () {
             img.transforms.stretchX.active && img.transforms.stretchX.velocity ||
             img.transforms.stretchY.active && img.transforms.stretchY.velocity
         ),
-        velocityMax: 10
+        velocityMax: 100
     });
 
     // activate
