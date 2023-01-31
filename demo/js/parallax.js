@@ -307,7 +307,7 @@ function init () {
         animationFriction: config.scene.friction
     });
 
-    parallax.on();
+    parallax.start();
 
     parallax.effects.unshift(function () {
         stats.begin();

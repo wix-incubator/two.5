@@ -99,16 +99,6 @@
               
                 
                 <li><a
-                  href='#two5config'
-                  class="">
-                  two5Config
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
                   href='#effects'
                   class="h5 bold black caps toggle-sibling">
                   effects
@@ -208,27 +198,63 @@
                       <li class='h5'><span>Instance members</span></li>
                       
                       <li><a
+                        href='#scrollstart'
+                        class='regular pre-open'>
+                        #start
+                      </a></li>
+                      
+                      <li><a
+                        href='#scrollpause'
+                        class='regular pre-open'>
+                        #pause
+                      </a></li>
+                      
+                      <li><a
                         href='#scrollresetprogress'
                         class='regular pre-open'>
                         #resetProgress
                       </a></li>
                       
                       <li><a
-                        href='#scrollgeteffects'
+                        href='#scrolltick'
                         class='regular pre-open'>
-                        #getEffects
+                        #tick
                       </a></li>
                       
                       <li><a
-                        href='#scrollsetupevents'
+                        href='#scrolllerp'
                         class='regular pre-open'>
-                        #setupEvents
+                        #lerp
                       </a></li>
                       
                       <li><a
-                        href='#scrollteardownevents'
+                        href='#scrolldestroy'
                         class='regular pre-open'>
-                        #teardownEvents
+                        #destroy
+                      </a></li>
+                      
+                      <li><a
+                        href='#scrollsetupevent'
+                        class='regular pre-open'>
+                        #setupEvent
+                      </a></li>
+                      
+                      <li><a
+                        href='#scrollremoveevent'
+                        class='regular pre-open'>
+                        #removeEvent
+                      </a></li>
+                      
+                      <li><a
+                        href='#scrollsetupeffect'
+                        class='regular pre-open'>
+                        #setupEffect
+                      </a></li>
+                      
+                      <li><a
+                        href='#scrollremoveeffect'
+                        class='regular pre-open'>
+                        #removeEffect
                       </a></li>
                       
                     </ul>
@@ -282,6 +308,16 @@
                   
                   
                 </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#framethrottle'
+                  class="">
+                  frameThrottle
+                  
+                </a>
                 
                 </li>
               
@@ -362,7 +398,7 @@
 
   <p>Initialize a WebGL target with effects.</p>
 
-    <div class='pre p1 fill-light mt0'>new Two5(config: <a href="#two5config">two5Config</a>)</div>
+    <div class='pre p1 fill-light mt0'>new Two5(config: two5Config)</div>
   
   
 
@@ -379,7 +415,7 @@
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>config</span> <code class='quiet'>(<a href="#two5config">two5Config</a>)</code>
+            <span class='code bold'>config</span> <code class='quiet'>(two5Config)</code>
 	    
           </div>
           
@@ -506,7 +542,7 @@
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>tick(time)</span>
+            <span class='code strong strong truncate'>tick()</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -516,7 +552,7 @@
 
   <p>Handle animation frame work.</p>
 
-    <div class='pre p1 fill-light mt0'>tick(time: any)</div>
+    <div class='pre p1 fill-light mt0'>tick()</div>
   
   
 
@@ -527,19 +563,6 @@
   
   
 
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>time</span> <code class='quiet'>(any)</code>
-	    
-          </div>
-          
-        </div>
-      
-    </div>
   
 
   
@@ -731,7 +754,7 @@
 
   
 
-  <p>Clears registered effects and measures.</p>
+  <p>Clears registered effects and triggers.</p>
 
     <div class='pre p1 fill-light mt0'>teardownEffects()</div>
   
@@ -834,93 +857,6 @@
   
   <div class='clearfix'>
     
-    <h3 class='fl m0' id='two5config'>
-      two5Config
-    </h3>
-    
-    
-  </div>
-  
-
-  
-    <div class='pre p1 fill-light mt0'>two5Config</div>
-  
-    <p>
-      Type:
-      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
-    </p>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Properties</div>
-    <div>
-      
-        <div class='space-bottom0'>
-          <span class='code bold'>animationActive</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?)</code>
-          : whether to animate effect progress.
-
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <span class='code bold'>animationFriction</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?)</code>
-          : from 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
-
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <span class='code bold'>velocityActive</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?)</code>
-          : whether to calculate velocity with progress.
-
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <span class='code bold'>velocityMax</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?)</code>
-          : max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
-
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
     <h3 class='fl m0' id='effects'>
       effects
     </h3>
@@ -930,7 +866,6 @@
   
 
   
-
     <div class='pre p1 fill-light mt0'>effects</div>
   
   
@@ -1064,15 +999,15 @@
         </div>
       
         <div class='space-bottom0'>
-          <span class='code bold'>animationActive</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?)</code>
+          <span class='code bold'>transitionActive</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?)</code>
           : whether to animate effect progress.
 
           
         </div>
       
         <div class='space-bottom0'>
-          <span class='code bold'>animationFriction</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?)</code>
-          : between 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
+          <span class='code bold'>transitionFriction</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?)</code>
+          : between 0 to 1, amount of friction effect in the transition. 1 being no movement and 0 as no friction. Defaults to 0.4.
 
           
         </div>
@@ -1150,7 +1085,7 @@
         </div>
       
         <div class='space-bottom0'>
-          <span class='code bold'>snaps</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;SnapPoint>)</code>
+          <span class='code bold'>snaps</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;SnapPoint>?)</code>
           : list of scroll snap points.
 
           
@@ -1609,7 +1544,6 @@
   
 
   
-
     <div class='pre p1 fill-light mt0'>utilities</div>
   
   
@@ -1716,7 +1650,7 @@
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> x = clamp(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1.5</span>); <span class="hljs-comment">// returns 1</span></pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> x = <span class="hljs-title function_">clamp</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1.5</span>); <span class="hljs-comment">// returns 1</span></pre>
     
   
 
@@ -1779,7 +1713,6 @@
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
         
-
       
     
   
@@ -1860,7 +1793,6 @@ its properties are served as defaults.</p>
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
         
-
       
     
   
@@ -1949,7 +1881,6 @@ its properties are served as defaults.</p>
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
         
-
       
     
   
@@ -2003,13 +1934,6 @@ its properties are served as defaults.</p>
     <div class='pre p1 fill-light mt0'>new Scroll(config: <a href="#scrollconfig">scrollConfig</a>)</div>
   
   
-    <p>
-      Extends
-      
-        <a href="#two5">Two5</a>
-      
-    </p>
-  
 
   
   
@@ -2045,14 +1969,14 @@ its properties are served as defaults.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { Scroll } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;two.5&#x27;</span>;
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Scroll</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;two.5&#x27;</span>;
 
-<span class="hljs-keyword">const</span> scroll = <span class="hljs-keyword">new</span> Scroll({
-    <span class="hljs-attr">container</span>: <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">&#x27;main&#x27;</span>),
-    <span class="hljs-attr">wrapper</span>: <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">&#x27;body &gt; div&#x27;</span>),
+<span class="hljs-keyword">const</span> scroll = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Scroll</span>({
+    <span class="hljs-attr">container</span>: <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;main&#x27;</span>),
+    <span class="hljs-attr">wrapper</span>: <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;body &gt; div&#x27;</span>),
     <span class="hljs-attr">scenes</span>: [...]
 });
-scroll.on();</pre>
+scroll.<span class="hljs-title function_">start</span>();</pre>
     
   
 
@@ -2061,6 +1985,104 @@ scroll.on();</pre>
   
     <div class='py1 quiet mt1 prose-big'>Instance Members</div>
     <div class="clearfix">
+  
+    <div class='border-bottom' id='scrollstart'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>start()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Setup event and effect, and starts animation loop.</p>
+
+    <div class='pre p1 fill-light mt0'>start()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='scrollpause'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>pause()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Removes event and stops animation loop.</p>
+
+    <div class='pre p1 fill-light mt0'>pause()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
   
     <div class='border-bottom' id='scrollresetprogress'>
       <div class="clearfix small pointer toggle-sibling">
@@ -2156,11 +2178,11 @@ scroll.on();</pre>
       </div>
     </div>
   
-    <div class='border-bottom' id='scrollgeteffects'>
+    <div class='border-bottom' id='scrolltick'>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>getEffects()</span>
+            <span class='code strong strong truncate'>tick()</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -2168,66 +2190,9 @@ scroll.on();</pre>
 
   
 
-  <p>Initializes and returns scroll controller.</p>
+  <p>Handle animation frame work.</p>
 
-    <div class='pre p1 fill-light mt0'>getEffects(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">function</a>></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">function</a>></code>:
-        
-
-      
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-      </div>
-    </div>
-  
-    <div class='border-bottom' id='scrollsetupevents'>
-      <div class="clearfix small pointer toggle-sibling">
-        <div class="py1 contain">
-            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>setupEvents()</span>
-        </div>
-      </div>
-      <div class="clearfix display-none toggle-target">
-        <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-
-  <p>Register scroll position measuring.</p>
-
-    <div class='pre p1 fill-light mt0'>setupEvents()</div>
+    <div class='pre p1 fill-light mt0'>tick()</div>
   
   
 
@@ -2262,11 +2227,11 @@ scroll.on();</pre>
       </div>
     </div>
   
-    <div class='border-bottom' id='scrollteardownevents'>
+    <div class='border-bottom' id='scrolllerp'>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>teardownEvents()</span>
+            <span class='code strong strong truncate'>lerp()</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -2274,9 +2239,254 @@ scroll.on();</pre>
 
   
 
-  <p>Remove scroll measuring handler.</p>
+  <p>Calculate current progress.</p>
 
-    <div class='pre p1 fill-light mt0'>teardownEvents()</div>
+    <div class='pre p1 fill-light mt0'>lerp()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='scrolldestroy'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>destroy()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Stop the event and effect, and remove all DOM side-effects.</p>
+
+    <div class='pre p1 fill-light mt0'>destroy()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='scrollsetupevent'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>setupEvent()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Register to scroll for triggering update.</p>
+
+    <div class='pre p1 fill-light mt0'>setupEvent()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='scrollremoveevent'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>removeEvent()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Remove scroll handler.</p>
+
+    <div class='pre p1 fill-light mt0'>removeEvent()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='scrollsetupeffect'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>setupEffect()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Reset registered effect.</p>
+
+    <div class='pre p1 fill-light mt0'>setupEffect()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='scrollremoveeffect'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>removeEffect()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Destroy registered effect.</p>
+
+    <div class='pre p1 fill-light mt0'>removeEffect()</div>
   
   
 
@@ -2382,10 +2592,10 @@ scroll.on();</pre>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { Tilt } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;two.5&#x27;</span>;
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Tilt</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;two.5&#x27;</span>;
 
-<span class="hljs-keyword">const</span> tilt = <span class="hljs-keyword">new</span> Tilt();
-tilt.on();</pre>
+<span class="hljs-keyword">const</span> tilt = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Tilt</span>();
+tilt.<span class="hljs-title function_">on</span>();</pre>
     
   
 
@@ -2458,7 +2668,7 @@ tilt.on();</pre>
 
   <p>Initializes and returns tilt effect.</p>
 
-    <div class='pre p1 fill-light mt0'>getEffects(): [tilt]</div>
+    <div class='pre p1 fill-light mt0'>getEffects(): [<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">function</a>]</div>
   
   
 
@@ -2476,9 +2686,8 @@ tilt.on();</pre>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code>[tilt]</code>:
+      <code>[<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">function</a>]</code>:
         
-
       
     
   
@@ -2618,6 +2827,78 @@ If feature detection fails, handler is set on MouseOver event.</p>
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='framethrottle'>
+      frameThrottle
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Throttle a function to trigger once per animation frame.
+Keeps the arguments from last call, even if that call gets ignored.</p>
+
+    <div class='pre p1 fill-light mt0'>frameThrottle(fn: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">function</a>): (function (): void)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>fn</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">function</a>)</code>
+	    function to throttle
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>(function (): void)</code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='ticker'>
       ticker
     </h3>
@@ -2631,7 +2912,7 @@ If feature detection fails, handler is set on MouseOver event.</p>
   
     <p>
       Type:
-      <a href="#ticker">ticker</a>
+      Ticker
     </p>
   
   
@@ -2645,6 +2926,23 @@ If feature detection fails, handler is set on MouseOver event.</p>
 
   
 
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>pool</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Set">Set</a>)</code>
+          
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>animationFrame</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          
+          
+        </div>
+      
+    </div>
   
 
   
@@ -2761,7 +3059,7 @@ If feature detection fails, handler is set on MouseOver event.</p>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>tick(time)</span>
+            <span class='code strong strong truncate'>tick()</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -2771,7 +3069,7 @@ If feature detection fails, handler is set on MouseOver event.</p>
 
   <p>Invoke <code>.tick()</code> on all instances in the pool.</p>
 
-    <div class='pre p1 fill-light mt0'>tick(time: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+    <div class='pre p1 fill-light mt0'>tick()</div>
   
   
 
@@ -2782,20 +3080,6 @@ If feature detection fails, handler is set on MouseOver event.</p>
   
   
 
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>time</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
-	    animation frame time argument.
-
-          </div>
-          
-        </div>
-      
-    </div>
   
 
   

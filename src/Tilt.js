@@ -2,7 +2,7 @@ import { getEffect as getTiltEffect } from './effects/tilt.js';
 import { getHandler as getHover } from './events/hover.js';
 import { getHandler as getGyroscope } from './events/gyroscope.js';
 import { clone } from './utilities.js';
-import Two5 from './Two5.js';
+import { Two5 } from './Two5.js';
 
 /**
  * @class Tilt
@@ -51,7 +51,7 @@ export default class Tilt extends Two5 {
     /**
      * Initializes and returns tilt effect.
      *
-     * @return {[tilt]}
+     * @return {[function]}
      */
     getEffects () {
         return [getTiltEffect(

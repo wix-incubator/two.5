@@ -9,9 +9,9 @@ test('constructor :: empty', t => {
 });
 
 test('constructor :: config', t => {
-    const scroll = new Scroll({animationActive: true});
+    const scroll = new Scroll({transitionActive: true});
 
-    t.is(scroll.config.animationActive, true);
+    t.is(scroll.config.transitionActive, true);
 });
 
 test('resetProgress', t => {
@@ -29,7 +29,7 @@ test('resetProgress', t => {
 test('resetProgress :: animationActive=true', t => {
     const scrollPosition = {x: 10, y: 20};
     const scroll = new Scroll({
-        animationActive: true
+        transitionActive: true
     });
 
     scroll.resetProgress(scrollPosition);
@@ -42,7 +42,7 @@ test('resetProgress :: animationActive=true', t => {
     t.is(scroll.currentProgress.y, scrollPosition.y);
 });
 
-test('on :: measure progress', t => {
+test('start :: measure progress', t => {
     const scroll = new Scroll({
         root: window,
         scenes: [
@@ -54,7 +54,7 @@ test('on :: measure progress', t => {
         ]
     });
 
-    scroll.on();
+    scroll.start();
 
     window.scrollTo(10, 1000);
     window.executeAnimationFrame(scroll.time);
@@ -63,7 +63,7 @@ test('on :: measure progress', t => {
     t.is(scroll.progress.y, 1000);
 });
 
-test('on :: effect progress', t => {
+test('start :: effect progress', t => {
     let progress = 0;
     const scroll = new Scroll({
         root: window,
@@ -78,7 +78,7 @@ test('on :: effect progress', t => {
         ]
     });
 
-    scroll.on();
+    scroll.start();
 
     window.scrollTo(0, 300);
     window.executeAnimationFrame(scroll.time);
@@ -86,7 +86,7 @@ test('on :: effect progress', t => {
     t.is(progress, 0.6);
 });
 
-test('on :: effect progress :: velocityActive=true', t => {
+test('start :: effect progress :: velocityActive=true', t => {
     let progress = 0;
     let velocity = 0;
     const scroll = new Scroll({
@@ -105,7 +105,7 @@ test('on :: effect progress :: velocityActive=true', t => {
         ]
     });
 
-    scroll.on();
+    scroll.start();
 
     window.scrollTo(0, 300);
     window.executeAnimationFrame(scroll.time);
@@ -114,13 +114,42 @@ test('on :: effect progress :: velocityActive=true', t => {
     t.is(velocity, 300 / 400);
 });
 
-//
-test.serial('on :: effect progress :: animationActive=true', t => {
+test('start :: effect progress :: velocityActive=true with transitionActive=true', t => {
+    let progress = 0;
+    let velocity = 0;
+    const scroll = new Scroll({
+        root: window,
+        transitionActive:  true,
+        transitionFriction: 0.5,
+        velocityActive: true,
+        velocityMax: 400,
+        scenes: [
+            {
+                effect(scene, p, v) {
+                    progress = p;
+                    velocity = v;
+                },
+                start: 0,
+                duration: 500
+            }
+        ]
+    });
+
+    scroll.start();
+
+    window.scrollTo(0, 300);
+    window.executeAnimationFrame(scroll.time);
+
+    t.is(progress, 0.3);
+    t.is(velocity, 150 / 400);
+});
+
+test('start :: effect progress :: transitionActive=true', t => {
     let progress = 0;
     const scroll = new Scroll({
         root: window,
-        animationActive: true,
-        animationFriction: 0.5,
+        transitionActive: true,
+        transitionFriction: 0.5,
         scenes: [
             {
                 effect(scene, p, v) {
@@ -132,7 +161,7 @@ test.serial('on :: effect progress :: animationActive=true', t => {
         ]
     });
 
-    scroll.on();
+    scroll.start();
 
     window.scrollTo(0, 300);
     window.executeAnimationFrame(scroll.time);
@@ -140,7 +169,7 @@ test.serial('on :: effect progress :: animationActive=true', t => {
     t.is(progress, 0.3);
 });
 
-test('on :: effect progress :: with container', t => {
+test('start :: effect progress :: with container', t => {
     let progress = 0;
     const scrollY = 300;
     const container = {
@@ -162,7 +191,7 @@ test('on :: effect progress :: with container', t => {
         ]
     });
 
-    scroll.on();
+    scroll.start();
 
     window.scrollTo(0, scrollY);
     window.executeAnimationFrame(scroll.time);
@@ -190,7 +219,7 @@ test('viewport :: disable', t => {
         ]
     });
 
-    scroll.on();
+    scroll.start();
 
     window.intersectionEntries.push({
         isIntersecting: true,
@@ -218,7 +247,7 @@ test('viewport :: disable', t => {
     t.is(scroll.config.scenes[0].disabled, true);
 });
 
-test('off', t => {
+test('pause', t => {
     let progress = 0;
     const scroll = new Scroll({
         root: window,
@@ -233,16 +262,16 @@ test('off', t => {
         ]
     });
 
-    scroll.on();
+    scroll.start();
 
     window.scrollTo(0, 300);
     window.executeAnimationFrame(scroll.time);
 
     t.is(progress, 0.6);
 
-    scroll.off();
+    scroll.pause();
 
-    t.is(scroll.measures.length, 0);
+    t.is(scroll.ticking, false);
 });
 
 test('destroy', t => {
@@ -260,7 +289,7 @@ test('destroy', t => {
         ]
     });
 
-    scroll.on();
+    scroll.start();
 
     window.scrollTo(0, 300);
     window.executeAnimationFrame();
@@ -269,6 +298,7 @@ test('destroy', t => {
 
     scroll.destroy();
 
-    t.is(scroll.measures.length, 0);
+    t.is(scroll.ticking, false);
+
     t.is(scroll.effects.length, 0);
 });

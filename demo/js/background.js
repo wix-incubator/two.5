@@ -929,8 +929,8 @@ function init () {
         container: scrollContainer,
         wrapper,
         scenes,
-        animationActive: config.scene.animation,
-        animationFriction: config.scene.friction,
+        transitionActive: config.scene.animation,
+        transitionFriction: config.scene.friction,
         velocityActive: config.images.some(img =>
             img.transforms.skewY.active && img.transforms.skewY.velocity ||
             img.transforms.skewX.active && img.transforms.skewX.velocity ||
@@ -941,7 +941,7 @@ function init () {
     });
 
     // activate
-    parallax.on();
+    parallax.start();
 
     // setup meter
     parallax.effects.unshift(function () {

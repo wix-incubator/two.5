@@ -1266,7 +1266,7 @@ function init () {
     });
 
     // activate
-    parallax.on();
+    parallax.start();
 
     // setup meter
     parallax.effects.unshift(function () {

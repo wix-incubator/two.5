@@ -12,7 +12,7 @@ const DEFAULTS = {
     scrollHandler (container, wrapper, x, y) {
         container.style.transform = `translate3d(${-x}px, ${-y}px, 0px)`;
     },
-    scrollClear (container, wrapper, x, y) {
+    scrollClear (container /*, wrapper, x, y */) {
         container.style.transform = '';
     }
 };

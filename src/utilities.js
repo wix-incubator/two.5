@@ -48,9 +48,32 @@ function lerp (a, b, t) {
     return a * (1 - t) + b * t;
 }
 
+/**
+ * Throttle a function to trigger once per animation frame.
+ * Keeps the arguments from last call, even if that call gets ignored.
+ *
+ * @param {function} fn function to throttle
+ * @return {(function(): void)}
+ */
+function frameThrottle (fn) {
+    let throttled = false;
+
+    return function () {
+        if (!throttled) {
+            throttled = true;
+
+            window.requestAnimationFrame(() => {
+                throttled = false;
+                fn();
+            });
+        }
+    };
+}
+
 export {
     clamp,
     clone,
     defaultTo,
-    lerp
+    lerp,
+    frameThrottle
 };

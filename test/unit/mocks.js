@@ -1,4 +1,9 @@
+const eventListeners = {
+    scroll: new Set()
+};
+
 const _window = {
+    eventListeners,
     scrollX: 0,
     scrollY: 0,
     document: {
@@ -11,6 +16,8 @@ const _window = {
     scrollTo(x, y) {
         _window.scrollX = x;
         _window.scrollY = y;
+
+        eventListeners.scroll.forEach(listener => listener());
     },
     animationFrameHandlers: [],
     requestAnimationFrame(fn) {
@@ -37,6 +44,12 @@ const _window = {
             observe() {},
             disconnect() {}
         };
+    },
+    addEventListener(eventName, listener) {
+        eventListeners[eventName].add(listener);
+    },
+    removeEventListener(eventName, listener) {
+        eventListeners[eventName].delete(listener);
     }
 };
 

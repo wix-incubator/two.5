@@ -5,7 +5,7 @@ import { defaultTo, lerp } from './utilities.js';
  * @property {Set} pool
  * @property {number} animationFrame
  */
-const ticker = {
+export const ticker = {
     pool: new Set(),
     /**
      * Starts the animation loop.
@@ -87,7 +87,7 @@ const DEFAULTS = {
  * @abstract
  * @param {two5Config} config
  */
-export default class Two5 {
+export class Two5 {
     constructor (config = {}) {
         this.config = defaultTo(config, DEFAULTS);
         this.progress = {
@@ -103,7 +103,7 @@ export default class Two5 {
             vy: 0
         };
 
-        this.measures = [];
+        this.triggers = [];
         this.effects = [];
         this.ticking = false;
         this.ticker = this.config.ticker;
@@ -137,9 +137,6 @@ export default class Two5 {
         const progress = this.config.animationActive ? this.currentProgress : this.progress;
         // cache values for calculating deltas for velocity
         const {x, y} = progress;
-
-        // perform any registered measures
-        this.measures.forEach(measure => measure());
 
         // if animation is active interpolate to next point
         if (this.config.animationActive) {
@@ -194,10 +191,10 @@ export default class Two5 {
     }
 
     /**
-     * Clears registered effects and measures.
+     * Clears registered effects and triggers.
      */
     teardownEffects () {
-        this.measures.length = 0;
+        this.triggers.length = 0;
         this.effects.length = 0;
     }
 
@@ -209,11 +206,3 @@ export default class Two5 {
         this.teardownEffects();
     }
 }
-
-/**
- * @typedef {Object} two5Config
- * @property {boolean} [animationActive] whether to animate effect progress.
- * @property {number} [animationFriction] from 0 to 1, amount of friction effect in the animation. 1 being no movement and 0 as no friction. Defaults to 0.4.
- * @property {boolean} [velocityActive] whether to calculate velocity with progress.
- * @property {number} [velocityMax] max possible value for velocity. Velocity value will be normalized according to this number, so it is kept between 0 and 1. Defaults to 1.
- */
