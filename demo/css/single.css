@@ -15,7 +15,7 @@ main {
 
 #background-wrapper {
     position: relative;
-    grid-column: 1 / 6;
+    grid-column: 1 / 5;
     grid-row: 1 / 6;
     width: 94vw;
     height: 94vh;

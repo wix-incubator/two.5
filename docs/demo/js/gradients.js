@@ -611,6 +611,7 @@
       for (let effect of this.effects) {
         effect.destroy && effect.destroy();
       }
+      this.effects.length = 0;
     }
   }
 
@@ -7173,7 +7174,7 @@ void main() {
     });
 
     // activate
-    parallax.on();
+    parallax.start();
 
     // setup meter
     parallax.effects.unshift(function () {

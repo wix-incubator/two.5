@@ -835,7 +835,10 @@ const DEFAULTS$1 = {
   scaleInvertX: false,
   scaleInvertY: false,
   scaleMaxX: 0.5,
-  scaleMaxY: 0.5
+  scaleMaxY: 0.5,
+  blurActive: false,
+  blurInvert: false,
+  blurMax: 20
 };
 function formatTransition({
   property,
@@ -877,11 +880,15 @@ function getEffect(config) {
       layerStyle['pointer-events'] = 'none';
     }
     if (layer.transitionActive) {
-      layerStyle.transition = formatTransition({
+      layerStyle.transition = `${formatTransition({
         property: 'transform',
         duration: layer.transitionDuration,
         easing: layer.transitionEasing
-      });
+      })}, ${formatTransition({
+        property: 'filter',
+        duration: layer.transitionDuration,
+        easing: layer.transitionEasing
+      })}`;
     } else {
       delete layerStyle.transition;
     }
@@ -943,6 +950,13 @@ function getEffect(config) {
         layerPerspectiveZ = `perspective(${_config.perspectiveZ}px) `;
       }
       layer.el.style.transform = `${layerPerspectiveZ}${translatePart}${scalePart}${skewPart}${rotatePart}`;
+      if (layer.blurActive) {
+        const py = Math.abs(y - 0.5) * 2;
+        const px = Math.abs(x - 0.5) * 2;
+        const p = layer.blurActive === 'y' ? py : layer.blurActive === 'x' ? px : Math.hypot(px, py);
+        const blurVal = layer.blurInvert ? 1 - p : p;
+        layer.el.style.filter = `blur(${Math.round(blurVal * layer.blurMax)}px)`;
+      }
     });
     if (_config.perspectiveActive) {
       let aX = 1,

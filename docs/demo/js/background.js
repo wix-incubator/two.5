@@ -611,6 +611,7 @@
       for (let effect of this.effects) {
         effect.destroy && effect.destroy();
       }
+      this.effects.length = 0;
     }
   }
 

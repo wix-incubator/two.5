@@ -43,5 +43,8 @@
     "rollup-plugin-filesize": "^9.1.2",
     "rollup-plugin-progress": "^1.1.2",
     "stats.js": "^0.17.0"
+  },
+  "dependencies": {
+    "build": "^0.1.4"
   }
 }

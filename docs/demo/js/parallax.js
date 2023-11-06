@@ -611,6 +611,7 @@
       for (let effect of this.effects) {
         effect.destroy && effect.destroy();
       }
+      this.effects.length = 0;
     }
   }
 
@@ -3409,7 +3410,7 @@
       animationActive: true,
       animationFriction: config.scene.friction
     });
-    parallax.on();
+    parallax.start();
     parallax.effects.unshift(function () {
       stats.begin();
     });

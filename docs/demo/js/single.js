@@ -326,7 +326,10 @@
     scaleInvertX: false,
     scaleInvertY: false,
     scaleMaxX: 0.5,
-    scaleMaxY: 0.5
+    scaleMaxY: 0.5,
+    blurActive: false,
+    blurInvert: false,
+    blurMax: 20
   };
   function formatTransition({
     property,
@@ -368,11 +371,15 @@
         layerStyle['pointer-events'] = 'none';
       }
       if (layer.transitionActive) {
-        layerStyle.transition = formatTransition({
-          property: 'transform',
-          duration: layer.transitionDuration,
-          easing: layer.transitionEasing
-        });
+        layerStyle.transition = `${formatTransition({
+        property: 'transform',
+        duration: layer.transitionDuration,
+        easing: layer.transitionEasing
+      })}, ${formatTransition({
+        property: 'filter',
+        duration: layer.transitionDuration,
+        easing: layer.transitionEasing
+      })}`;
       } else {
         delete layerStyle.transition;
       }
@@ -434,6 +441,13 @@
           layerPerspectiveZ = `perspective(${_config.perspectiveZ}px) `;
         }
         layer.el.style.transform = `${layerPerspectiveZ}${translatePart}${scalePart}${skewPart}${rotatePart}`;
+        if (layer.blurActive) {
+          const py = Math.abs(y - 0.5) * 2;
+          const px = Math.abs(x - 0.5) * 2;
+          const p = layer.blurActive === 'y' ? py : layer.blurActive === 'x' ? px : Math.hypot(px, py);
+          const blurVal = layer.blurInvert ? 1 - p : p;
+          layer.el.style.filter = `blur(${Math.round(blurVal * layer.blurMax)}px)`;
+        }
       });
       if (_config.perspectiveActive) {
         let aX = 1,
@@ -3336,6 +3350,11 @@
           invertY: config.scaleInvertY || false,
           maxX: config.scaleMaxX || 0.5,
           maxY: config.scaleMaxY || 0.5
+        },
+        blur: {
+          active: config.blurActive || false,
+          invert: config.blurInvert || false,
+          max: config.blurMax || 20
         }
       };
     }
@@ -3433,6 +3452,15 @@
       scaling.add(config.scaling, 'invertY').onChange(getHandler('scaleInvertY', targetIndex));
       scaling.add(config.scaling, 'maxX', 0.1, 2, 0.1).onChange(getHandler('scaleMaxX', targetIndex));
       scaling.add(config.scaling, 'maxY', 0.1, 2, 0.1).onChange(getHandler('scaleMaxY', targetIndex));
+      const blur = folder.addFolder('Blur');
+      blur.add(config.blur, 'active', {
+        non: false,
+        x: 'x',
+        y: 'y',
+        distance: 'r'
+      }).onChange(getHandler('blurActive', targetIndex));
+      blur.add(config.blur, 'invert').onChange(getHandler('blurInvert', targetIndex));
+      blur.add(config.blur, 'max', 5, 50, 5).onChange(getHandler('blurMax', targetIndex));
     }
   }
   new Demo();
