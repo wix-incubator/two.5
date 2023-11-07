@@ -52,6 +52,9 @@
   function lerp(a, b, t) {
     return a * (1 - t) + b * t;
   }
+  function map$1(x, a, b, c, d) {
+    return (x - a) * (d - c) / (b - a) + c;
+  }
 
   /**
    * @typedef {Ticker}
@@ -329,7 +332,10 @@
     scaleMaxY: 0.5,
     blurActive: false,
     blurInvert: false,
-    blurMax: 20
+    blurMax: 20,
+    opacityActive: false,
+    opacityInvert: false,
+    opacityMin: 0.3
   };
   function formatTransition({
     property,
@@ -448,7 +454,14 @@
           const px = Math.abs(x - 0.5) * 2;
           const p = layer.blurActive === 'y' ? py : layer.blurActive === 'x' ? px : Math.hypot(px, py);
           const blurVal = layer.blurInvert ? 1 - p : p;
-          layer.el.style.filter = `blur(${Math.round(blurVal * layer.blurMax)}px)`;
+          layer.el.style.filter = `blur(${Math.round(blurVal * layer.blurMax) * depth}px)`;
+        }
+        if (layer.opacityActive) {
+          const py = Math.abs(y - 0.5) * 2;
+          const px = Math.abs(x - 0.5) * 2;
+          const p = layer.opacityActive === 'y' ? py : layer.opacityActive === 'x' ? px : Math.hypot(px, py);
+          const opacityVal = layer.opacityInvert ? 1 - p : p;
+          layer.el.style.opacity = map$1(opacityVal, 0, 1, layer.opacityMin * depth, 1);
         }
       });
       if (_config.perspectiveActive) {

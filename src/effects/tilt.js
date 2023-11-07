@@ -1,4 +1,4 @@
-import { defaultTo } from '../utilities.js';
+import { defaultTo, map } from '../utilities.js';
 
 /**
  * @private
@@ -46,6 +46,9 @@ const DEFAULTS = {
     blurActive: false,
     blurInvert: false,
     blurMax: 20,
+    opacityActive: false,
+    opacityInvert: false,
+    opacityMin: 0.3,
 };
 
 function formatTransition ({property, duration, easing}) {
@@ -219,7 +222,22 @@ export function getEffect (config) {
                     ? 1 - p
                     : p
 
-                layer.el.style.filter = `blur(${Math.round(blurVal * layer.blurMax)}px)`;
+                layer.el.style.filter = `blur(${Math.round(blurVal * layer.blurMax) * depth}px)`;
+            }
+
+            if (layer.opacityActive) {
+                const py = Math.abs(y - 0.5) * 2;
+                const px = Math.abs(x - 0.5) * 2
+                const p = layer.opacityActive === 'y'
+                    ? py
+                    : layer.opacityActive === 'x'
+                        ? px
+                        : Math.hypot(px, py);
+                const opacityVal = layer.opacityInvert
+                    ? 1 - p
+                    : p
+
+                layer.el.style.opacity = map(opacityVal, 0, 1, layer.opacityMin * depth, 1);
             }
         });
 

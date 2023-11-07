@@ -70,7 +70,12 @@ function frameThrottle (fn) {
     };
 }
 
+function map (x, a, b, c, d) {
+    return (x - a) * (d - c) / (b - a) + c;
+}
+
 export {
+    map,
     clamp,
     clone,
     defaultTo,
