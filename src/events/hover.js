@@ -1,6 +1,6 @@
 import { clamp, clone } from '../utilities.js';
 
-export function getHandler ({target, progress}) {
+export function getHandler ({target, progress, callback}) {
     let rect;
 
     if (target && target !== window) {
@@ -25,8 +25,10 @@ export function getHandler ({target, progress}) {
         const x = clamp(0, 1, (clientX - left) / width);
         const y = clamp(0, 1, (clientY - top) / height);
 
-        progress.x = x;
-        progress.y = y;
+        progress.x = +x.toPrecision(4);
+        progress.y = +y.toPrecision(4);
+
+        callback();
     }
 
     function on (config) {

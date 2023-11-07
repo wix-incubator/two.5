@@ -136,9 +136,15 @@ export function getEffect (config) {
                 rotateZVal = 0;
 
             if (layer.rotateActive) {
-                const rotateInput = layer.rotateActive === 'x' ? x : y;
+                const px = x * 2 - 1;
+                const py = y * 2 - 1;
+                const rotateInput = layer.rotateActive === 'x'
+                    ? px * layer.rotateMax * depth
+                    : layer.rotateActive === 'y'
+                        ? py * layer.rotateMax * depth
+                        : Math.atan2(py, px) * 180 / Math.PI;
 
-                rotateZVal = (layer.rotateInvert ? -1 : 1) * layer.rotateMax * (rotateInput * 2 - 1) * depth;
+                rotateZVal = (layer.rotateInvert ? -1 : 1) * rotateInput;
 
                 rotatePart += ` rotateZ(${rotateZVal.toFixed(2)}deg)`;
             }
@@ -176,12 +182,16 @@ export function getEffect (config) {
             if (layer.scaleActive) {
                 const scaleXInput = layer.scaleActive === 'yy' ? y : x;
                 const scaleYInput = layer.scaleActive === 'xx' ? x : y;
-                const scaleXVal = layer.scaleActive === 'y'
-                    ? 1
-                    : 1 + (layer.scaleInvertX ? -1 : 1) * layer.scaleMaxX * (Math.abs(0.5 - scaleXInput) * 2) * depth;
-                const scaleYVal = layer.scaleActive === 'x'
-                    ? 1
-                    : 1 + (layer.scaleInvertY ? -1 : 1) * layer.scaleMaxY * (Math.abs(0.5 - scaleYInput) * 2) * depth;
+                const scaleXVal = layer.scaleActive === 'sync'
+                    ? 1 + layer.scaleMaxX * (layer.scaleInvertX ? 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2) : Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) * depth
+                    : layer.scaleActive === 'y'
+                        ? 1
+                        : 1 + layer.scaleMaxX * (layer.scaleInvertX ? 1 - Math.abs(0.5 - scaleXInput) * 2 : Math.abs(0.5 - scaleXInput) * 2) * depth;
+                const scaleYVal = layer.scaleActive === 'sync'
+                    ? 1 + layer.scaleMaxY * (layer.scaleInvertY ? 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2) : Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) * depth
+                    : layer.scaleActive === 'x'
+                        ? 1
+                        : 1 + layer.scaleMaxY * (layer.scaleInvertY ? 1 - Math.abs(0.5 - scaleYInput) * 2 : Math.abs(0.5 - scaleYInput) * 2) * depth;
 
                 scalePart = ` scale(${scaleXVal.toFixed(2)}, ${scaleYVal.toFixed(2)})`;
             }

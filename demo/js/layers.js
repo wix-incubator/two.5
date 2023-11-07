@@ -190,6 +190,11 @@ class Demo {
                 invertY: config.scaleInvertY || false,
                 maxX: config.scaleMaxX || 0.5,
                 maxY: config.scaleMaxY || 0.5
+            },
+            blur: {
+                active: config.blurActive || false,
+                invert: config.blurInvert || false,
+                max: config.blurMax || 20
             }
         };
 
@@ -272,7 +277,7 @@ class Demo {
         translation.open();
 
         const rotate = folder.addFolder('Rotate');
-        rotate.add(config.rotate, 'active', {non: false, x: 'x', y: 'y'})
+        rotate.add(config.rotate, 'active', {non: false, follow: 'follow', x: 'x', y: 'y'})
             .onChange(getHandler('rotateActive', targetIndex));
         rotate.add(config.rotate, 'invert')
             .onChange(getHandler('rotateInvert', targetIndex));
@@ -304,7 +309,7 @@ class Demo {
             .onChange(getHandler('skewMaxY', targetIndex));
 
         const scaling = folder.addFolder('Scaling');
-        scaling.add(config.scaling, 'active', {non: false, both: true, 'x sync': 'xx', 'y sync': 'yy', x: 'x', y: 'y'})
+        scaling.add(config.scaling, 'active', {non: false, sync: 'sync', both: true, 'x sync': 'xx', 'y sync': 'yy', x: 'x', y: 'y'})
             .onChange(getHandler('scaleActive', targetIndex));
         scaling.add(config.scaling, 'invertX')
             .onChange(getHandler('scaleInvertX', targetIndex));
@@ -314,6 +319,14 @@ class Demo {
             .onChange(getHandler('scaleMaxX', targetIndex));
         scaling.add(config.scaling, 'maxY', 0.1, 2, 0.1)
             .onChange(getHandler('scaleMaxY', targetIndex));
+
+        const blur = folder.addFolder('Blur');
+        blur.add(config.blur, 'active', {non: false, x: 'x', y: 'y', distance: 'r'})
+            .onChange(getHandler('blurActive', targetIndex));
+        blur.add(config.blur, 'invert')
+            .onChange(getHandler('blurInvert', targetIndex));
+        blur.add(config.blur, 'max', 5, 50, 5)
+            .onChange(getHandler('blurMax', targetIndex));
     }
 }
 

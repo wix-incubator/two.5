@@ -71,6 +71,7 @@ export default class Tilt extends Two5 {
      * If feature detection fails, handler is set on MouseOver event.
      */
     setupEvents () {
+        const tick = () => this.tick()
         // attempt usage of DeviceOrientation event
         const gyroscopeHandler = getGyroscope({
             progress: this.progress,
@@ -90,7 +91,8 @@ export default class Tilt extends Two5 {
              */
             this.tiltHandler = getHover({
                 target: this.config.mouseTarget,
-                progress: this.progress
+                progress: this.progress,
+                callback: () => requestAnimationFrame(tick)
             });
         }
 
@@ -102,6 +104,17 @@ export default class Tilt extends Two5 {
      */
     teardownEvents () {
         this.tiltHandler.off();
+    }
+    on() {
+        this.setupEvents();
+        this.setupEffects();
+    }
+
+    /**
+     * Removes events and stops animation loop.
+     */
+    off() {
+        this.teardownEvents();
     }
 }
 
