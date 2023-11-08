@@ -22,6 +22,19 @@ class Demo {
         this.setupStats();
 
         this.two5Config = {
+            'Save to local': function() {
+                window.localStorage.setItem('data', getValues());
+            },
+            'Clear local': function() {
+                window.localStorage.clear();
+                window.location.reload();
+            },
+            'Save to File': function() {
+                download(getValues(), `background-effects-${getTimeStamp()}.txt`);
+            },
+            'Load from File': function() {
+                upload();
+            },
             hitRegion: null,
             perspectiveZ: 0,
             elevation: 0,
@@ -38,7 +51,12 @@ class Demo {
         };
 
         this.gui = new dat.GUI();
+        this.gui.remember(this.two5Config);
 
+        this.gui.add(this.two5Config, 'Save to local');
+        this.gui.add(this.two5Config, 'Clear local');
+        this.gui.add(this.two5Config, 'Save to File');
+        this.gui.add(this.two5Config, 'Load from File');
         this.gui.add(this.two5Config, 'hitRegion', {screen: null, container: 'container'})
             .onChange(value => {
                 const mouseTarget = value && this.currentContainer;
@@ -57,6 +75,7 @@ class Demo {
             .onChange(this.getSceneHandler('perspectiveZ'));
 
         this.animation = this.gui.addFolder('Animation');
+        this.gui.remember(this.two5Config.animation);
         this.animation.add(this.two5Config.animation, 'active')
             .onChange(v => {
                 this.two5.config.animationActive = v;
@@ -67,6 +86,7 @@ class Demo {
             });
 
         this.transition = this.gui.addFolder('Transition');
+        this.gui.remember(this.two5Config.transition);
         this.transition.add(this.two5Config.transition, 'active')
             .onChange((function (handler) {
                 return v => {
@@ -91,6 +111,8 @@ class Demo {
 
             this.createEffectControls(layerFolder, this.two5Config.elements[index], index);
         });
+
+        setValues(JSON.parse(window.localStorage.getItem('data') || '[]'), this);
     }
 
     setupStats () {
@@ -195,11 +217,13 @@ class Demo {
         const getHandler = config === this.two5Config
             ? prop => this.getSceneHandler(prop)
             : (prop, index) => this.getLayerHandler(prop, index);
+        this.gui.remember(config);
 
         folder.add(config, 'depth', 0.2, 1, 0.2)
             .onChange(getHandler('depth', targetIndex));
 
         const perspective = folder.addFolder('Perspective');
+        this.gui.remember(config.perspective);
         perspective.add(config.perspective, 'active', {non: false, both: true, x: 'x', y: 'y'})
             .onChange(getHandler('perspectiveActive', targetIndex));
         perspective.add(config.perspective, 'invertX')
@@ -212,6 +236,7 @@ class Demo {
             .onChange(getHandler('perspectiveMaxY', targetIndex));
 
         const translation = folder.addFolder('Translation');
+        this.gui.remember(config.translation);
         translation.add(config.translation, 'active', {non: false, both: true, x: 'x', y: 'y'})
             .onChange(getHandler('translationActive', targetIndex));
         translation.add(config.translation, 'invertX')
@@ -224,6 +249,7 @@ class Demo {
             .onChange(getHandler('translationMaxY', targetIndex));
 
         const rotate = folder.addFolder('Rotate');
+        this.gui.remember(config.rotate);
         rotate.add(config.rotate, 'active', {non: false, follow: 'follow', x: 'x', y: 'y'})
             .onChange(getHandler('rotateActive', targetIndex));
         rotate.add(config.rotate, 'invert')
@@ -232,6 +258,7 @@ class Demo {
             .onChange(getHandler('rotateMax', targetIndex));
 
         const tilt = folder.addFolder('Tilt');
+        this.gui.remember(config.tilt);
         tilt.add(config.tilt, 'active', {non: false, both: true, x: 'x', y: 'y'})
             .onChange(getHandler('tiltActive', targetIndex));
         tilt.add(config.tilt, 'invertX')
@@ -244,6 +271,7 @@ class Demo {
             .onChange(getHandler('tiltMaxY', targetIndex));
 
         const skewing = folder.addFolder('Skewing');
+        this.gui.remember(config.skewing);
         skewing.add(config.skewing, 'active', {non: false, both: true, x: 'x', y: 'y'})
             .onChange(getHandler('skewActive', targetIndex));
         skewing.add(config.skewing, 'invertX')
@@ -256,6 +284,7 @@ class Demo {
             .onChange(getHandler('skewMaxY', targetIndex));
 
         const scaling = folder.addFolder('Scaling');
+        this.gui.remember(config.scaling);
         scaling.add(config.scaling, 'active', {non: false, sync: 'sync', both: true, 'x sync': 'xx', 'y sync': 'yy', x: 'x', y: 'y'})
             .onChange(getHandler('scaleActive', targetIndex));
         scaling.add(config.scaling, 'invertX')
@@ -268,6 +297,7 @@ class Demo {
             .onChange(getHandler('scaleMaxY', targetIndex));
 
         const blur = folder.addFolder('Blur');
+        this.gui.remember(config.blur);
         blur.add(config.blur, 'active', {non: false, x: 'x', y: 'y', distance: 'r'})
             .onChange(getHandler('blurActive', targetIndex));
         blur.add(config.blur, 'invert')
@@ -276,6 +306,7 @@ class Demo {
             .onChange(getHandler('blurMax', targetIndex));
 
         const opacity = folder.addFolder('Opacity');
+        this.gui.remember(config.opacity);
         opacity.add(config.opacity, 'active', {non: false, x: 'x', y: 'y', distance: 'r'})
             .onChange(getHandler('opacityActive', targetIndex));
         opacity.add(config.opacity, 'invert')
@@ -286,3 +317,94 @@ class Demo {
 }
 
 const demo = new Demo();
+
+/**
+ * Get a date string
+ * @returns {string} YYYY-MM-DD-HH:MM:SS
+ */
+function getTimeStamp() {
+    const date = new Date();
+    return `${date.toISOString().split('T')[0]}-${date.toLocaleTimeString('en-US', { hour12: false })}`
+}
+
+/**
+ * Download data to a file
+ * https://stackoverflow.com/a/30832210
+ * @param {string} data the file contents
+ * @param {string} filename the file to save
+ * @param {string} [type='text/plain'] file mime type ('text/plain' etc.)
+ */
+function download(data, filename, type='text/plain') {
+    const file = new Blob([data], {type});
+    const a = document.createElement("a");
+    const url = URL.createObjectURL(file);
+
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+
+    a.click();
+    setTimeout(function() {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 0);
+}
+
+/**
+ * Read data from a text file
+ * https://stackoverflow.com/a/45815534
+ */
+function upload() {
+    //alert('Not implemented yet')
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'text/plain';
+    input.multiple = 'multiple';
+    input.onchange = function () {
+        for (const file of this.files || []) {
+            if (file) {
+                const reader = new FileReader();
+
+                reader.addEventListener('load', function (e) {
+                    console.log('loading', file.name);
+                    setValues(JSON.parse(e.target.result), demo);
+                    demo.gui.saveAs(file.name);
+                });
+
+                reader.readAsBinaryString(file);
+            }
+        }
+    };
+    document.body.appendChild(input);
+
+    input.click();
+    setTimeout(function() {
+        document.body.removeChild(input);
+    }, 0);
+}
+
+/**
+ * @param {Array<Object>} rememberedValues in the format of the output of getValues()
+ * [
+ *   {
+ *     "someKey": "value",
+ *     "otherKey": "otherValue"
+ *   },
+ *   {
+ *     "thirdKey": "thirdValue"
+ *   },
+ *   ...
+ * ]
+ */
+function setValues(rememberedValues, instance) {
+    rememberedValues.forEach((values, index) => {
+        (Array.isArray(values) ? values : Object.keys(values)).forEach((key) => {
+            const controller = instance.gui.__rememberedObjectIndecesToControllers[index][key];
+            controller && controller.setValue(values[key]);
+        });
+    });
+}
+
+function getValues() {
+    return JSON.stringify(demo.gui.__rememberedObjects, null, 2);
+}

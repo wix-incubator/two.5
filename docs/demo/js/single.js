@@ -3276,6 +3276,19 @@
       this.two5.on();
       this.setupStats();
       this.two5Config = {
+        'Save to local': function () {
+          window.localStorage.setItem('data', getValues());
+        },
+        'Clear local': function () {
+          window.localStorage.clear();
+          window.location.reload();
+        },
+        'Save to File': function () {
+          download(getValues(), `background-effects-${getTimeStamp()}.txt`);
+        },
+        'Load from File': function () {
+          upload();
+        },
         hitRegion: null,
         perspectiveZ: 0,
         elevation: 0,
@@ -3291,6 +3304,11 @@
         elements: this.createElementsConfig()
       };
       this.gui = new GUI$1();
+      this.gui.remember(this.two5Config);
+      this.gui.add(this.two5Config, 'Save to local');
+      this.gui.add(this.two5Config, 'Clear local');
+      this.gui.add(this.two5Config, 'Save to File');
+      this.gui.add(this.two5Config, 'Load from File');
       this.gui.add(this.two5Config, 'hitRegion', {
         screen: null,
         container: 'container'
@@ -3305,6 +3323,7 @@
       this.sceneConfig.add(this.two5Config, 'elevation', 0, 40, 1).onChange(this.getSceneHandler('elevation'));
       this.sceneConfig.add(this.two5Config, 'perspectiveZ', 100, 1000, 50).onChange(this.getSceneHandler('perspectiveZ'));
       this.animation = this.gui.addFolder('Animation');
+      this.gui.remember(this.two5Config.animation);
       this.animation.add(this.two5Config.animation, 'active').onChange(v => {
         this.two5.config.animationActive = v;
       });
@@ -3312,6 +3331,7 @@
         this.two5.config.animationFriction = v;
       });
       this.transition = this.gui.addFolder('Transition');
+      this.gui.remember(this.two5Config.transition);
       this.transition.add(this.two5Config.transition, 'active').onChange(function (handler) {
         return v => {
           if (v === false) {
@@ -3329,6 +3349,7 @@
         const layerFolder = this.elementsFolder.addFolder(layer.el.id);
         this.createEffectControls(layerFolder, this.two5Config.elements[index], index);
       });
+      setValues(JSON.parse(window.localStorage.getItem('data') || '[]'), this);
     }
     setupStats() {
       this.two5.effects.unshift(function () {
@@ -3421,8 +3442,10 @@
     }
     createEffectControls(folder, config, targetIndex) {
       const getHandler = config === this.two5Config ? prop => this.getSceneHandler(prop) : (prop, index) => this.getLayerHandler(prop, index);
+      this.gui.remember(config);
       folder.add(config, 'depth', 0.2, 1, 0.2).onChange(getHandler('depth', targetIndex));
       const perspective = folder.addFolder('Perspective');
+      this.gui.remember(config.perspective);
       perspective.add(config.perspective, 'active', {
         non: false,
         both: true,
@@ -3434,6 +3457,7 @@
       perspective.add(config.perspective, 'maxX', 0, 0.5, 0.05).onChange(getHandler('perspectiveMaxX', targetIndex));
       perspective.add(config.perspective, 'maxY', 0, 0.5, 0.05).onChange(getHandler('perspectiveMaxY', targetIndex));
       const translation = folder.addFolder('Translation');
+      this.gui.remember(config.translation);
       translation.add(config.translation, 'active', {
         non: false,
         both: true,
@@ -3445,6 +3469,7 @@
       translation.add(config.translation, 'maxX', 10, 500, 5).onChange(getHandler('translationMaxX', targetIndex));
       translation.add(config.translation, 'maxY', 10, 500, 5).onChange(getHandler('translationMaxY', targetIndex));
       const rotate = folder.addFolder('Rotate');
+      this.gui.remember(config.rotate);
       rotate.add(config.rotate, 'active', {
         non: false,
         follow: 'follow',
@@ -3454,6 +3479,7 @@
       rotate.add(config.rotate, 'invert').onChange(getHandler('rotateInvert', targetIndex));
       rotate.add(config.rotate, 'max', 10, 270, 1).onChange(getHandler('rotateMax', targetIndex));
       const tilt = folder.addFolder('Tilt');
+      this.gui.remember(config.tilt);
       tilt.add(config.tilt, 'active', {
         non: false,
         both: true,
@@ -3465,6 +3491,7 @@
       tilt.add(config.tilt, 'maxX', 10, 85, 1).onChange(getHandler('tiltMaxX', targetIndex));
       tilt.add(config.tilt, 'maxY', 10, 85, 1).onChange(getHandler('tiltMaxY', targetIndex));
       const skewing = folder.addFolder('Skewing');
+      this.gui.remember(config.skewing);
       skewing.add(config.skewing, 'active', {
         non: false,
         both: true,
@@ -3476,6 +3503,7 @@
       skewing.add(config.skewing, 'maxX', 10, 85, 1).onChange(getHandler('skewMaxX', targetIndex));
       skewing.add(config.skewing, 'maxY', 10, 85, 1).onChange(getHandler('skewMaxY', targetIndex));
       const scaling = folder.addFolder('Scaling');
+      this.gui.remember(config.scaling);
       scaling.add(config.scaling, 'active', {
         non: false,
         sync: 'sync',
@@ -3490,6 +3518,7 @@
       scaling.add(config.scaling, 'maxX', 0.1, 3, 0.1).onChange(getHandler('scaleMaxX', targetIndex));
       scaling.add(config.scaling, 'maxY', 0.1, 3, 0.1).onChange(getHandler('scaleMaxY', targetIndex));
       const blur = folder.addFolder('Blur');
+      this.gui.remember(config.blur);
       blur.add(config.blur, 'active', {
         non: false,
         x: 'x',
@@ -3499,6 +3528,7 @@
       blur.add(config.blur, 'invert').onChange(getHandler('blurInvert', targetIndex));
       blur.add(config.blur, 'max', 5, 50, 5).onChange(getHandler('blurMax', targetIndex));
       const opacity = folder.addFolder('Opacity');
+      this.gui.remember(config.opacity);
       opacity.add(config.opacity, 'active', {
         non: false,
         x: 'x',
@@ -3509,6 +3539,95 @@
       opacity.add(config.opacity, 'min', 0.05, 0.85, 0.05).onChange(getHandler('opacityMin', targetIndex));
     }
   }
-  new Demo();
+  const demo = new Demo();
+
+  /**
+   * Get a date string
+   * @returns {string} YYYY-MM-DD-HH:MM:SS
+   */
+  function getTimeStamp() {
+    const date = new Date();
+    return `${date.toISOString().split('T')[0]}-${date.toLocaleTimeString('en-US', {
+    hour12: false
+  })}`;
+  }
+
+  /**
+   * Download data to a file
+   * https://stackoverflow.com/a/30832210
+   * @param {string} data the file contents
+   * @param {string} filename the file to save
+   * @param {string} [type='text/plain'] file mime type ('text/plain' etc.)
+   */
+  function download(data, filename, type = 'text/plain') {
+    const file = new Blob([data], {
+      type
+    });
+    const a = document.createElement("a");
+    const url = URL.createObjectURL(file);
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }, 0);
+  }
+
+  /**
+   * Read data from a text file
+   * https://stackoverflow.com/a/45815534
+   */
+  function upload() {
+    //alert('Not implemented yet')
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'text/plain';
+    input.multiple = 'multiple';
+    input.onchange = function () {
+      for (const file of this.files || []) {
+        if (file) {
+          const reader = new FileReader();
+          reader.addEventListener('load', function (e) {
+            console.log('loading', file.name);
+            setValues(JSON.parse(e.target.result), demo);
+            demo.gui.saveAs(file.name);
+          });
+          reader.readAsBinaryString(file);
+        }
+      }
+    };
+    document.body.appendChild(input);
+    input.click();
+    setTimeout(function () {
+      document.body.removeChild(input);
+    }, 0);
+  }
+
+  /**
+   * @param {Array<Object>} rememberedValues in the format of the output of getValues()
+   * [
+   *   {
+   *     "someKey": "value",
+   *     "otherKey": "otherValue"
+   *   },
+   *   {
+   *     "thirdKey": "thirdValue"
+   *   },
+   *   ...
+   * ]
+   */
+  function setValues(rememberedValues, instance) {
+    rememberedValues.forEach((values, index) => {
+      (Array.isArray(values) ? values : Object.keys(values)).forEach(key => {
+        const controller = instance.gui.__rememberedObjectIndecesToControllers[index][key];
+        controller && controller.setValue(values[key]);
+      });
+    });
+  }
+  function getValues() {
+    return JSON.stringify(demo.gui.__rememberedObjects, null, 2);
+  }
 
 }));
