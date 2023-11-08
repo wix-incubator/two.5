@@ -3385,6 +3385,11 @@
           active: config.blurActive || false,
           invert: config.blurInvert || false,
           max: config.blurMax || 20
+        },
+        opacity: {
+          active: config.opacityActive || false,
+          invert: config.opacityInvert || false,
+          min: config.opacityMin || 0.3
         }
       };
     }
@@ -3437,11 +3442,12 @@
       }).onChange(getHandler('translationActive', targetIndex));
       translation.add(config.translation, 'invertX').onChange(getHandler('translationInvertX', targetIndex));
       translation.add(config.translation, 'invertY').onChange(getHandler('translationInvertY', targetIndex));
-      translation.add(config.translation, 'maxX', 10, 150, 5).onChange(getHandler('translationMaxX', targetIndex));
-      translation.add(config.translation, 'maxY', 10, 150, 5).onChange(getHandler('translationMaxY', targetIndex));
+      translation.add(config.translation, 'maxX', 10, 500, 5).onChange(getHandler('translationMaxX', targetIndex));
+      translation.add(config.translation, 'maxY', 10, 500, 5).onChange(getHandler('translationMaxY', targetIndex));
       const rotate = folder.addFolder('Rotate');
       rotate.add(config.rotate, 'active', {
         non: false,
+        follow: 'follow',
         x: 'x',
         y: 'y'
       }).onChange(getHandler('rotateActive', targetIndex));
@@ -3456,8 +3462,8 @@
       }).onChange(getHandler('tiltActive', targetIndex));
       tilt.add(config.tilt, 'invertX').onChange(getHandler('tiltInvertX', targetIndex));
       tilt.add(config.tilt, 'invertY').onChange(getHandler('tiltInvertY', targetIndex));
-      tilt.add(config.tilt, 'maxX', 10, 60, 1).onChange(getHandler('tiltMaxX', targetIndex));
-      tilt.add(config.tilt, 'maxY', 10, 60, 1).onChange(getHandler('tiltMaxY', targetIndex));
+      tilt.add(config.tilt, 'maxX', 10, 85, 1).onChange(getHandler('tiltMaxX', targetIndex));
+      tilt.add(config.tilt, 'maxY', 10, 85, 1).onChange(getHandler('tiltMaxY', targetIndex));
       const skewing = folder.addFolder('Skewing');
       skewing.add(config.skewing, 'active', {
         non: false,
@@ -3467,11 +3473,12 @@
       }).onChange(getHandler('skewActive', targetIndex));
       skewing.add(config.skewing, 'invertX').onChange(getHandler('skewInvertX', targetIndex));
       skewing.add(config.skewing, 'invertY').onChange(getHandler('skewInvertY', targetIndex));
-      skewing.add(config.skewing, 'maxX', 10, 60, 1).onChange(getHandler('skewMaxX', targetIndex));
-      skewing.add(config.skewing, 'maxY', 10, 60, 1).onChange(getHandler('skewMaxY', targetIndex));
+      skewing.add(config.skewing, 'maxX', 10, 85, 1).onChange(getHandler('skewMaxX', targetIndex));
+      skewing.add(config.skewing, 'maxY', 10, 85, 1).onChange(getHandler('skewMaxY', targetIndex));
       const scaling = folder.addFolder('Scaling');
       scaling.add(config.scaling, 'active', {
         non: false,
+        sync: 'sync',
         both: true,
         'x sync': 'xx',
         'y sync': 'yy',
@@ -3480,8 +3487,8 @@
       }).onChange(getHandler('scaleActive', targetIndex));
       scaling.add(config.scaling, 'invertX').onChange(getHandler('scaleInvertX', targetIndex));
       scaling.add(config.scaling, 'invertY').onChange(getHandler('scaleInvertY', targetIndex));
-      scaling.add(config.scaling, 'maxX', 0.1, 2, 0.1).onChange(getHandler('scaleMaxX', targetIndex));
-      scaling.add(config.scaling, 'maxY', 0.1, 2, 0.1).onChange(getHandler('scaleMaxY', targetIndex));
+      scaling.add(config.scaling, 'maxX', 0.1, 3, 0.1).onChange(getHandler('scaleMaxX', targetIndex));
+      scaling.add(config.scaling, 'maxY', 0.1, 3, 0.1).onChange(getHandler('scaleMaxY', targetIndex));
       const blur = folder.addFolder('Blur');
       blur.add(config.blur, 'active', {
         non: false,
@@ -3491,6 +3498,15 @@
       }).onChange(getHandler('blurActive', targetIndex));
       blur.add(config.blur, 'invert').onChange(getHandler('blurInvert', targetIndex));
       blur.add(config.blur, 'max', 5, 50, 5).onChange(getHandler('blurMax', targetIndex));
+      const opacity = folder.addFolder('Opacity');
+      opacity.add(config.opacity, 'active', {
+        non: false,
+        x: 'x',
+        y: 'y',
+        distance: 'r'
+      }).onChange(getHandler('opacityActive', targetIndex));
+      opacity.add(config.opacity, 'invert').onChange(getHandler('opacityInvert', targetIndex));
+      opacity.add(config.opacity, 'min', 0.05, 0.85, 0.05).onChange(getHandler('opacityMin', targetIndex));
     }
   }
   new Demo();
