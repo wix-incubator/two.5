@@ -3354,7 +3354,7 @@
         };
       })(this.getSceneHandler('transitionActive')));
       this.transition.add(this.two5Config.transition, 'duration', 50, 1000, 50).onChange(this.getSceneHandler('transitionDuration'));
-      this.transition.add(this.two5Config.transition, 'easing', ['linear', 'ease-out']).onChange(this.getSceneHandler('transitionEasing'));
+      this.transition.add(this.two5Config.transition, 'easing', ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']).onChange(this.getSceneHandler('transitionEasing'));
       this.effects = this.gui.addFolder('Effects');
       this.createEffectControls(this.effects, this.two5Config);
 
