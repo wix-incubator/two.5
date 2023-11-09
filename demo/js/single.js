@@ -176,6 +176,11 @@ class Demo {
                 active: config.opacityActive || false,
                 invert: config.opacityInvert || false,
                 min: config.opacityMin || 0.3
+            },
+            pointLight: {
+                active: config.pointLightActive || false,
+                invert: config.pointLightInvert || false,
+                z: config.pointLightZ || 20,
             }
         };
     }
@@ -313,6 +318,15 @@ class Demo {
             .onChange(getHandler('opacityInvert', targetIndex));
         opacity.add(config.opacity, 'min', 0.05, 0.85, 0.05)
             .onChange(getHandler('opacityMin', targetIndex));
+
+        const pointLight = folder.addFolder('Point light');
+        this.gui.remember(config.pointLight);
+        pointLight.add(config.pointLight, 'active', {non: false, follow: 'follow', x: 'x', y: 'y'})
+            .onChange(getHandler('pointLightActive', targetIndex));
+        pointLight.add(config.pointLight, 'invert')
+            .onChange(getHandler('pointLightInvert', targetIndex));
+        pointLight.add(config.pointLight, 'z', 0, 200, 1)
+            .onChange(getHandler('pointLightZ', targetIndex));
     }
 }
 

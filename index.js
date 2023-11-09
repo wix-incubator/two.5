@@ -844,7 +844,10 @@ const DEFAULTS$1 = {
   blurMax: 20,
   opacityActive: false,
   opacityInvert: false,
-  opacityMin: 0.3
+  opacityMin: 0.3,
+  pointLightActive: false,
+  pointLightInvert: false,
+  pointLightZ: 20
 };
 function formatTransition({
   property,
@@ -852,6 +855,32 @@ function formatTransition({
   easing
 }) {
   return `${property} ${duration}ms ${easing}`;
+}
+function generatePointLightSource({
+  id,
+  width = 300,
+  height = 200,
+  z = 20,
+  x = 0,
+  y = 0
+}) {
+  return `<svg id="light-canvas-${id}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">
+        <defs>
+            <filter id="point-light-${id}">
+                <feDiffuseLighting in="SourceGraphic" result="light" lighting-color="white" x="0" y="0" width="100%" height="100%">
+                    <fePointLight id="point-light-source-${id}" x="${x}" y="${y}" z="${z}" />
+                </feDiffuseLighting>
+                <feComposite
+                        in="SourceGraphic"
+                        in2="light"
+                        operator="arithmetic"
+                        k1="1"
+                        k2="0"
+                        k3="0"
+                        k4="0" />
+            </filter>
+        </defs>
+    </svg>`;
 }
 function getEffect(config) {
   const _config = defaultTo(config, DEFAULTS$1);
@@ -958,19 +987,45 @@ function getEffect(config) {
         layerPerspectiveZ = `perspective(${_config.perspectiveZ}px) `;
       }
       layer.el.style.transform = `${layerPerspectiveZ}${translatePart}${scalePart}${skewPart}${rotatePart}`;
+      let layerBlurPart = '';
       if (layer.blurActive) {
         const py = Math.abs(y - 0.5) * 2;
         const px = Math.abs(x - 0.5) * 2;
         const p = layer.blurActive === 'y' ? py : layer.blurActive === 'x' ? px : Math.hypot(px, py);
         const blurVal = layer.blurInvert ? 1 - p : p;
-        layer.el.style.filter = `blur(${Math.round(blurVal * layer.blurMax) * depth}px)`;
+        layerBlurPart = `blur(${Math.round(blurVal * layer.blurMax) * depth}px)`;
       }
+      let layerPointLightPart = '';
+      if (layer.pointLightActive) {
+        const py = layer.pointLightActive === 'x' ? 0.5 : layer.pointLightInvert ? 1 - y : y;
+        const px = layer.pointLightActive === 'y' ? 0.5 : layer.pointLightInvert ? 1 - x : x;
+        layerPointLightPart = ` url(#point-light-${index})`;
+        const width = layer.el.offsetWidth;
+        const height = layer.el.offsetHeight;
+        if (!layer.pointLightElement) {
+          const pointLightElement = generatePointLightSource({
+            id: index,
+            z: layer.pointLightZ,
+            width,
+            height
+          });
+          layer.el.insertAdjacentHTML('afterend', pointLightElement);
+          layer.pointLightElement = layer.el.nextElementSibling;
+        }
+        const pointLightSource = layer.pointLightElement.querySelector(`#point-light-source-${index}`);
+        pointLightSource.setAttribute('x', px * width);
+        pointLightSource.setAttribute('y', py * height);
+        pointLightSource.setAttribute('z', layer.pointLightZ);
+      }
+      layer.el.style.filter = `${layerBlurPart}${layerPointLightPart}`;
       if (layer.opacityActive) {
         const py = Math.abs(y - 0.5) * 2;
         const px = Math.abs(x - 0.5) * 2;
         const p = layer.opacityActive === 'y' ? py : layer.opacityActive === 'x' ? px : Math.hypot(px, py);
         const opacityVal = layer.opacityInvert ? 1 - p : p;
         layer.el.style.opacity = map(opacityVal, 0, 1, layer.opacityMin * depth, 1);
+      } else {
+        layer.el.style.opacity = 1;
       }
     });
     if (_config.perspectiveActive) {
