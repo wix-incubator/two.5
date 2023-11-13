@@ -909,7 +909,7 @@ function getEffect(config) {
   /*
    * Setup layers styling
    */
-  _config.layers.forEach(layer => {
+  _config.layers.forEach((layer, index) => {
     const layerStyle = {};
     if (!layer.allowPointer) {
       layerStyle['pointer-events'] = 'none';
@@ -927,7 +927,13 @@ function getEffect(config) {
     } else {
       delete layerStyle.transition;
     }
-    return Object.assign(layer.el.style, layerStyle);
+    Object.assign(layer.el.style, layerStyle);
+
+    /* Set up filters */
+    const filterElement = document.querySelector(`#light-canvas-${index}`);
+    if (filterElement) {
+      layer.pointLightElement = filterElement;
+    }
   });
   return function tilt({
     x,
@@ -1009,12 +1015,13 @@ function getEffect(config) {
             width,
             height
           });
-          layer.el.insertAdjacentHTML('afterend', pointLightElement);
-          layer.pointLightElement = layer.el.nextElementSibling;
+          layer.el.insertAdjacentHTML('beforebegin', pointLightElement);
+          layer.pointLightElement = layer.el.previousElementSibling;
+          layer.el.style.willChange = 'filter';
         }
         const pointLightSource = layer.pointLightElement.querySelector(`#point-light-source-${index}`);
-        pointLightSource.setAttribute('x', px * width);
-        pointLightSource.setAttribute('y', py * height);
+        pointLightSource.setAttribute('x', Math.round(px * width));
+        pointLightSource.setAttribute('y', Math.round(py * height));
         pointLightSource.setAttribute('z', layer.pointLightZ);
       }
       layer.el.style.filter = `${layerBlurPart}${layerPointLightPart}`;

@@ -7,7 +7,7 @@ stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom);
 
 const container = document.querySelector('main');
-const layers = [...container.querySelectorAll('img, h1, h2')].map(el => ({el, depth: 1}));
+const layers = [...container.querySelectorAll('img, h1')].map(el => ({el, depth: 1}));
 
 class Demo {
     constructor () {
