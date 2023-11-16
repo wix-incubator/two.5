@@ -308,38 +308,47 @@
     centerToLayer: false,
     // layer only
     translationActive: true,
+    translationEasing: 'linear',
     translationInvertX: false,
     translationInvertY: false,
     translationMaxX: 50,
     translationMaxY: 50,
     rotateActive: false,
+    rotateEasing: 'linear',
     rotateInvert: false,
     rotateMax: 45,
     tiltActive: false,
+    tiltEasing: 'linear',
     tiltInvertX: false,
     tiltInvertY: false,
     tiltMaxX: 25,
     tiltMaxY: 25,
     skewActive: false,
+    skewEasing: 'linear',
     skewInvertX: false,
     skewInvertY: false,
     skewMaxX: 25,
     skewMaxY: 25,
     scaleActive: false,
+    scaleEasing: 'linear',
     scaleInvertX: false,
     scaleInvertY: false,
     scaleMaxX: 0.5,
     scaleMaxY: 0.5,
     blurActive: false,
+    blurEasing: 'linear',
     blurInvert: false,
     blurMax: 20,
     opacityActive: false,
+    opacityEasing: 'linear',
     opacityInvert: false,
     opacityMin: 0.3,
     pointLightActive: false,
+    pointLightEasing: 'linear',
     pointLightInvert: false,
     pointLightZ: 20,
     clipActive: false,
+    clipEasing: 'linear',
     clipDirection: 'left'
   };
   function formatTransition({
@@ -377,26 +386,39 @@
   }
   const clipPathDirections = {
     left(x, y) {
-      return `polygon(0% 0%, ${x}% 0%, ${x}% 100%, 0% 100%)`;
+      return `polygon(0% 0%, ${x * 100}% 0%, ${x * 100}% 100%, 0% 100%)`;
     },
     right(x, y) {
-      return `polygon(100% 0%, ${x}% 0%, ${x}% 100%, 100% 100%)`;
+      return `polygon(100% 0%, ${x * 100}% 0%, ${x * 100}% 100%, 100% 100%)`;
     },
     top(x, y) {
-      return `polygon(0% 0%, 0% ${y}%, 100% ${y}%, 100% 0%)`;
+      return `polygon(0% 0%, 0% ${y * 100}%, 100% ${y * 100}%, 100% 0%)`;
     },
     bottom(x, y) {
-      return `polygon(0% 100%, 0% ${y}%, 100% ${y}%, 100% 100%)`;
+      return `polygon(0% 100%, 0% ${y * 100}%, 100% ${y * 100}%, 100% 100%)`;
     },
-    rect(x, y) {
-      const py = Math.abs(y - 50) * 2;
-      const px = Math.abs(x - 50) * 2;
+    rect(x, y, easing) {
+      const py = ease(easing, Math.abs(y - 0.5) * 2);
+      const px = ease(easing, Math.abs(x - 0.5) * 2);
       const r = Math.hypot(px, py);
-      return `inset(${r}%)`;
+      return `inset(${r * 100}%)`;
     }
   };
-  function getClipPath(direction, x, y) {
-    return `${clipPathDirections[direction](x * 100, y * 100)}`;
+  function getClipPath(direction, x, y, easing) {
+    return `${clipPathDirections[direction](x, y, easing)}`;
+  }
+  const EASINGS = {
+    linear: x => x,
+    quad: x => x * x * Math.sign(x),
+    cubic: x => x * x * x,
+    quart: x => x * x * x * x * Math.sign(x),
+    quint: x => x * x * x * x * x,
+    sine: x => 1 - Math.cos(x * Math.PI / 2),
+    expo: x => x === 0 ? 0 : Math.pow(2, 10 * Math.abs(x) - 10) * Math.sign(x),
+    circ: x => (1 - Math.sqrt(1 - Math.pow(x, 2))) * Math.sign(x)
+  };
+  function ease(easing, t) {
+    return EASINGS[easing](t);
   }
   function getEffect(config) {
     const _config = defaultTo(config, DEFAULTS$1);
@@ -465,8 +487,10 @@
         }
         let translatePart = '';
         if (layer.translationActive) {
-          const translateXVal = layer.translationActive === 'y' ? 0 : (layer.translationInvertX ? -1 : 1) * layer.translationMaxX * (2 * x - 1) * depth;
-          const translateYVal = layer.translationActive === 'x' ? 0 : (layer.translationInvertY ? -1 : 1) * layer.translationMaxY * (2 * y - 1) * depth;
+          const tx = ease(layer.translationEasing, 2 * x - 1);
+          const ty = ease(layer.translationEasing, 2 * y - 1);
+          const translateXVal = layer.translationActive === 'y' ? 0 : (layer.translationInvertX ? -1 : 1) * layer.translationMaxX * tx * depth;
+          const translateYVal = layer.translationActive === 'x' ? 0 : (layer.translationInvertY ? -1 : 1) * layer.translationMaxY * ty * depth;
           translatePart = `translate3d(${translateXVal.toFixed(2)}px, ${translateYVal.toFixed(2)}px, ${translateZVal}px)`;
         } else {
           translatePart = `translateZ(${translateZVal}px)`;
@@ -476,15 +500,19 @@
           rotateYVal = 0,
           rotateZVal = 0;
         if (layer.rotateActive) {
-          const px = x * 2 - 1;
-          const py = y * 2 - 1;
-          const rotateInput = layer.rotateActive === 'x' ? px * layer.rotateMax * depth : layer.rotateActive === 'y' ? py * layer.rotateMax * depth : Math.atan2(py, px) * 180 / Math.PI;
+          const rx = x * 2 - 1;
+          const ry = y * 2 - 1;
+          const px = ease(layer.rotateEasing, rx);
+          const py = ease(layer.rotateEasing, ry);
+          const rotateInput = layer.rotateActive === 'x' ? px * layer.rotateMax * depth : layer.rotateActive === 'y' ? py * layer.rotateMax * depth : Math.atan2(ry, rx) * 180 / Math.PI;
           rotateZVal = (layer.rotateInvert ? -1 : 1) * rotateInput;
           rotatePart += ` rotateZ(${rotateZVal.toFixed(2)}deg)`;
         }
         if (layer.tiltActive) {
-          rotateXVal = layer.tiltActive === 'x' ? 0 : (layer.tiltInvertY ? -1 : 1) * layer.tiltMaxY * (1 - y * 2) * depth;
-          rotateYVal = layer.tiltActive === 'y' ? 0 : (layer.tiltInvertX ? -1 : 1) * layer.tiltMaxX * (x * 2 - 1) * depth;
+          const tx = ease(layer.tiltEasing, x * 2 - 1);
+          const ty = ease(layer.tiltEasing, 1 - y * 2);
+          rotateXVal = layer.tiltActive === 'x' ? 0 : (layer.tiltInvertY ? -1 : 1) * layer.tiltMaxY * ty * depth;
+          rotateYVal = layer.tiltActive === 'y' ? 0 : (layer.tiltInvertX ? -1 : 1) * layer.tiltMaxX * tx * depth;
           if (_config.invertRotation) {
             // see https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Using_device_orientation_with_3D_transforms#Orientation_compensation
             rotatePart = ` rotateY(${rotateYVal.toFixed(2)}deg) rotateX(${rotateXVal.toFixed(2)}deg)${rotatePart}`;
@@ -494,16 +522,18 @@
         }
         let skewPart = '';
         if (layer.skewActive) {
-          const skewXVal = layer.skewActive === 'y' ? 0 : (layer.skewInvertX ? -1 : 1) * layer.skewMaxX * (1 - x * 2) * depth;
-          const skewYVal = layer.skewActive === 'x' ? 0 : (layer.skewInvertY ? -1 : 1) * layer.skewMaxY * (1 - y * 2) * depth;
+          const sx = ease(layer.skewEasing, 1 - x * 2);
+          const sy = ease(layer.skewEasing, 1 - y * 2);
+          const skewXVal = layer.skewActive === 'y' ? 0 : (layer.skewInvertX ? -1 : 1) * layer.skewMaxX * sx * depth;
+          const skewYVal = layer.skewActive === 'x' ? 0 : (layer.skewInvertY ? -1 : 1) * layer.skewMaxY * sy * depth;
           skewPart = ` skew(${skewXVal.toFixed(2)}deg, ${skewYVal.toFixed(2)}deg)`;
         }
         let scalePart = '';
         if (layer.scaleActive) {
           const scaleXInput = layer.scaleActive === 'yy' ? y : x;
           const scaleYInput = layer.scaleActive === 'xx' ? x : y;
-          const scaleXVal = layer.scaleActive === 'sync' ? 1 + layer.scaleMaxX * (layer.scaleInvertX ? 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2) : Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) * depth : layer.scaleActive === 'y' ? 1 : 1 + layer.scaleMaxX * (layer.scaleInvertX ? 1 - Math.abs(0.5 - scaleXInput) * 2 : Math.abs(0.5 - scaleXInput) * 2) * depth;
-          const scaleYVal = layer.scaleActive === 'sync' ? 1 + layer.scaleMaxY * (layer.scaleInvertY ? 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2) : Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) * depth : layer.scaleActive === 'x' ? 1 : 1 + layer.scaleMaxY * (layer.scaleInvertY ? 1 - Math.abs(0.5 - scaleYInput) * 2 : Math.abs(0.5 - scaleYInput) * 2) * depth;
+          const scaleXVal = layer.scaleActive === 'sync' ? 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleActive, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth : layer.scaleActive === 'y' ? 1 : 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleEasing, 1 - Math.abs(0.5 - scaleXInput) * 2) : ease(layer.scaleEasing, Math.abs(0.5 - scaleXInput) * 2)) * depth;
+          const scaleYVal = layer.scaleActive === 'sync' ? 1 + layer.scaleMaxY * (layer.scaleInvertY ? ease(layer.scaleEasing, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth : layer.scaleActive === 'x' ? 1 : 1 + layer.scaleMaxY * (layer.scaleInvertY ? ease(layer.scaleEasing, 1 - Math.abs(0.5 - scaleYInput) * 2) : ease(layer.scaleEasing, Math.abs(0.5 - scaleYInput) * 2)) * depth;
           scalePart = ` scale(${scaleXVal.toFixed(2)}, ${scaleYVal.toFixed(2)})`;
         }
         let layerPerspectiveZ = '';
@@ -517,14 +547,18 @@
         if (layer.blurActive) {
           const py = Math.abs(y - 0.5) * 2;
           const px = Math.abs(x - 0.5) * 2;
-          const p = layer.blurActive === 'y' ? py : layer.blurActive === 'x' ? px : Math.hypot(px, py);
+          const bx = ease(layer.blurEasing, px);
+          const by = ease(layer.blurEasing, py);
+          const p = layer.blurActive === 'y' ? by : layer.blurActive === 'x' ? bx : Math.hypot(bx, by);
           const blurVal = layer.blurInvert ? 1 - p : p;
           layerBlurPart = `blur(${Math.round(blurVal * layer.blurMax) * depth}px)`;
         }
         let layerPointLightPart = '';
         if (layer.pointLightActive) {
-          const py = layer.pointLightActive === 'x' ? 0.5 : layer.pointLightInvert ? 1 - y : y;
-          const px = layer.pointLightActive === 'y' ? 0.5 : layer.pointLightInvert ? 1 - x : x;
+          const plx = ease(layer.pointLightEasing, x);
+          const ply = ease(layer.pointLightEasing, y);
+          const py = layer.pointLightActive === 'x' ? 0.5 : layer.pointLightInvert ? 1 - ply : ply;
+          const px = layer.pointLightActive === 'y' ? 0.5 : layer.pointLightInvert ? 1 - plx : plx;
           layerPointLightPart = ` url(#point-light-${index})`;
           const width = layer.el.offsetWidth;
           const height = layer.el.offsetHeight;
@@ -548,14 +582,16 @@
         if (layer.opacityActive) {
           const py = Math.abs(y - 0.5) * 2;
           const px = Math.abs(x - 0.5) * 2;
-          const p = layer.opacityActive === 'y' ? py : layer.opacityActive === 'x' ? px : Math.hypot(px, py);
+          const ox = ease(layer.opacityEasing, px);
+          const oy = ease(layer.opacityEasing, py);
+          const p = layer.opacityActive === 'y' ? oy : layer.opacityActive === 'x' ? ox : Math.hypot(ox, oy);
           const opacityVal = layer.opacityInvert ? 1 - p : p;
           layer.el.style.opacity = map$1(opacityVal, 0, 1, layer.opacityMin * depth, 1);
         } else {
           layer.el.style.opacity = 1;
         }
         if (layer.clipActive) {
-          layer.el.style.clipPath = getClipPath(layer.clipDirection, x, y);
+          layer.el.style.clipPath = getClipPath(layer.clipDirection, x, y, layer.clipEasing);
         } else {
           layer.el.style.clipPath = 'none';
         }
@@ -573,8 +609,8 @@
           aY = 1 + 2 * _config.perspectiveMaxY;
           bY = _config.perspectiveMaxY;
         }
-        const perspX = _config.perspectiveActive === 'y' ? 0.5 : (_config.perspectiveInvertX ? 1 - x : x) * aX - bX;
-        const perspY = _config.perspectiveActive === 'x' ? 0.5 : (_config.perspectiveInvertY ? 1 - y : y) * aY - bY;
+        const perspX = _config.perspectiveActive === 'y' ? 0.5 : (_config.perspectiveInvertX ? 1 - x_ : x_) * aX - bX;
+        const perspY = _config.perspectiveActive === 'x' ? 0.5 : (_config.perspectiveInvertY ? 1 - y_ : y_) * aY - bY;
         container.style.perspectiveOrigin = `${(perspX * 100).toFixed(2)}% ${(perspY * 100).toFixed(2)}%`;
       } else if (container) {
         container.style.perspectiveOrigin = '50% 50%';
@@ -3359,6 +3395,7 @@
   const stats = new Stats();
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
   document.body.appendChild(stats.dom);
+  const EFFECT_EASINGS = ['linear', 'quad', 'cubic', 'quart', 'quint', 'expo', 'sine', 'circ'];
   const container = document.querySelector('main');
   const layers = [...container.querySelectorAll('img, h1')].map(el => {
     const rect = el.getBoundingClientRect().toJSON();
@@ -3475,6 +3512,7 @@
         },
         translation: {
           active: config.translationActive || false,
+          easing: config.translationEasing || 'linear',
           invertX: config.translationInvertX || false,
           invertY: config.translationInvertY || false,
           maxX: config.translationMaxX || 50,
@@ -3482,11 +3520,13 @@
         },
         rotate: {
           active: config.rotateActive || false,
+          easing: config.rotateEasing || 'linear',
           invert: config.rotateInvert || false,
           max: config.rotate || 25
         },
         tilt: {
           active: config.tiltActive || false,
+          easing: config.tiltEasing || 'linear',
           invertX: config.tiltInvertX || false,
           invertY: config.tiltInvertY || false,
           maxX: config.tiltMaxX || 25,
@@ -3494,6 +3534,7 @@
         },
         skewing: {
           active: config.skewActive || false,
+          easing: config.skewEasing || 'linear',
           invertX: config.skewInvertX || false,
           invertY: config.skewInvertY || false,
           maxX: config.skewMaxX || 25,
@@ -3501,6 +3542,7 @@
         },
         scaling: {
           active: config.scaleActive || false,
+          easing: config.scaleEasing || 'linear',
           invertX: config.scaleInvertX || false,
           invertY: config.scaleInvertY || false,
           maxX: config.scaleMaxX || 0.5,
@@ -3508,20 +3550,24 @@
         },
         blur: {
           active: config.blurActive || false,
+          easing: config.blurEasing || 'linear',
           invert: config.blurInvert || false,
           max: config.blurMax || 20
         },
         opacity: {
           active: config.opacityActive || false,
+          easing: config.opacityEasing || 'linear',
           invert: config.opacityInvert || false,
           min: config.opacityMin || 0.3
         },
         clip: {
           active: config.clipActive || false,
+          easing: config.clipEasing || 'linear',
           direction: config.clipDirection || 'left'
         },
         pointLight: {
           active: config.pointLightActive || false,
+          easing: config.pointLightEasing || 'linear',
           invert: config.pointLightInvert || false,
           z: config.pointLightZ || 20
         }
@@ -3578,6 +3624,7 @@
         x: 'x',
         y: 'y'
       }).onChange(getHandler('translationActive', targetIndex));
+      translation.add(config.translation, 'easing', EFFECT_EASINGS).onChange(getHandler('translationEasing', targetIndex));
       translation.add(config.translation, 'invertX').onChange(getHandler('translationInvertX', targetIndex));
       translation.add(config.translation, 'invertY').onChange(getHandler('translationInvertY', targetIndex));
       translation.add(config.translation, 'maxX', 10, 500, 5).onChange(getHandler('translationMaxX', targetIndex));
@@ -3590,6 +3637,7 @@
         x: 'x',
         y: 'y'
       }).onChange(getHandler('rotateActive', targetIndex));
+      rotate.add(config.rotate, 'easing', EFFECT_EASINGS).onChange(getHandler('rotateEasing', targetIndex));
       rotate.add(config.rotate, 'invert').onChange(getHandler('rotateInvert', targetIndex));
       rotate.add(config.rotate, 'max', 10, 270, 1).onChange(getHandler('rotateMax', targetIndex));
       const tilt = folder.addFolder('Tilt');
@@ -3600,6 +3648,7 @@
         x: 'x',
         y: 'y'
       }).onChange(getHandler('tiltActive', targetIndex));
+      tilt.add(config.tilt, 'easing', EFFECT_EASINGS).onChange(getHandler('tiltEasing', targetIndex));
       tilt.add(config.tilt, 'invertX').onChange(getHandler('tiltInvertX', targetIndex));
       tilt.add(config.tilt, 'invertY').onChange(getHandler('tiltInvertY', targetIndex));
       tilt.add(config.tilt, 'maxX', 10, 85, 1).onChange(getHandler('tiltMaxX', targetIndex));
@@ -3612,6 +3661,7 @@
         x: 'x',
         y: 'y'
       }).onChange(getHandler('skewActive', targetIndex));
+      skewing.add(config.skewing, 'easing', EFFECT_EASINGS).onChange(getHandler('skewEasing', targetIndex));
       skewing.add(config.skewing, 'invertX').onChange(getHandler('skewInvertX', targetIndex));
       skewing.add(config.skewing, 'invertY').onChange(getHandler('skewInvertY', targetIndex));
       skewing.add(config.skewing, 'maxX', 10, 85, 1).onChange(getHandler('skewMaxX', targetIndex));
@@ -3627,6 +3677,7 @@
         x: 'x',
         y: 'y'
       }).onChange(getHandler('scaleActive', targetIndex));
+      scaling.add(config.scaling, 'easing', EFFECT_EASINGS).onChange(getHandler('scaleEasing', targetIndex));
       scaling.add(config.scaling, 'invertX').onChange(getHandler('scaleInvertX', targetIndex));
       scaling.add(config.scaling, 'invertY').onChange(getHandler('scaleInvertY', targetIndex));
       scaling.add(config.scaling, 'maxX', 0.1, 3, 0.1).onChange(getHandler('scaleMaxX', targetIndex));
@@ -3639,6 +3690,7 @@
         y: 'y',
         distance: 'r'
       }).onChange(getHandler('blurActive', targetIndex));
+      blur.add(config.blur, 'easing', EFFECT_EASINGS).onChange(getHandler('blurEasing', targetIndex));
       blur.add(config.blur, 'invert').onChange(getHandler('blurInvert', targetIndex));
       blur.add(config.blur, 'max', 5, 50, 5).onChange(getHandler('blurMax', targetIndex));
       const opacity = folder.addFolder('Opacity');
@@ -3649,11 +3701,13 @@
         y: 'y',
         distance: 'r'
       }).onChange(getHandler('opacityActive', targetIndex));
+      opacity.add(config.opacity, 'easing', EFFECT_EASINGS).onChange(getHandler('opacityEasing', targetIndex));
       opacity.add(config.opacity, 'invert').onChange(getHandler('opacityInvert', targetIndex));
       opacity.add(config.opacity, 'min', 0.05, 0.85, 0.05).onChange(getHandler('opacityMin', targetIndex));
       const clip = folder.addFolder('Clip');
       this.gui.remember(config.clip);
       clip.add(config.clip, 'active').onChange(getHandler('clipActive', targetIndex));
+      clip.add(config.clip, 'easing', EFFECT_EASINGS).onChange(getHandler('clipEasing', targetIndex));
       clip.add(config.clip, 'direction', {
         left: 'left',
         right: 'right',
@@ -3669,6 +3723,7 @@
         x: 'x',
         y: 'y'
       }).onChange(getHandler('pointLightActive', targetIndex));
+      pointLight.add(config.pointLight, 'easing', EFFECT_EASINGS).onChange(getHandler('pointLightEasing', targetIndex));
       pointLight.add(config.pointLight, 'invert').onChange(getHandler('pointLightInvert', targetIndex));
       pointLight.add(config.pointLight, 'z', 0, 200, 1).onChange(getHandler('pointLightZ', targetIndex));
     }

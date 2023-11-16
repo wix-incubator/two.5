@@ -6,6 +6,8 @@ const stats = new Stats();
 stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom);
 
+const EFFECT_EASINGS = ['linear', 'quad', 'cubic', 'quart', 'quint', 'expo', 'sine', 'circ'];
+
 const container = document.querySelector('main');
 const layers = [...container.querySelectorAll('img, h1')].map(el => {
     const rect = el.getBoundingClientRect().toJSON();
@@ -140,6 +142,7 @@ class Demo {
             },
             translation: {
                 active: config.translationActive || false,
+                easing: config.translationEasing || 'linear',
                 invertX: config.translationInvertX || false,
                 invertY: config.translationInvertY || false,
                 maxX: config.translationMaxX || 50,
@@ -147,11 +150,13 @@ class Demo {
             },
             rotate: {
                 active: config.rotateActive || false,
+                easing: config.rotateEasing || 'linear',
                 invert: config.rotateInvert || false,
                 max: config.rotate || 25
             },
             tilt: {
                 active: config.tiltActive || false,
+                easing: config.tiltEasing || 'linear',
                 invertX: config.tiltInvertX || false,
                 invertY: config.tiltInvertY || false,
                 maxX: config.tiltMaxX || 25,
@@ -159,6 +164,7 @@ class Demo {
             },
             skewing: {
                 active: config.skewActive || false,
+                easing: config.skewEasing || 'linear',
                 invertX: config.skewInvertX || false,
                 invertY: config.skewInvertY || false,
                 maxX: config.skewMaxX || 25,
@@ -166,6 +172,7 @@ class Demo {
             },
             scaling: {
                 active: config.scaleActive || false,
+                easing: config.scaleEasing || 'linear',
                 invertX: config.scaleInvertX || false,
                 invertY: config.scaleInvertY || false,
                 maxX: config.scaleMaxX || 0.5,
@@ -173,20 +180,24 @@ class Demo {
             },
             blur: {
                 active: config.blurActive || false,
+                easing: config.blurEasing || 'linear',
                 invert: config.blurInvert || false,
                 max: config.blurMax || 20
             },
             opacity: {
                 active: config.opacityActive || false,
+                easing: config.opacityEasing || 'linear',
                 invert: config.opacityInvert || false,
                 min: config.opacityMin || 0.3
             },
             clip: {
                 active: config.clipActive || false,
+                easing: config.clipEasing || 'linear',
                 direction: config.clipDirection || 'left'
             },
             pointLight: {
                 active: config.pointLightActive || false,
+                easing: config.pointLightEasing || 'linear',
                 invert: config.pointLightInvert || false,
                 z: config.pointLightZ || 20
             }
@@ -255,6 +266,8 @@ class Demo {
         this.gui.remember(config.translation);
         translation.add(config.translation, 'active', {non: false, both: true, x: 'x', y: 'y'})
             .onChange(getHandler('translationActive', targetIndex));
+        translation.add(config.translation, 'easing', EFFECT_EASINGS)
+            .onChange(getHandler('translationEasing', targetIndex));
         translation.add(config.translation, 'invertX')
             .onChange(getHandler('translationInvertX', targetIndex));
         translation.add(config.translation, 'invertY')
@@ -268,6 +281,8 @@ class Demo {
         this.gui.remember(config.rotate);
         rotate.add(config.rotate, 'active', {non: false, follow: 'follow', x: 'x', y: 'y'})
             .onChange(getHandler('rotateActive', targetIndex));
+        rotate.add(config.rotate, 'easing', EFFECT_EASINGS)
+            .onChange(getHandler('rotateEasing', targetIndex));
         rotate.add(config.rotate, 'invert')
             .onChange(getHandler('rotateInvert', targetIndex));
         rotate.add(config.rotate, 'max', 10, 270, 1)
@@ -277,6 +292,8 @@ class Demo {
         this.gui.remember(config.tilt);
         tilt.add(config.tilt, 'active', {non: false, both: true, x: 'x', y: 'y'})
             .onChange(getHandler('tiltActive', targetIndex));
+        tilt.add(config.tilt, 'easing', EFFECT_EASINGS)
+            .onChange(getHandler('tiltEasing', targetIndex));
         tilt.add(config.tilt, 'invertX')
             .onChange(getHandler('tiltInvertX', targetIndex));
         tilt.add(config.tilt, 'invertY')
@@ -290,6 +307,8 @@ class Demo {
         this.gui.remember(config.skewing);
         skewing.add(config.skewing, 'active', {non: false, both: true, x: 'x', y: 'y'})
             .onChange(getHandler('skewActive', targetIndex));
+        skewing.add(config.skewing, 'easing', EFFECT_EASINGS)
+            .onChange(getHandler('skewEasing', targetIndex));
         skewing.add(config.skewing, 'invertX')
             .onChange(getHandler('skewInvertX', targetIndex));
         skewing.add(config.skewing, 'invertY')
@@ -303,6 +322,8 @@ class Demo {
         this.gui.remember(config.scaling);
         scaling.add(config.scaling, 'active', {non: false, sync: 'sync', both: true, 'x sync': 'xx', 'y sync': 'yy', x: 'x', y: 'y'})
             .onChange(getHandler('scaleActive', targetIndex));
+        scaling.add(config.scaling, 'easing', EFFECT_EASINGS)
+            .onChange(getHandler('scaleEasing', targetIndex));
         scaling.add(config.scaling, 'invertX')
             .onChange(getHandler('scaleInvertX', targetIndex));
         scaling.add(config.scaling, 'invertY')
@@ -316,6 +337,8 @@ class Demo {
         this.gui.remember(config.blur);
         blur.add(config.blur, 'active', {non: false, x: 'x', y: 'y', distance: 'r'})
             .onChange(getHandler('blurActive', targetIndex));
+        blur.add(config.blur, 'easing', EFFECT_EASINGS)
+            .onChange(getHandler('blurEasing', targetIndex));
         blur.add(config.blur, 'invert')
             .onChange(getHandler('blurInvert', targetIndex));
         blur.add(config.blur, 'max', 5, 50, 5)
@@ -325,6 +348,8 @@ class Demo {
         this.gui.remember(config.opacity);
         opacity.add(config.opacity, 'active', {non: false, x: 'x', y: 'y', distance: 'r'})
             .onChange(getHandler('opacityActive', targetIndex));
+        opacity.add(config.opacity, 'easing', EFFECT_EASINGS)
+            .onChange(getHandler('opacityEasing', targetIndex));
         opacity.add(config.opacity, 'invert')
             .onChange(getHandler('opacityInvert', targetIndex));
         opacity.add(config.opacity, 'min', 0.05, 0.85, 0.05)
@@ -334,6 +359,8 @@ class Demo {
         this.gui.remember(config.clip);
         clip.add(config.clip, 'active')
             .onChange(getHandler('clipActive', targetIndex));
+        clip.add(config.clip, 'easing', EFFECT_EASINGS)
+            .onChange(getHandler('clipEasing', targetIndex));
         clip.add(config.clip, 'direction', {left: 'left', right: 'right', top: 'top', bottom: 'bottom', rect: 'rect'})
             .onChange(getHandler('clipDirection', targetIndex));
 
@@ -341,6 +368,8 @@ class Demo {
         this.gui.remember(config.pointLight);
         pointLight.add(config.pointLight, 'active', {non: false, follow: 'follow', x: 'x', y: 'y'})
             .onChange(getHandler('pointLightActive', targetIndex));
+        pointLight.add(config.pointLight, 'easing', EFFECT_EASINGS)
+            .onChange(getHandler('pointLightEasing', targetIndex));
         pointLight.add(config.pointLight, 'invert')
             .onChange(getHandler('pointLightInvert', targetIndex));
         pointLight.add(config.pointLight, 'z', 0, 200, 1)
