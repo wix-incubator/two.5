@@ -7,7 +7,10 @@ stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom);
 
 const container = document.querySelector('main');
-const layers = [...container.querySelectorAll('img, h1')].map(el => ({el, depth: 1}));
+const layers = [...container.querySelectorAll('img, h1')].map(el => {
+    const rect = el.getBoundingClientRect().toJSON();
+    return {el, depth: 1, rect,  centerToLayer: false};
+});
 
 class Demo {
     constructor () {
@@ -127,6 +130,7 @@ class Demo {
     createEffectConfig (config) {
         return {
             depth: config.depth,
+            centerToLayer: config.centerToLayer,
             perspective: {
                 active: config.perspectiveActive || false,
                 invertX: config.perspectiveInvertX || false,
@@ -230,6 +234,9 @@ class Demo {
 
         folder.add(config, 'depth', 0.2, 1, 0.2)
             .onChange(getHandler('depth', targetIndex));
+
+        folder.add(config, 'centerToLayer')
+            .onChange(getHandler('centerToLayer', targetIndex));
 
         const perspective = folder.addFolder('Perspective');
         this.gui.remember(config.perspective);

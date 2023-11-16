@@ -27,6 +27,8 @@ export function getHandler ({target, progress, callback}) {
 
         progress.x = +x.toPrecision(4);
         progress.y = +y.toPrecision(4);
+        progress.h = height;
+        progress.w = width;
 
         callback();
     }

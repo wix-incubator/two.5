@@ -305,7 +305,7 @@
     //todo: split to layer and container config
     transitionEasing: 'ease-out',
     //todo: split to layer and container config
-
+    centerToLayer: false,
     // layer only
     translationActive: true,
     translationInvertX: false,
@@ -448,13 +448,21 @@
       }
     });
     return function tilt({
-      x,
-      y
+      x: x_,
+      y: y_,
+      h,
+      w
     }) {
       const len = _config.layers.length;
       _config.layers.forEach((layer, index) => {
         const depth = layer.hasOwnProperty('depth') ? layer.depth : (index + 1) / len;
         const translateZVal = layer.hasOwnProperty('elevation') ? layer.elevation : _config.elevation * (index + 1);
+        let x = x_,
+          y = y_;
+        if (layer.centerToLayer) {
+          x = x_ + 0.5 - (layer.rect.left + layer.rect.width / 2) / w;
+          y = y_ + 0.5 - (layer.rect.top + layer.rect.height / 2) / h;
+        }
         let translatePart = '';
         if (layer.translationActive) {
           const translateXVal = layer.translationActive === 'y' ? 0 : (layer.translationInvertX ? -1 : 1) * layer.translationMaxX * (2 * x - 1) * depth;
@@ -607,6 +615,8 @@
       const y = clamp(0, 1, (clientY - top) / height);
       progress.x = +x.toPrecision(4);
       progress.y = +y.toPrecision(4);
+      progress.h = height;
+      progress.w = width;
       callback();
     }
     function on(config) {
@@ -3350,10 +3360,15 @@
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
   document.body.appendChild(stats.dom);
   const container = document.querySelector('main');
-  const layers = [...container.querySelectorAll('img, h1')].map(el => ({
-    el,
-    depth: 1
-  }));
+  const layers = [...container.querySelectorAll('img, h1')].map(el => {
+    const rect = el.getBoundingClientRect().toJSON();
+    return {
+      el,
+      depth: 1,
+      rect,
+      centerToLayer: false
+    };
+  });
   class Demo {
     constructor() {
       this.currentContainer = container;
@@ -3450,6 +3465,7 @@
     createEffectConfig(config) {
       return {
         depth: config.depth,
+        centerToLayer: config.centerToLayer,
         perspective: {
           active: config.perspectiveActive || false,
           invertX: config.perspectiveInvertX || false,
@@ -3541,6 +3557,7 @@
       const getHandler = config === this.two5Config ? prop => this.getSceneHandler(prop) : (prop, index) => this.getLayerHandler(prop, index);
       this.gui.remember(config);
       folder.add(config, 'depth', 0.2, 1, 0.2).onChange(getHandler('depth', targetIndex));
+      folder.add(config, 'centerToLayer').onChange(getHandler('centerToLayer', targetIndex));
       const perspective = folder.addFolder('Perspective');
       this.gui.remember(config.perspective);
       perspective.add(config.perspective, 'active', {

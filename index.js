@@ -814,7 +814,7 @@ const DEFAULTS$1 = {
   //todo: split to layer and container config
   transitionEasing: 'ease-out',
   //todo: split to layer and container config
-
+  centerToLayer: false,
   // layer only
   translationActive: true,
   translationInvertX: false,
@@ -957,13 +957,21 @@ function getEffect(config) {
     }
   });
   return function tilt({
-    x,
-    y
+    x: x_,
+    y: y_,
+    h,
+    w
   }) {
     const len = _config.layers.length;
     _config.layers.forEach((layer, index) => {
       const depth = layer.hasOwnProperty('depth') ? layer.depth : (index + 1) / len;
       const translateZVal = layer.hasOwnProperty('elevation') ? layer.elevation : _config.elevation * (index + 1);
+      let x = x_,
+        y = y_;
+      if (layer.centerToLayer) {
+        x = x_ + 0.5 - (layer.rect.left + layer.rect.width / 2) / w;
+        y = y_ + 0.5 - (layer.rect.top + layer.rect.height / 2) / h;
+      }
       let translatePart = '';
       if (layer.translationActive) {
         const translateXVal = layer.translationActive === 'y' ? 0 : (layer.translationInvertX ? -1 : 1) * layer.translationMaxX * (2 * x - 1) * depth;
@@ -1117,6 +1125,8 @@ function getHandler$1({
     const y = clamp(0, 1, (clientY - top) / height);
     progress.x = +x.toPrecision(4);
     progress.y = +y.toPrecision(4);
+    progress.h = height;
+    progress.w = width;
     callback();
   }
   function on(config) {
