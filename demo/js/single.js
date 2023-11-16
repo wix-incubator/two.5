@@ -177,10 +177,14 @@ class Demo {
                 invert: config.opacityInvert || false,
                 min: config.opacityMin || 0.3
             },
+            clip: {
+                active: config.clipActive || false,
+                direction: config.clipDirection || 'left'
+            },
             pointLight: {
                 active: config.pointLightActive || false,
                 invert: config.pointLightInvert || false,
-                z: config.pointLightZ || 20,
+                z: config.pointLightZ || 20
             }
         };
     }
@@ -318,6 +322,13 @@ class Demo {
             .onChange(getHandler('opacityInvert', targetIndex));
         opacity.add(config.opacity, 'min', 0.05, 0.85, 0.05)
             .onChange(getHandler('opacityMin', targetIndex));
+
+        const clip = folder.addFolder('Clip');
+        this.gui.remember(config.clip);
+        clip.add(config.clip, 'active')
+            .onChange(getHandler('clipActive', targetIndex));
+        clip.add(config.clip, 'direction', {left: 'left', right: 'right', top: 'top', bottom: 'bottom', rect: 'rect'})
+            .onChange(getHandler('clipDirection', targetIndex));
 
         const pointLight = folder.addFolder('Point light');
         this.gui.remember(config.pointLight);

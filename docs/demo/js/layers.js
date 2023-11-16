@@ -338,7 +338,9 @@
     opacityMin: 0.3,
     pointLightActive: false,
     pointLightInvert: false,
-    pointLightZ: 20
+    pointLightZ: 20,
+    clipActive: false,
+    clipDirection: 'left'
   };
   function formatTransition({
     property,
@@ -372,6 +374,29 @@
             </filter>
         </defs>
     </svg>`;
+  }
+  const clipPathDirections = {
+    left(x, y) {
+      return `polygon(0% 0%, ${x}% 0%, ${x}% 100%, 0% 100%)`;
+    },
+    right(x, y) {
+      return `polygon(100% 0%, ${x}% 0%, ${x}% 100%, 100% 100%)`;
+    },
+    top(x, y) {
+      return `polygon(0% 0%, 0% ${y}%, 100% ${y}%, 100% 0%)`;
+    },
+    bottom(x, y) {
+      return `polygon(0% 100%, 0% ${y}%, 100% ${y}%, 100% 100%)`;
+    },
+    rect(x, y) {
+      const py = Math.abs(y - 50) * 2;
+      const px = Math.abs(x - 50) * 2;
+      const r = Math.hypot(px, py);
+      return `inset(${r}%)`;
+    }
+  };
+  function getClipPath(direction, x, y) {
+    return `${clipPathDirections[direction](x * 100, y * 100)}`;
   }
   function getEffect(config) {
     const _config = defaultTo(config, DEFAULTS$1);
@@ -407,11 +432,7 @@
       }
       if (layer.transitionActive) {
         layerStyle.transition = `${formatTransition({
-        property: 'transform',
-        duration: layer.transitionDuration,
-        easing: layer.transitionEasing
-      })}, ${formatTransition({
-        property: 'filter',
+        property: 'all',
         duration: layer.transitionDuration,
         easing: layer.transitionEasing
       })}`;
@@ -524,6 +545,11 @@
           layer.el.style.opacity = map$1(opacityVal, 0, 1, layer.opacityMin * depth, 1);
         } else {
           layer.el.style.opacity = 1;
+        }
+        if (layer.clipActive) {
+          layer.el.style.clipPath = getClipPath(layer.clipDirection, x, y);
+        } else {
+          layer.el.style.clipPath = 'none';
         }
       });
       if (_config.perspectiveActive) {

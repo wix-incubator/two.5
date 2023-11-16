@@ -8,19 +8,18 @@ main {
     display: grid;
     grid-template: repeat(5, 20%) / repeat(5, 20%);
     place-items: center;
-    width: calc(100vw - 15px);
-    height: calc(100vh - 15px);
+    width: calc(100vw);
+    height: calc(100vh);
     overflow: hidden;
     margin: 0;
-    padding: 24px;
 }
 
 #background-wrapper {
     position: relative;
     grid-column: 1 / 6;
     grid-row: 1 / 6;
-    width: 94vw;
-    height: 94vh;
+    width: 99vw;
+    height: 99vh;
     overflow: hidden;
 }
 
