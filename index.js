@@ -1074,7 +1074,7 @@ function getEffect(config) {
         if (!layer.pointLightElement) {
           const pointLightElement = generatePointLightSource({
             id: index,
-            z: layer.pointLightZ,
+            z: layer.pointLightZ * depth,
             width,
             height
           });
@@ -1085,7 +1085,7 @@ function getEffect(config) {
         const pointLightSource = layer.pointLightElement.querySelector(`#point-light-source-${index}`);
         pointLightSource.setAttribute('x', Math.round(px * width));
         pointLightSource.setAttribute('y', Math.round(py * height));
-        pointLightSource.setAttribute('z', layer.pointLightZ);
+        pointLightSource.setAttribute('z', layer.pointLightZ * depth);
       }
       layer.el.style.filter = `${layerBlurPart}${layerPointLightPart}`;
       if (layer.opacityActive) {

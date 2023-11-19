@@ -330,7 +330,7 @@ export function getEffect (config) {
                 if (!layer.pointLightElement) {
                     const pointLightElement = generatePointLightSource({
                         id: index,
-                        z: layer.pointLightZ,
+                        z: layer.pointLightZ * depth,
                         width,
                         height
                     });
@@ -342,7 +342,7 @@ export function getEffect (config) {
 
                 pointLightSource.setAttribute('x', Math.round(px * width));
                 pointLightSource.setAttribute('y', Math.round(py * height));
-                pointLightSource.setAttribute('z', layer.pointLightZ);
+                pointLightSource.setAttribute('z', layer.pointLightZ * depth);
             }
 
             layer.el.style.filter = `${layerBlurPart}${layerPointLightPart}`
