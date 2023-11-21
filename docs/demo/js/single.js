@@ -351,12 +351,15 @@
     clipEasing: 'linear',
     clipDirection: 'left'
   };
+  function getTransitionEasing(easing) {
+    return easing === 'bounce' ? 'cubic-bezier(0.58, 2.5, 0, 0.95)' : easing;
+  }
   function formatTransition({
     property,
     duration,
     easing
   }) {
-    return `${property} ${duration}ms ${easing}`;
+    return `${property} ${duration}ms ${getTransitionEasing(easing)}`;
   }
   function generatePointLightSource({
     id,
@@ -3482,7 +3485,7 @@
         };
       }(this.getSceneHandler('transitionActive')));
       this.transition.add(this.two5Config.transition, 'duration', 50, 1000, 50).onChange(this.getSceneHandler('transitionDuration'));
-      this.transition.add(this.two5Config.transition, 'easing', ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']).onChange(this.getSceneHandler('transitionEasing'));
+      this.transition.add(this.two5Config.transition, 'easing', ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out', 'bounce']).onChange(this.getSceneHandler('transitionEasing'));
       this.elementsFolder = this.gui.addFolder('Elements');
       this.elementsFolder.open();
       this.two5.layers.forEach((layer, index) => {

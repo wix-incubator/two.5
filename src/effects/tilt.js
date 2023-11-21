@@ -66,8 +66,12 @@ const DEFAULTS = {
     clipDirection: 'left'
 };
 
+function getTransitionEasing (easing) {
+    return easing === 'bounce' ? 'cubic-bezier(0.58, 2.5, 0, 0.95)' : easing;
+}
+
 function formatTransition ({property, duration, easing}) {
-    return `${property} ${duration}ms ${easing}`;
+    return `${property} ${duration}ms ${getTransitionEasing(easing)}`;
 }
 
 function generatePointLightSource ({id, width = 300, height = 200, z = 20, x = 0, y = 0}) {
