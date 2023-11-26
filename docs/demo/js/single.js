@@ -330,6 +330,7 @@
     skewMaxX: 25,
     skewMaxY: 25,
     scaleActive: false,
+    scaleUp: 1,
     scaleEasing: 'linear',
     scaleInvertX: false,
     scaleInvertY: false,
@@ -525,8 +526,9 @@
         if (layer.scaleActive) {
           const scaleXInput = layer.scaleActive === 'yy' ? y : x;
           const scaleYInput = layer.scaleActive === 'xx' ? x : y;
-          const scaleXVal = layer.scaleActive === 'sync' ? 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleEasing, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth : layer.scaleActive === 'y' ? 1 : 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleEasing, 1 - Math.abs(0.5 - scaleXInput) * 2) : ease(layer.scaleEasing, Math.abs(0.5 - scaleXInput) * 2)) * depth;
-          const scaleYVal = layer.scaleActive === 'sync' ? 1 + layer.scaleMaxY * (layer.scaleInvertY ? ease(layer.scaleEasing, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth : layer.scaleActive === 'x' ? 1 : 1 + layer.scaleMaxY * (layer.scaleInvertY ? ease(layer.scaleEasing, 1 - Math.abs(0.5 - scaleYInput) * 2) : ease(layer.scaleEasing, Math.abs(0.5 - scaleYInput) * 2)) * depth;
+          const scaleInitial = +layer.scaleUp || 0;
+          const scaleXVal = layer.scaleActive === 'sync' ? scaleInitial + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleEasing, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth : layer.scaleActive === 'y' ? 1 : scaleInitial + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleEasing, 1 - Math.abs(0.5 - scaleXInput) * 2) : ease(layer.scaleEasing, Math.abs(0.5 - scaleXInput) * 2)) * depth;
+          const scaleYVal = layer.scaleActive === 'sync' ? scaleInitial + layer.scaleMaxY * (layer.scaleInvertY ? ease(layer.scaleEasing, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth : layer.scaleActive === 'x' ? 1 : scaleInitial + layer.scaleMaxY * (layer.scaleInvertY ? ease(layer.scaleEasing, 1 - Math.abs(0.5 - scaleYInput) * 2) : ease(layer.scaleEasing, Math.abs(0.5 - scaleYInput) * 2)) * depth;
           scalePart = ` scale(${scaleXVal.toFixed(2)}, ${scaleYVal.toFixed(2)})`;
         }
         let layerPerspectiveZ = '';
@@ -3544,6 +3546,7 @@
         },
         scaling: {
           active: config.scaleActive || false,
+          direction: config.scaleUp || 1,
           easing: config.scaleEasing || 'linear',
           invertX: config.scaleInvertX || false,
           invertY: config.scaleInvertY || false,
@@ -3667,6 +3670,10 @@
         x: 'x',
         y: 'y'
       }).onChange(getHandler('scaleActive', targetIndex));
+      scaling.add(config.scaling, 'direction', {
+        up: 1,
+        down: 0
+      }).onChange(getHandler('scaleUp', targetIndex));
       scaling.add(config.scaling, 'easing', EFFECT_EASINGS).onChange(getHandler('scaleEasing', targetIndex));
       scaling.add(config.scaling, 'invertX').onChange(getHandler('scaleInvertX', targetIndex));
       scaling.add(config.scaling, 'invertY').onChange(getHandler('scaleInvertY', targetIndex));

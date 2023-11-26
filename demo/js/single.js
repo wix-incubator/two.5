@@ -181,6 +181,7 @@ class Demo {
             },
             scaling: {
                 active: config.scaleActive || false,
+                direction: config.scaleUp || 1,
                 easing: config.scaleEasing || 'linear',
                 invertX: config.scaleInvertX || false,
                 invertY: config.scaleInvertY || false,
@@ -318,6 +319,8 @@ class Demo {
         this.gui.remember(config.scaling);
         scaling.add(config.scaling, 'active', {non: false, sync: 'sync', both: true, 'x sync': 'xx', 'y sync': 'yy', x: 'x', y: 'y'})
             .onChange(getHandler('scaleActive', targetIndex));
+        scaling.add(config.scaling, 'direction', {up: 1, down: 0})
+            .onChange(getHandler('scaleUp', targetIndex));
         scaling.add(config.scaling, 'easing', EFFECT_EASINGS)
             .onChange(getHandler('scaleEasing', targetIndex));
         scaling.add(config.scaling, 'invertX')
