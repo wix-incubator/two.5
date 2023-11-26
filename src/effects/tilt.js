@@ -138,19 +138,7 @@ export function getEffect (config) {
      * also set transition if required.
      */
     if (container) {
-        const containerStyle = {
-            perspective: `${perspectiveZ}px`
-        };
-
-        if (_config.transitionActive && _config.perspectiveActive) {
-            containerStyle.transition = formatTransition({
-                property: 'perspective-origin',
-                duration: _config.transitionDuration,
-                easing: _config.transitionEasing
-            });
-        }
-
-        Object.assign(container.style, containerStyle);
+        container.style.perspective = `${perspectiveZ}px`;
     }
 
     /*
@@ -273,7 +261,7 @@ export function getEffect (config) {
                 const scaleXInput = layer.scaleActive === 'yy' ? y : x;
                 const scaleYInput = layer.scaleActive === 'xx' ? x : y;
                 const scaleXVal = layer.scaleActive === 'sync'
-                    ? 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleActive, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth
+                    ? 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleEasing, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth
                     : layer.scaleActive === 'y'
                         ? 1
                         : 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleEasing, 1 - Math.abs(0.5 - scaleXInput) * 2) : ease(layer.scaleEasing, Math.abs(0.5 - scaleXInput) * 2)) * depth;

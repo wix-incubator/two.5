@@ -434,17 +434,7 @@
      * also set transition if required.
      */
     if (container) {
-      const containerStyle = {
-        perspective: `${perspectiveZ}px`
-      };
-      if (_config.transitionActive && _config.perspectiveActive) {
-        containerStyle.transition = formatTransition({
-          property: 'perspective-origin',
-          duration: _config.transitionDuration,
-          easing: _config.transitionEasing
-        });
-      }
-      Object.assign(container.style, containerStyle);
+      container.style.perspective = `${perspectiveZ}px`;
     }
 
     /*
@@ -535,7 +525,7 @@
         if (layer.scaleActive) {
           const scaleXInput = layer.scaleActive === 'yy' ? y : x;
           const scaleYInput = layer.scaleActive === 'xx' ? x : y;
-          const scaleXVal = layer.scaleActive === 'sync' ? 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleActive, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth : layer.scaleActive === 'y' ? 1 : 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleEasing, 1 - Math.abs(0.5 - scaleXInput) * 2) : ease(layer.scaleEasing, Math.abs(0.5 - scaleXInput) * 2)) * depth;
+          const scaleXVal = layer.scaleActive === 'sync' ? 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleEasing, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth : layer.scaleActive === 'y' ? 1 : 1 + layer.scaleMaxX * (layer.scaleInvertX ? ease(layer.scaleEasing, 1 - Math.abs(0.5 - scaleXInput) * 2) : ease(layer.scaleEasing, Math.abs(0.5 - scaleXInput) * 2)) * depth;
           const scaleYVal = layer.scaleActive === 'sync' ? 1 + layer.scaleMaxY * (layer.scaleInvertY ? ease(layer.scaleEasing, 1 - Math.hypot((0.5 - x) * 2, (0.5 - y) * 2)) : ease(layer.scaleEasing, Math.hypot((0.5 - x) * 2, (0.5 - y) * 2))) * depth : layer.scaleActive === 'x' ? 1 : 1 + layer.scaleMaxY * (layer.scaleInvertY ? ease(layer.scaleEasing, 1 - Math.abs(0.5 - scaleYInput) * 2) : ease(layer.scaleEasing, Math.abs(0.5 - scaleYInput) * 2)) * depth;
           scalePart = ` scale(${scaleXVal.toFixed(2)}, ${scaleYVal.toFixed(2)})`;
         }
@@ -3414,7 +3404,8 @@
       this.currentContainer = container;
       this.two5 = new Tilt({
         translationActive: false,
-        layers
+        layers,
+        container
       });
       this.two5.on();
       this.setupStats();
@@ -3443,6 +3434,11 @@
           active: this.two5.config.transitionActive || false,
           duration: this.two5.config.transitionDuration || 300,
           easing: this.two5.config.transitionEasing || 'linear'
+        },
+        perspective: {
+          active: this.two5.config.perspectiveActive || false,
+          maxX: this.two5.config.perspectiveMaxX || 0,
+          maxY: this.two5.config.perspectiveMaxY || 0
         },
         elements: this.createElementsConfig()
       };
@@ -3486,6 +3482,16 @@
       }(this.getSceneHandler('transitionActive')));
       this.transition.add(this.two5Config.transition, 'duration', 50, 1000, 50).onChange(this.getSceneHandler('transitionDuration'));
       this.transition.add(this.two5Config.transition, 'easing', ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out', 'bounce']).onChange(this.getSceneHandler('transitionEasing'));
+      this.perspective = this.gui.addFolder('Perspective');
+      this.gui.remember(this.two5Config.perspective);
+      this.perspective.add(this.two5Config.perspective, 'active', {
+        non: false,
+        follow: 'follow',
+        x: 'x',
+        y: 'y'
+      }).onChange(this.getSceneHandler('perspectiveActive'));
+      this.perspective.add(this.two5Config.perspective, 'maxX', 0, 0.5, 0.05).onChange(this.getSceneHandler('perspectiveMaxY'));
+      this.perspective.add(this.two5Config.perspective, 'maxY', 0, 0.5, 0.05).onChange(this.getSceneHandler('perspectiveMaxY'));
       this.elementsFolder = this.gui.addFolder('Elements');
       this.elementsFolder.open();
       this.two5.layers.forEach((layer, index) => {
@@ -3506,13 +3512,6 @@
       return {
         depth: config.depth,
         centerToLayer: config.centerToLayer,
-        perspective: {
-          active: config.perspectiveActive || false,
-          invertX: config.perspectiveInvertX || false,
-          invertY: config.perspectiveInvertY || false,
-          maxX: config.perspectiveMaxX || 0,
-          maxY: config.perspectiveMaxY || 0
-        },
         translation: {
           active: config.translationActive || false,
           easing: config.translationEasing || 'linear',
@@ -3607,18 +3606,6 @@
       this.gui.remember(config);
       folder.add(config, 'depth', 0.2, 1, 0.2).onChange(getHandler('depth', targetIndex));
       folder.add(config, 'centerToLayer').onChange(getHandler('centerToLayer', targetIndex));
-      const perspective = folder.addFolder('Perspective');
-      this.gui.remember(config.perspective);
-      perspective.add(config.perspective, 'active', {
-        non: false,
-        both: true,
-        x: 'x',
-        y: 'y'
-      }).onChange(getHandler('perspectiveActive', targetIndex));
-      perspective.add(config.perspective, 'invertX').onChange(getHandler('perspectiveInvertX', targetIndex));
-      perspective.add(config.perspective, 'invertY').onChange(getHandler('perspectiveInvertY', targetIndex));
-      perspective.add(config.perspective, 'maxX', 0, 0.5, 0.05).onChange(getHandler('perspectiveMaxX', targetIndex));
-      perspective.add(config.perspective, 'maxY', 0, 0.5, 0.05).onChange(getHandler('perspectiveMaxY', targetIndex));
       const translation = folder.addFolder('Translation');
       this.gui.remember(config.translation);
       translation.add(config.translation, 'active', {

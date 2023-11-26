@@ -20,7 +20,8 @@ class Demo {
 
         this.two5 = new Tilt({
             translationActive: false,
-            layers
+            layers,
+            container
         });
 
         this.two5.on();
@@ -51,6 +52,11 @@ class Demo {
                 active: this.two5.config.transitionActive || false,
                 duration: this.two5.config.transitionDuration || 300,
                 easing: this.two5.config.transitionEasing || 'linear'
+            },
+            perspective: {
+                active: this.two5.config.perspectiveActive || false,
+                maxX: this.two5.config.perspectiveMaxX || 0,
+                maxY: this.two5.config.perspectiveMaxY || 0
             },
             elements: this.createElementsConfig()
         };
@@ -108,6 +114,16 @@ class Demo {
         this.transition.add(this.two5Config.transition, 'easing', ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out', 'bounce'])
             .onChange(this.getSceneHandler('transitionEasing'));
 
+        this.perspective = this.gui.addFolder('Perspective');
+        this.gui.remember(this.two5Config.perspective);
+        this.perspective.add(this.two5Config.perspective, 'active', {non: false, follow: 'follow', x: 'x', y: 'y'})
+            .onChange(this.getSceneHandler('perspectiveActive'));
+        this.perspective.add(this.two5Config.perspective, 'maxX', 0, 0.5, 0.05)
+            .onChange(this.getSceneHandler('perspectiveMaxY'));
+        this.perspective.add(this.two5Config.perspective, 'maxY', 0, 0.5, 0.05)
+            .onChange(this.getSceneHandler('perspectiveMaxY'));
+
+
         this.elementsFolder = this.gui.addFolder('Elements');
         this.elementsFolder.open();
 
@@ -133,13 +149,6 @@ class Demo {
         return {
             depth: config.depth,
             centerToLayer: config.centerToLayer,
-            perspective: {
-                active: config.perspectiveActive || false,
-                invertX: config.perspectiveInvertX || false,
-                invertY: config.perspectiveInvertY || false,
-                maxX: config.perspectiveMaxX || 0,
-                maxY: config.perspectiveMaxY || 0
-            },
             translation: {
                 active: config.translationActive || false,
                 easing: config.translationEasing || 'linear',
@@ -248,19 +257,6 @@ class Demo {
 
         folder.add(config, 'centerToLayer')
             .onChange(getHandler('centerToLayer', targetIndex));
-
-        const perspective = folder.addFolder('Perspective');
-        this.gui.remember(config.perspective);
-        perspective.add(config.perspective, 'active', {non: false, both: true, x: 'x', y: 'y'})
-            .onChange(getHandler('perspectiveActive', targetIndex));
-        perspective.add(config.perspective, 'invertX')
-            .onChange(getHandler('perspectiveInvertX', targetIndex));
-        perspective.add(config.perspective, 'invertY')
-            .onChange(getHandler('perspectiveInvertY', targetIndex));
-        perspective.add(config.perspective, 'maxX', 0, 0.5, 0.05)
-            .onChange(getHandler('perspectiveMaxX', targetIndex));
-        perspective.add(config.perspective, 'maxY', 0, 0.5, 0.05)
-            .onChange(getHandler('perspectiveMaxY', targetIndex));
 
         const translation = folder.addFolder('Translation');
         this.gui.remember(config.translation);
