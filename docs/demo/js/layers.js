@@ -306,6 +306,7 @@
     transitionEasing: 'ease-out',
     //todo: split to layer and container config
     centerToLayer: false,
+    transformOrigin: 'center center',
     // layer only
     translationActive: true,
     translationEasing: 'linear',
@@ -413,13 +414,20 @@
   }
   const EASINGS = {
     linear: x => x,
-    quad: x => x * x * Math.sign(x),
-    cubic: x => x * x * x,
-    quart: x => x * x * x * x * Math.sign(x),
-    quint: x => x * x * x * x * x,
-    sine: x => 1 - Math.cos(x * Math.PI / 2),
-    expo: x => x === 0 ? 0 : Math.pow(2, 10 * Math.abs(x) - 10) * Math.sign(x),
-    circ: x => (1 - Math.sqrt(1 - Math.pow(x, 2))) * Math.sign(x)
+    quadIn: x => x * x * Math.sign(x),
+    cubicIn: x => x * x * x,
+    quartIn: x => x * x * x * x * Math.sign(x),
+    quintIn: x => x * x * x * x * x,
+    sineIn: x => 1 - Math.cos(x * Math.PI / 2),
+    expoIn: x => x === 0 ? 0 : Math.pow(2, 10 * Math.abs(x) - 10) * Math.sign(x),
+    circIn: x => (1 - Math.sqrt(1 - Math.pow(x, 2))) * Math.sign(x),
+    quadOut: x => 1 - (1 - x) * (1 - x),
+    cubicOut: x => (1 - Math.pow(1 - Math.abs(x), 3)) * Math.sign(x),
+    quartOut: x => (1 - Math.pow(1 - Math.abs(x), 4)) * Math.sign(x),
+    quintOut: x => (1 - Math.pow(1 - Math.abs(x), 5)) * Math.sign(x),
+    sineOut: x => Math.sin(x * Math.PI / 2),
+    expoOut: x => x === 1 ? 1 : (1 - Math.pow(2, -10 * Math.abs(x))) * Math.sign(x),
+    circOut: x => Math.sqrt(1 - Math.pow(x - 1, 2)) * Math.sign(x)
   };
   function ease(easing, t) {
     return EASINGS[easing](t);
@@ -454,6 +462,9 @@
       })}`;
       } else {
         delete layerStyle.transition;
+      }
+      if (layer.transformOrigin) {
+        layer.el.style.transformOrigin = layer.transformOrigin;
       }
       Object.assign(layer.el.style, layerStyle);
 

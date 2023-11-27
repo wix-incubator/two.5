@@ -6,7 +6,35 @@ const stats = new Stats();
 stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom);
 
-const EFFECT_EASINGS = ['linear', 'quad', 'cubic', 'quart', 'quint', 'expo', 'sine', 'circ'];
+const EFFECT_EASINGS = [
+    'linear',
+    'quadIn',
+    'cubicIn',
+    'quartIn',
+    'quintIn',
+    'expoIn',
+    'sineIn',
+    'circIn',
+    'quadOut',
+    'cubicOut',
+    'quartOut',
+    'quintOut',
+    'expoOut',
+    'sineOut',
+    'circOut'
+];
+
+const ORIGIN_OPTIONS = {
+    'top left': '0% 0%',
+    'top center': '50% 0%',
+    'top right': '100% 0%',
+    'center left': '0% 50%',
+    'center center': '50% 50%',
+    'center right': '100% 50%',
+    'bottom left': '0% 100%',
+    'bottom center': '50% 100%',
+    'bottom right': '100% 100%'
+};
 
 const container = document.querySelector('main');
 const layers = [...container.querySelectorAll('img, h1')].map(el => {
@@ -123,7 +151,6 @@ class Demo {
         this.perspective.add(this.two5Config.perspective, 'maxY', 0, 0.5, 0.05)
             .onChange(this.getSceneHandler('perspectiveMaxY'));
 
-
         this.elementsFolder = this.gui.addFolder('Elements');
         this.elementsFolder.open();
 
@@ -149,6 +176,7 @@ class Demo {
         return {
             depth: config.depth,
             centerToLayer: config.centerToLayer,
+            'Transform origin': config.transformOrigin || '50% 50%',
             translation: {
                 active: config.translationActive || false,
                 easing: config.translationEasing || 'linear',
@@ -258,6 +286,9 @@ class Demo {
 
         folder.add(config, 'centerToLayer')
             .onChange(getHandler('centerToLayer', targetIndex));
+
+        folder.add(config, 'Transform origin', ORIGIN_OPTIONS)
+            .onChange(getHandler('transformOrigin', targetIndex));
 
         const translation = folder.addFolder('Translation');
         this.gui.remember(config.translation);

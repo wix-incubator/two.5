@@ -306,6 +306,7 @@
     transitionEasing: 'ease-out',
     //todo: split to layer and container config
     centerToLayer: false,
+    transformOrigin: 'center center',
     // layer only
     translationActive: true,
     translationEasing: 'linear',
@@ -413,13 +414,20 @@
   }
   const EASINGS = {
     linear: x => x,
-    quad: x => x * x * Math.sign(x),
-    cubic: x => x * x * x,
-    quart: x => x * x * x * x * Math.sign(x),
-    quint: x => x * x * x * x * x,
-    sine: x => 1 - Math.cos(x * Math.PI / 2),
-    expo: x => x === 0 ? 0 : Math.pow(2, 10 * Math.abs(x) - 10) * Math.sign(x),
-    circ: x => (1 - Math.sqrt(1 - Math.pow(x, 2))) * Math.sign(x)
+    quadIn: x => x * x * Math.sign(x),
+    cubicIn: x => x * x * x,
+    quartIn: x => x * x * x * x * Math.sign(x),
+    quintIn: x => x * x * x * x * x,
+    sineIn: x => 1 - Math.cos(x * Math.PI / 2),
+    expoIn: x => x === 0 ? 0 : Math.pow(2, 10 * Math.abs(x) - 10) * Math.sign(x),
+    circIn: x => (1 - Math.sqrt(1 - Math.pow(x, 2))) * Math.sign(x),
+    quadOut: x => 1 - (1 - x) * (1 - x),
+    cubicOut: x => (1 - Math.pow(1 - Math.abs(x), 3)) * Math.sign(x),
+    quartOut: x => (1 - Math.pow(1 - Math.abs(x), 4)) * Math.sign(x),
+    quintOut: x => (1 - Math.pow(1 - Math.abs(x), 5)) * Math.sign(x),
+    sineOut: x => Math.sin(x * Math.PI / 2),
+    expoOut: x => x === 1 ? 1 : (1 - Math.pow(2, -10 * Math.abs(x))) * Math.sign(x),
+    circOut: x => Math.sqrt(1 - Math.pow(x - 1, 2)) * Math.sign(x)
   };
   function ease(easing, t) {
     return EASINGS[easing](t);
@@ -454,6 +462,9 @@
       })}`;
       } else {
         delete layerStyle.transition;
+      }
+      if (layer.transformOrigin) {
+        layer.el.style.transformOrigin = layer.transformOrigin;
       }
       Object.assign(layer.el.style, layerStyle);
 
@@ -3390,7 +3401,18 @@
   const stats = new Stats();
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
   document.body.appendChild(stats.dom);
-  const EFFECT_EASINGS = ['linear', 'quad', 'cubic', 'quart', 'quint', 'expo', 'sine', 'circ'];
+  const EFFECT_EASINGS = ['linear', 'quadIn', 'cubicIn', 'quartIn', 'quintIn', 'expoIn', 'sineIn', 'circIn', 'quadOut', 'cubicOut', 'quartOut', 'quintOut', 'expoOut', 'sineOut', 'circOut'];
+  const ORIGIN_OPTIONS = {
+    'top left': '0% 0%',
+    'top center': '50% 0%',
+    'top right': '100% 0%',
+    'center left': '0% 50%',
+    'center center': '50% 50%',
+    'center right': '100% 50%',
+    'bottom left': '0% 100%',
+    'bottom center': '50% 100%',
+    'bottom right': '100% 100%'
+  };
   const container = document.querySelector('main');
   const layers = [...container.querySelectorAll('img, h1')].map(el => {
     const rect = el.getBoundingClientRect().toJSON();
@@ -3514,6 +3536,7 @@
       return {
         depth: config.depth,
         centerToLayer: config.centerToLayer,
+        'Transform origin': config.transformOrigin || '50% 50%',
         translation: {
           active: config.translationActive || false,
           easing: config.translationEasing || 'linear',
@@ -3609,6 +3632,7 @@
       this.gui.remember(config);
       folder.add(config, 'depth', 0.2, 1, 0.2).onChange(getHandler('depth', targetIndex));
       folder.add(config, 'centerToLayer').onChange(getHandler('centerToLayer', targetIndex));
+      folder.add(config, 'Transform origin', ORIGIN_OPTIONS).onChange(getHandler('transformOrigin', targetIndex));
       const translation = folder.addFolder('Translation');
       this.gui.remember(config.translation);
       translation.add(config.translation, 'active', {
