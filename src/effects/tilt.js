@@ -14,7 +14,7 @@ const DEFAULTS = {
 
     // layer and config
     perspectiveZ: 600, //todo: split to layer and container config
-    elevation: 10,  // todo: why in line 102 we check for config.hasOwnProperty(elevation)?
+    elevation: 0,  // todo: why in line 102 we check for config.hasOwnProperty(elevation)?
     transitionDuration: 200, // todo: split to layer and container config
     transitionActive: false, //todo: split to layer and container config
     transitionEasing: 'ease-out', //todo: split to layer and container config
@@ -51,6 +51,7 @@ const DEFAULTS = {
     scaleInvertY: false,
     scaleMaxX: 0.5,
     scaleMaxY: 0.5,
+    originActive: false,
     blurActive: false,
     blurEasing: 'linear',
     blurInvert: false,
@@ -298,6 +299,24 @@ export function getEffect (config) {
             }
 
             layer.el.style.transform = `${layerPerspectiveZ}${translatePart}${scalePart}${skewPart}${rotatePart}`;
+
+            let transformOriginPart = layer.transformOrigin;
+            if (layer.originActive) {
+                const originX = layer.originActive === 'both' || layer.originActive === 'x'
+                    ? x
+                    : layer.originActive === 'y' || layer.originActive === 'flipY'
+                        ? 0.5
+                        : x > 0.5 ? 1 : 0;
+                const originY = layer.originActive === 'both' || layer.originActive === 'y'
+                    ? y
+                    : layer.originActive === 'x' || layer.originActive === 'flipX'
+                        ? 0.5
+                        : y > 0.5 ? 1 : 0;
+
+                transformOriginPart = `${originX * 100}% ${originY * 100}%`;
+            }
+
+            layer.el.style.transformOrigin = transformOriginPart;
 
             let layerBlurPart = '';
             if (layer.blurActive) {

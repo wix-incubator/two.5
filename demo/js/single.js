@@ -216,6 +216,9 @@ class Demo {
                 maxX: config.scaleMaxX || 0.5,
                 maxY: config.scaleMaxY || 0.5
             },
+            origin: {
+                active: config.originActive || false,
+            },
             blur: {
                 active: config.blurActive || false,
                 easing: config.blurEasing || 'linear',
@@ -362,6 +365,11 @@ class Demo {
             .onChange(getHandler('scaleMaxX', targetIndex));
         scaling.add(config.scaling, 'maxY', 0.1, 3, 0.1)
             .onChange(getHandler('scaleMaxY', targetIndex));
+
+        const origin = folder.addFolder('Origin');
+        this.gui.remember(config.origin);
+        origin.add(config.origin, 'active', {non: false, both: 'both', 'flip x': 'flipX', 'flip y': 'flipY', x: 'x', y: 'y'})
+            .onChange(getHandler('originActive', targetIndex));
 
         const blur = folder.addFolder('Blur');
         this.gui.remember(config.blur);

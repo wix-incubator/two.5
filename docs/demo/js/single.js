@@ -297,7 +297,7 @@
     // layer and config
     perspectiveZ: 600,
     //todo: split to layer and container config
-    elevation: 10,
+    elevation: 0,
     // todo: why in line 102 we check for config.hasOwnProperty(elevation)?
     transitionDuration: 200,
     // todo: split to layer and container config
@@ -337,6 +337,7 @@
     scaleInvertY: false,
     scaleMaxX: 0.5,
     scaleMaxY: 0.5,
+    originActive: false,
     blurActive: false,
     blurEasing: 'linear',
     blurInvert: false,
@@ -549,6 +550,13 @@
           layerPerspectiveZ = `perspective(${_config.perspectiveZ}px) `;
         }
         layer.el.style.transform = `${layerPerspectiveZ}${translatePart}${scalePart}${skewPart}${rotatePart}`;
+        let transformOriginPart = layer.transformOrigin;
+        if (layer.originActive) {
+          const originX = layer.originActive === 'both' || layer.originActive === 'x' ? x : layer.originActive === 'y' || layer.originActive === 'flipY' ? 0.5 : x > 0.5 ? 1 : 0;
+          const originY = layer.originActive === 'both' || layer.originActive === 'y' ? y : layer.originActive === 'x' || layer.originActive === 'flipX' ? 0.5 : y > 0.5 ? 1 : 0;
+          transformOriginPart = `${originX * 100}% ${originY * 100}%`;
+        }
+        layer.el.style.transformOrigin = transformOriginPart;
         let layerBlurPart = '';
         if (layer.blurActive) {
           const py = Math.abs(y - 0.5) * 2;
@@ -3576,6 +3584,9 @@
           maxX: config.scaleMaxX || 0.5,
           maxY: config.scaleMaxY || 0.5
         },
+        origin: {
+          active: config.originActive || false
+        },
         blur: {
           active: config.blurActive || false,
           easing: config.blurEasing || 'linear',
@@ -3703,6 +3714,16 @@
       scaling.add(config.scaling, 'invertY').onChange(getHandler('scaleInvertY', targetIndex));
       scaling.add(config.scaling, 'maxX', 0.1, 3, 0.1).onChange(getHandler('scaleMaxX', targetIndex));
       scaling.add(config.scaling, 'maxY', 0.1, 3, 0.1).onChange(getHandler('scaleMaxY', targetIndex));
+      const origin = folder.addFolder('Origin');
+      this.gui.remember(config.origin);
+      origin.add(config.origin, 'active', {
+        non: false,
+        both: 'both',
+        'flip x': 'flipX',
+        'flip y': 'flipY',
+        x: 'x',
+        y: 'y'
+      }).onChange(getHandler('originActive', targetIndex));
       const blur = folder.addFolder('Blur');
       this.gui.remember(config.blur);
       blur.add(config.blur, 'active', {
