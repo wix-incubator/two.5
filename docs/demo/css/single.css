@@ -14,6 +14,16 @@ main {
     margin: 0;
 }
 
+footer {
+    background: radial-gradient(farthest-corner at left top, lightskyblue, deepskyblue, darkmagenta, deeppink);
+    height: 100vh;
+}
+
+header {
+    background: radial-gradient(farthest-corner at right bottom, yellow, orange, orchid);
+    height: 100vh;
+}
+
 #background-wrapper {
     position: relative;
     grid-column: 1 / 6;
