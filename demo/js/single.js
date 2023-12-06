@@ -38,8 +38,7 @@ const ORIGIN_OPTIONS = {
 
 const container = document.querySelector('main');
 const layers = [...container.querySelectorAll('img, h1')].map(el => {
-    const rect = el.getBoundingClientRect().toJSON();
-    return {el, depth: 1, rect,  centerToLayer: false};
+    return {el, depth: 1,  centerToLayer: false};
 });
 
 class Demo {

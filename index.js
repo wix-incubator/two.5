@@ -74,6 +74,19 @@ function map (x, a, b, c, d) {
     return (x - a) * (d - c) / (b - a) + c;
 }
 
+function getOffset (el) {
+    let elem = el;
+    const offset = { left: 0, top: 0 };
+    if (elem.offsetParent) {
+        do {
+            offset.left += elem.offsetLeft;
+            offset.top += elem.offsetTop;
+            elem = elem.offsetParent;
+        } while (elem);
+    }
+    return offset;
+}
+
 /**
  * @private
  * @type {scrollConfig}
@@ -936,6 +949,13 @@ function getClipPath (direction, x, y, easing) {
     return `${clipPathDirections[direction](x, y,  easing)}`;
 }
 
+function getLayerRect (element) {
+    const offset = getOffset(element);
+    offset.top -= window.scrollY;
+    offset.left -= window.scrollX;
+    return { ...offset, width: element.offsetWidth, height: element.offsetHeight };
+}
+
 const EASINGS = {
     linear: x => x,
     quadIn: x => x * x * Math.sign(x),
@@ -976,6 +996,7 @@ function getEffect (config) {
     /*
      * Setup layers styling
      */
+    let hasCenterToLayer = false;
     _config.layers.forEach((layer, index) => {
         const layerStyle = {};
 
@@ -1005,9 +1026,24 @@ function getEffect (config) {
         if (filterElement) {
             layer.pointLightElement = filterElement;
         }
+
+        if (layer.centerToLayer) {
+            layer.rect = getLayerRect(layer.el);
+            hasCenterToLayer = true;
+        }
     });
 
-    return function tilt ({x: x_, y: y_, h, w}) {
+    if (hasCenterToLayer) {
+        document.addEventListener('scrollend', () => {
+            _config.layers.forEach((layer) => {
+                if (layer.centerToLayer) {
+                    layer.rect = getLayerRect(layer.el);
+                }
+            });
+        });
+    }
+
+    return function tilt ({x: x_, y: y_, h, w, posX, posY}) {
         const len = _config.layers.length;
 
         _config.layers.forEach((layer, index) => {
@@ -1017,8 +1053,20 @@ function getEffect (config) {
 
             let x = x_, y = y_;
             if (layer.centerToLayer) {
-                x = x_ + 0.5 - (layer.rect.left + layer.rect.width / 2) / w;
-                y = y_ + 0.5 - (layer.rect.top + layer.rect.height / 2) / h;
+                /* this is the old "offset" algo */
+                // x = x_ + 0.5 - (layer.rect.left + layer.rect.width / 2) / w;
+                // y = y_ + 0.5 - (layer.rect.top + layer.rect.height / 2) / h;
+
+                const layerCenterX = layer.rect.left + layer.rect.width / 2;
+                const layerCenterY = layer.rect.top + layer.rect.height / 2;
+                const isXStartFarthest = layerCenterX >= w / 2;
+                const isYStartFarthest = layerCenterY >= h / 2;
+                const xDuration = (isXStartFarthest ? layerCenterX : w - layerCenterX) * 2;
+                const yDuration = (isYStartFarthest ? layerCenterY : h - layerCenterY) * 2;
+                const x0 = isXStartFarthest ? 0 : layerCenterX - xDuration / 2;
+                const y0 = isYStartFarthest ? 0 : layerCenterY - yDuration / 2;
+                x = (posX - x0) / xDuration;
+                y = (posY - y0) / yDuration;
             }
 
             let translatePart = '';
@@ -1267,14 +1315,14 @@ function getHandler$1 ({target, progress, callback}) {
     const {width, height, left, top} = rect;
 
     function handler (event) {
-        const {clientX, clientY} = event;
-
         // percentage of position progress
-        const x = clamp(0, 1, (clientX - left) / width);
-        const y = clamp(0, 1, (clientY - top) / height);
+        const x = clamp(0, 1, (event.x - left) / width);
+        const y = clamp(0, 1, (event.y - top) / height);
 
         progress.x = +x.toPrecision(4);
         progress.y = +y.toPrecision(4);
+        progress.posX = event.x;
+        progress.posY = event.y;
         progress.h = height;
         progress.w = width;
 

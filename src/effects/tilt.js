@@ -1,4 +1,4 @@
-import { defaultTo, map } from '../utilities.js';
+import { defaultTo, map, getOffset } from '../utilities.js';
 
 /**
  * @private
@@ -114,6 +114,13 @@ function getClipPath (direction, x, y, easing) {
     return `${clipPathDirections[direction](x, y,  easing)}`;
 }
 
+function getLayerRect (element) {
+    const offset = getOffset(element);
+    offset.top -= window.scrollY;
+    offset.left -= window.scrollX;
+    return { ...offset, width: element.offsetWidth, height: element.offsetHeight };
+}
+
 const EASINGS = {
     linear: x => x,
     quadIn: x => x * x * Math.sign(x),
@@ -154,6 +161,7 @@ export function getEffect (config) {
     /*
      * Setup layers styling
      */
+    let hasCenterToLayer = false;
     _config.layers.forEach((layer, index) => {
         const layerStyle = {};
 
@@ -183,9 +191,24 @@ export function getEffect (config) {
         if (filterElement) {
             layer.pointLightElement = filterElement;
         }
+
+        if (layer.centerToLayer) {
+            layer.rect = getLayerRect(layer.el);
+            hasCenterToLayer = true;
+        }
     });
 
-    return function tilt ({x: x_, y: y_, h, w}) {
+    if (hasCenterToLayer) {
+        document.addEventListener('scrollend', () => {
+            _config.layers.forEach((layer) => {
+                if (layer.centerToLayer) {
+                    layer.rect = getLayerRect(layer.el);
+                }
+            });
+        });
+    }
+
+    return function tilt ({x: x_, y: y_, h, w, posX, posY}) {
         const len = _config.layers.length;
 
         _config.layers.forEach((layer, index) => {
@@ -195,8 +218,20 @@ export function getEffect (config) {
 
             let x = x_, y = y_;
             if (layer.centerToLayer) {
-                x = x_ + 0.5 - (layer.rect.left + layer.rect.width / 2) / w;
-                y = y_ + 0.5 - (layer.rect.top + layer.rect.height / 2) / h;
+                /* this is the old "offset" algo */
+                // x = x_ + 0.5 - (layer.rect.left + layer.rect.width / 2) / w;
+                // y = y_ + 0.5 - (layer.rect.top + layer.rect.height / 2) / h;
+
+                const layerCenterX = layer.rect.left + layer.rect.width / 2;
+                const layerCenterY = layer.rect.top + layer.rect.height / 2;
+                const isXStartFarthest = layerCenterX >= w / 2;
+                const isYStartFarthest = layerCenterY >= h / 2;
+                const xDuration = (isXStartFarthest ? layerCenterX : w - layerCenterX) * 2;
+                const yDuration = (isYStartFarthest ? layerCenterY : h - layerCenterY) * 2;
+                const x0 = isXStartFarthest ? 0 : layerCenterX - xDuration / 2;
+                const y0 = isYStartFarthest ? 0 : layerCenterY - yDuration / 2;
+                x = (posX - x0) / xDuration;
+                y = (posY - y0) / yDuration;
             }
 
             let translatePart = '';

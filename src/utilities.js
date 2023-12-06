@@ -74,11 +74,25 @@ function map (x, a, b, c, d) {
     return (x - a) * (d - c) / (b - a) + c;
 }
 
+function getOffset (el) {
+    let elem = el;
+    const offset = { left: 0, top: 0 };
+    if (elem.offsetParent) {
+        do {
+            offset.left += elem.offsetLeft;
+            offset.top += elem.offsetTop;
+            elem = elem.offsetParent;
+        } while (elem);
+    }
+    return offset;
+}
+
 export {
     map,
     clamp,
     clone,
     defaultTo,
     lerp,
-    frameThrottle
+    frameThrottle,
+    getOffset
 };
